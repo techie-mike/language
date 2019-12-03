@@ -1,0 +1,209 @@
+//
+// Created by texnar on 03/12/2019.
+//
+
+#include "function.h"
+
+Tokens::Tokens (token_names_t DEFAULT_LENGTH_TOKENS, token_names_t DEFAULT_LENGTH_NAMES) :
+    data ((one_token*) calloc (DEFAULT_LENGTH_TOKENS, sizeof(one_token))),
+    length_token_ (DEFAULT_LENGTH_TOKENS),
+    length_names_ (DEFAULT_LENGTH_NAMES),
+    all_names_ ((char*) calloc(DEFAULT_LENGTH_NAMES, sizeof(char))),
+    size_token_ (0),
+    size_names_ (0),
+    read_line_ (1)
+{
+
+}
+
+Tokens::~Tokens() {
+    free (data);
+    free (all_names_);
+}
+
+void Tokens::lexicalAnalysis(char **text) {
+    int num_read = 1;
+    while (num_read) {
+//        double number = 0;
+//        sscanf (*text, " %lg%n", &number, &num_read);
+
+        num_read = lexicalAnalysisWriteNumber (text);
+        if (!num_read) {
+//            char string[LENGTH_NAME_TOKEN] = {};
+//            sscanf (*text, " %[A-Za-z]%n", string, &num_read);
+
+            num_read = lexicalAnalysisWriteString (text);
+            if (!num_read)
+                num_read = lexicalAnalysisWriteSymbols (text);
+        }
+    }
+    dump();
+}
+
+void Tokens::createToken (char *name, double number, int type, int line) {
+    autoLengthNamesIncrease ();
+    autoLengthTokenIncrease ();
+
+    token_t index = size_token_;
+
+    data[index].name = all_names_ + size_names_;
+    strcpy (all_names_ + size_names_, name);
+    size_names_ += strlen (name) + 1;
+
+//    printf("%s \n", data[index].name);
+    data[index].value = number;
+    data[index].type = type;
+    data[index].line = line;
+    size_token_++;
+}
+
+void Tokens::autoLengthNamesIncrease (int factor) {
+    if (size_names_ + LENGTH_NAME_TOKEN >= length_names_) {
+        token_names_t last_length_names = length_names_;
+        length_names_ *= factor;
+        char* new_names = (char*) calloc(length_names_, sizeof(char));
+
+        if (new_names) {
+            for (int i = 0; i < last_length_names; i++)
+                new_names[i] = all_names_[i];
+
+            for (int i = 0; i < length_names_; i++) {
+                if (data[i].name != nullptr)
+                    data[i].name = data[i].name - all_names_ + new_names;
+            }
+
+            free(all_names_);
+            all_names_ = new_names;
+
+        } else
+            printf("Error in new_address\n");
+    }
+
+}
+
+void Tokens::autoLengthTokenIncrease (int factor) {
+    if (size_token_ >= length_token_) {
+        length_token_ *= factor;
+        data = (one_token *) realloc (data, length_token_ * sizeof(data[0]));
+        if (data)
+            for (int i = size_token_; i < length_token_; i++)
+                data[i] = {};
+        else
+            printf("Error in new_address of autoLengthNamesIncrease\n");
+    }
+}
+
+int Tokens::lexicalAnalysisWriteNumber (char **text) {
+    int num_read = 0;
+    double number = 0;
+    sscanf (*text, " %lg%n", &number, &num_read);
+
+    if (num_read){
+        read_line_ += nummemchr (*text, '\n', num_read);
+        char str_num[LENGTH_NAME_TOKEN] = {};
+        sprintf (str_num, "%lg", number);
+        createToken (str_num, number, TYPE_NUMBER, read_line_);
+        *text += num_read;
+    }
+    return num_read;
+}
+
+int Tokens::lexicalAnalysisWriteString(char **text) {
+    int num_read =  0;
+    char string[LENGTH_NAME_TOKEN] = {};
+
+//              !!!IMPORTANT!!!
+//   scanf very bad work with cyrillic symbol,
+//   so i use win-1251 and it don't see code of symbol,
+//   so i manually write code of symbol
+//    A - \300      Я - \337
+//    а - \340      я - \377
+//    Ё - \250      ё - \270
+//              !!!IMPORTANT!!!
+
+    sscanf (*text, " %[\300-\337\340-\377\250\270]%n", string, &num_read);
+
+    if (num_read) {
+        read_line_ += nummemchr(*text, '\n', num_read);
+        createToken(string, 0, TYPE_STRING, read_line_);
+        *text += num_read;
+    }
+
+    return num_read;
+}
+
+long ItLength (FILE* file)
+{
+    assert(file != nullptr);
+
+    fseek(file, 0, SEEK_END);
+    long result = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    return result;
+}
+
+void Tokens::readFile (const char *name_file) {
+    FILE* file = fopen (name_file, "rb");
+    if (file == nullptr) {
+        printf ("Can't find/open file, please, check name of file!\n");
+        abort ();
+    }
+
+    long length_of_file = ItLength (file) + 1;
+    char* text = (char*) calloc (length_of_file, sizeof(char));
+    char* copy_text = text;
+    fread (text, sizeof (char), length_of_file - 1, file);
+
+    lexicalAnalysis(&copy_text);
+
+    free (text);
+}
+
+int Tokens::lexicalAnalysisWriteSymbols(char **text) {
+    int num_read =  0;
+    char string[2] = {};
+    sscanf (*text, " %c%n", string, &num_read);
+
+    if (num_read) {
+        read_line_ += nummemchr(*text, '\n', num_read);
+        createToken(string, 0, TYPE_SYMBOLS, read_line_);
+        *text += num_read;
+    }
+
+    return num_read;
+}
+
+int Tokens::nummemchr(char *memptr, int val, size_t num_block) {
+    char* copy_memptr = memptr;
+    num_block--;
+    memptr--;
+//    do {
+//        memptr++;
+//        num_block++;
+//        memptr = (char *) memchr ((void *) memptr, val, num_block - (memptr - copy_memptr) );
+//    } while (memptr != nullptr);
+//    bool first = true;
+    int num_enters = 0;
+    while  (true) {
+//        if (first)
+//            first = false;
+        memptr = (char *) memchr ((void *) memptr, val, num_block - (memptr - copy_memptr) - 1 );
+        if (memptr == nullptr)
+            break;
+        memptr++;
+        num_block++;
+        num_enters++;
+    }
+    return num_enters;
+}
+
+void Tokens::dump () {
+    for (int i = 0; i < size_token_; i++) {
+        printf("Address: 0x%p\n", &(data[i]));
+        printf("Name: '%s'\n", data[i].name);
+        printf("Value: %lg\n", data[i].value);
+        printf("Type: %d\n", data[i].type);
+        printf("Line: %d\n\n", data[i].line);
+    }
+}
