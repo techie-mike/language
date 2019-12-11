@@ -2,16 +2,22 @@
 // Created by texnar on 03/12/2019.
 //
 
-#include "function.h"
+#include "token.h"
 
-Tokens::Tokens (token_names_t DEFAULT_LENGTH_TOKENS, token_names_t DEFAULT_LENGTH_NAMES) :
+Tokens::Tokens (token_names_t DEFAULT_LENGTH_TOKENS, token_names_t DEFAULT_LENGTH_NAMES,
+        token_names_t DEFAULT_LENGTH_NAME_TOKEN) :
     data ((one_token*) calloc (DEFAULT_LENGTH_TOKENS, sizeof(one_token))),
     length_token_ (DEFAULT_LENGTH_TOKENS),
     length_names_ (DEFAULT_LENGTH_NAMES),
     all_names_ ((char*) calloc(DEFAULT_LENGTH_NAMES, sizeof(char))),
     size_token_ (0),
     size_names_ (0),
-    read_line_ (1)
+    read_line_ (1),
+    TYPE_NUMBER (1),
+    TYPE_STRING (2),
+    TYPE_SYMBOLS (3),
+    LENGTH_NAME_TOKEN (DEFAULT_LENGTH_NAME_TOKEN),
+    name_file_ (nullptr)
 {
 
 }
@@ -24,19 +30,16 @@ Tokens::~Tokens() {
 void Tokens::lexicalAnalysis(char **text) {
     int num_read = 1;
     while (num_read) {
-//        double number = 0;
-//        sscanf (*text, " %lg%n", &number, &num_read);
-
         num_read = lexicalAnalysisWriteNumber (text);
-        if (!num_read) {
-//            char string[LENGTH_NAME_TOKEN] = {};
-//            sscanf (*text, " %[A-Za-z]%n", string, &num_read);
 
+        if (!num_read) {
             num_read = lexicalAnalysisWriteString (text);
+
             if (!num_read)
                 num_read = lexicalAnalysisWriteSymbols (text);
         }
     }
+    createToken((char*) "\0", 0, TYPE_SYMBOLS, read_line_);
     dump();
 }
 
@@ -116,12 +119,12 @@ int Tokens::lexicalAnalysisWriteString(char **text) {
 //   scanf very bad work with cyrillic symbol,
 //   so i use win-1251 and it don't see code of symbol,
 //   so i manually write code of symbol
-//    A - \300      –Ø - \337
-//    –∞ - \340      —è - \377
-//    –Å - \250      —ë - \270
+//    A - \300      ﬂ - \337
+//    ‡ - \340      ˇ - \377
+//    ® - \250      ∏ - \270
 //              !!!IMPORTANT!!!
 
-    sscanf (*text, " %[\300-\337\340-\377\250\270]%n", string, &num_read);
+    sscanf (*text, " %[¿-ﬂ‡-ˇ®∏0-9]%n", string, &num_read);
 
     if (num_read) {
         read_line_ += nummemchr(*text, '\n', num_read);
@@ -132,8 +135,8 @@ int Tokens::lexicalAnalysisWriteString(char **text) {
     return num_read;
 }
 
-long ItLength (FILE* file)
-{
+extern long ItLength (FILE* file);
+/*{
     assert(file != nullptr);
 
     fseek(file, 0, SEEK_END);
@@ -141,9 +144,10 @@ long ItLength (FILE* file)
     fseek(file, 0, SEEK_SET);
 
     return result;
-}
+}*/
 
 void Tokens::readFile (const char *name_file) {
+    name_file_ = name_file;
     FILE* file = fopen (name_file, "rb");
     if (file == nullptr) {
         printf ("Can't find/open file, please, check name of file!\n");
@@ -178,16 +182,10 @@ int Tokens::nummemchr(char *memptr, int val, size_t num_block) {
     char* copy_memptr = memptr;
     num_block--;
     memptr--;
-//    do {
-//        memptr++;
-//        num_block++;
-//        memptr = (char *) memchr ((void *) memptr, val, num_block - (memptr - copy_memptr) );
-//    } while (memptr != nullptr);
-//    bool first = true;
+
     int num_enters = 0;
     while  (true) {
-//        if (first)
-//            first = false;
+
         memptr = (char *) memchr ((void *) memptr, val, num_block - (memptr - copy_memptr) - 1 );
         if (memptr == nullptr)
             break;
@@ -200,10 +198,12 @@ int Tokens::nummemchr(char *memptr, int val, size_t num_block) {
 
 void Tokens::dump () {
     for (int i = 0; i < size_token_; i++) {
-        printf("Address: 0x%p\n", &(data[i]));
+        printf("Token %d [0x%p]\n", i, &(data[i]));
         printf("Name: '%s'\n", data[i].name);
         printf("Value: %lg\n", data[i].value);
-        printf("Type: %d\n", data[i].type);
-        printf("Line: %d\n\n", data[i].line);
+        printf("Type:  %d\n", data[i].type);
+        printf("Line:  %d\n\n", data[i].line);
     }
 }
+
+

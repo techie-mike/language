@@ -2,17 +2,14 @@
 // Created by texnar on 03/12/2019.
 //
 
-#ifndef FRONTEND_FUNCTION_H
-#define FRONTEND_FUNCTION_H
+#ifndef FRONTEND_TOKEN_H
+#define FRONTEND_TOKEN_H
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
 
-const int TYPE_NUMBER = 1, TYPE_STRING = 2, TYPE_SYMBOLS = 3;
-
-const int LENGTH_NAME_TOKEN = 100;
 
 typedef int token_t;
 typedef int token_names_t;
@@ -27,10 +24,16 @@ struct one_token {
 struct Tokens {
     one_token* data;
 
+    const char* name_file_;
+
     void lexicalAnalysis (char** text);
     void readFile (const char* name_file);
-    explicit Tokens (token_names_t DEFAULT_LENGTH = 50, token_names_t DEFAULT_LENGTH_NAMES = 200);
+    explicit Tokens (token_names_t DEFAULT_LENGTH = 50, token_names_t DEFAULT_LENGTH_NAMES = 200,
+           token_names_t DEFAULT_LENGTH_NAME_TOKEN = 100);
     ~Tokens();
+
+    const int TYPE_NUMBER, TYPE_STRING, TYPE_SYMBOLS;
+    const int LENGTH_NAME_TOKEN;
 
 private:
     char* all_names_;
@@ -49,10 +52,11 @@ private:
     int lexicalAnalysisWriteSymbols (char** text);
 
     void createToken (char* name, double number, int type, int line);
+//    void convertInCommonName ();
 
     void autoLengthNamesIncrease (int factor = 2);
     void autoLengthTokenIncrease (int factor = 2);
 };
 
 
-#endif //FRONTEND_FUNCTION_H
+#endif //FRONTEND_TOKEN_H
