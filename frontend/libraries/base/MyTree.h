@@ -97,9 +97,15 @@ private:
     size_tree_t getBranch ();
     size_tree_t getCreate ();
 
-    size_tree_t getFunc ();
-    size_tree_t getE ();
 
+    size_tree_t getE ();
+    size_tree_t getT ();
+    size_tree_t getO ();
+    size_tree_t getP ();
+    size_tree_t getN ();
+
+    size_tree_t getFunc ();
+    size_tree_t getIdFunc ();
   /*  size_tree_t getE ();
     size_tree_t getT ();
     size_tree_t getO ();
@@ -114,7 +120,7 @@ private:
 
     bool itIsCmd (const char* name_command); // conformityCommand
 
-    void writeErrorSyntax ();
+    void writeErrorSyntax (const char* name_expected_command = nullptr);
 
     void deleteLastBracket (char *text);
 

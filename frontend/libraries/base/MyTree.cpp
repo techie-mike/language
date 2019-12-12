@@ -360,15 +360,16 @@ bool Tree::isOperator (char *name, size_tree_t index)
     return true;\
 }
 
-    OPER(+ , OPERATOR_ADD)
-    OPER(- , OPERATOR_SUB)
-    OPER(* , OPERATOR_MUL)
-    OPER(/ , OPERATOR_DIV)
-    OPER(^ , OPERATOR_POW)
+    OPER(+  , OPERATOR_ADD)
+    OPER(-  , OPERATOR_SUB)
+    OPER(*  , OPERATOR_MUL)
+    OPER(/  , OPERATOR_DIV)
+    OPER(^  , OPERATOR_POW)
     OPER(sin, OPERATOR_SIN)
     OPER(cos, OPERATOR_COS)
-    OPER(ln, OPERATOR_LN)
-    OPER(=, 0)
+    OPER(ln , OPERATOR_LN )
+    OPER(=  , 0)
+    OPER(;  , 0)
 
 #undef OPER
 }
@@ -1347,6 +1348,8 @@ void Tree::clearBranch(size_tree_t index) {
 size_tree_t Tree::getG (){
     point_read_ = 0;
     root_ = getBranch ();
+    if (*(tokens_->data[point_read_].name) != '\0')
+        writeErrorSyntax();
     dump();
 //    root_ = getE();
 //    assert(*point_read_ == '\0'|| *point_read_ == '\n');
@@ -1554,6 +1557,8 @@ bool Tree::readTreeFromTokens(Tokens *tokens) {
     return true;
 }
 
+//  We comparing token, whose we now read, with
+//  name of command in bracket
 bool Tree::itIsCmd (const char *name_command) {
     token_names_t temp_pos = point_read_;
     bool state = true;
@@ -1596,6 +1601,7 @@ size_tree_t Tree::getBranch() {
             size_tree_t index = getFunc ();
             main_index = createNewObject((char*) ";", index, main_index);
         }
+
         if (!is_create && !is_func)
             break;
     }
@@ -1621,6 +1627,8 @@ size_tree_t Tree::getCreate() {
             writeErrorSyntax();
 
         size_tree_t var_index = getId ();
+        if (!itIsCmd(name_assignment))
+            writeErrorSyntax(name_assignment);
         size_tree_t rez_index = getE ();
         return createNewObject((char*)"=", var_index, rez_index);
 }
@@ -1635,30 +1643,202 @@ size_tree_t Tree::getId () {
     return index;
 }
 
-void Tree::writeErrorSyntax() {
+void Tree::writeErrorSyntax (const char* name_expected_command) {
     char text[300] = {};
-    strcat(text, "echo \"");
-    strcat(text, tokens_->name_file_);
-    strcat(text, ": line:");
+    strcat (text, "echo \"");
+    strcat (text, tokens_->name_file_);
+    strcat (text, ": line:");
 
     char name[100] = {};
-    sprintf(name, "%d", tokens_->data[point_read_].line);
+    sprintf (name, "%d", tokens_->data[point_read_].line);
 
-    strcat(text, name);
-    strcat(text, ": \\e[1;31mError syntax\\e[0m ");
-    strcat(text, "\\e[4m");
-    strcat(text, tokens_->data[point_read_].name);
-    strcat(text, "\\e[0m\"");
+    strcat (text, name);
+    strcat (text, ": \\e[1;31mError syntax\\e[0m ");
+    strcat (text, "\\e[4m");
+    strcat (text, tokens_->data[point_read_].name);
+    strcat (text, "\\e[0m");
 
-    system(text);
+    if (name_expected_command) {
+        strcat (text, " , was expected \\e[1;36m");
+        strcat (text, name_expected_command);
+        strcat (text, "\\e[0m\"");
+    } else
+        strcat (text, "\"");
+
+    system (text);
 //    printf("-e ")
 }
 
 size_tree_t Tree::getFunc() {
+    if (tokens_->data[point_read_].type == tokens_->TYPE_STRING) {
+        char name_func[100] = "$";
+        strcat(name_func, tokens_->data[point_read_].name);
+        point_read_++;
+    }
     return 0;
 }
 
 size_tree_t Tree::getE() {
-    return 0;
+    size_tree_t first_index = getT(),
+            second_index = 0;
+    char* last_operator = tokens_->data[point_read_].name;
+
+//    while (*(tokens_->data[point_read_].name) == '+' || *(tokens_->data[point_read_].name) == '-') {
+    bool is_add = false, is_sub = false;
+    while ((is_add = itIsCmd(name_addition)) || (is_sub = itIsCmd(name_subtraction))) {
+//        char* str_operator = tokens_->data[point_read_].name;
+//        point_read_++;
+        second_index = getT();
+
+        if (!second_index)
+            printf("Don't found element after: %s\n", last_operator);
+
+
+        char str_operator[2] = {};
+        if (is_add)
+            str_operator[0] = '+';
+        if (is_sub)
+            str_operator[0] = '-';
+
+        first_index = createNewObject(str_operator, first_index, second_index);
+        last_operator = tokens_->data[point_read_].name;
+    }
+    return  first_index;
 }
+
+size_tree_t Tree::getT() {
+    #define operator *(tokens_->data[point_read_].name) // i don't use, but remove late
+
+    size_tree_t first_index = getO(),
+            second_index = 0;
+    bool is_mul = false, is_pow = false, is_div = false;
+    char* last_operator = tokens_->data[point_read_].name; // may be this i can remove
+//    while (operator == '*' || operator == '/' || operator == '^') {
+    while ((is_mul = itIsCmd(name_multiplication)) // this may replace on "while(true)" and many "if"
+       || (is_div = itIsCmd(name_division))
+       || (is_pow = itIsCmd(name_power))) {
+
+        second_index = getO();
+
+        if (!second_index)
+            printf("Don't found element after: %c\n", operator);
+
+        char str_operator[2] = {};
+        if (is_mul)
+            str_operator[0] = '*';
+        if (is_div)
+            str_operator[0] = '/';
+        if (is_pow)
+            str_operator[0] = '^';
+
+        first_index = createNewObject(str_operator, first_index, second_index);
+        one_element[first_index].type_ = TYPE_OPERATOR;
+        if (is_mul)
+            one_element[first_index].value_ = OPERATOR_MUL;
+        if (is_div)
+            one_element[first_index].value_ = OPERATOR_DIV;
+        if (is_pow)
+            one_element[first_index].value_ = OPERATOR_POW;
+
+
+        last_operator = tokens_->data[point_read_].name;
+    }
+    return  first_index;
+
+    #undef operator
+}
+
+size_tree_t Tree::getO() { // this i don't touch, it is math
+//    #define operator (tokens_->data[point_read_].name)
+    char* name_operator = tokens_->data[point_read_].name;
+    int num_read = 0;
+    size_tree_t new_index = 0;
+//    int how_read = sscanf(point_read_, "%[a-z]%n", oper, &num_read);
+    if ((!strcmp("sin", name_operator) || !strcmp("cos", name_operator) || !strcmp("ln", name_operator)) ) {
+        point_read_++;
+//        skipSymbols(&point_read_);//s
+        new_index = getP();
+        if (!new_index)
+            printf("Can't read afrer: %s\n", name_operator);
+
+
+        new_index = createNewObject(name_operator, 0, new_index);
+        one_element[new_index].type_ = TYPE_OPERATOR;
+        if (!strcmp("sin", name_operator))
+            one_element[new_index].value_ = OPERATOR_SIN;
+        else if (!strcmp("cos", name_operator))
+            one_element[new_index].value_ = OPERATOR_COS;
+        else if (!strcmp("ln", name_operator))
+            one_element[new_index].value_ = OPERATOR_LN;
+        return new_index;
+    } else {
+        new_index = getP();
+        if (!new_index)
+            printf("Can't read getO: %s\n", name_operator);
+        return new_index;
+    }
+
+//    #undef operator
+}
+
+size_tree_t Tree::getP() {
+    #define operator *(tokens_->data[point_read_].name)
+
+    size_tree_t temp_index = 0;
+    if (operator == '('){
+        point_read_++;
+        value_t value = getE();
+        if (operator != ')')
+//            printf("Error in syntax!\n");
+            writeErrorSyntax();
+        point_read_++;
+        return value;
+    } else {
+        temp_index = getN();
+        if (temp_index)
+            return temp_index;
+
+        temp_index = getId();
+        if (temp_index)
+            return temp_index;
+    }
+
+    return 0;
+
+    #undef operator
+}
+
+size_tree_t Tree::getN() {
+    bool first_state = false;
+
+    if (tokens_->data[point_read_].type == tokens_->TYPE_NUMBER)
+        first_state = true;
+/*    while (isdigit(*point_read_) *//*&& !num_run*//*){
+        value = value * 10 + (*point_read_ - '0');
+        point_read_++;
+        num_run++;
+    }*/
+
+    if (first_state){
+        /*char name[100] = {};
+        sprintf(name, "%lg", value);*/
+        size_tree_t new_index = createNewObject(tokens_->data[point_read_].name, 0, 0);
+        point_read_++;
+        return new_index;
+    } else
+        return 0;
+}
+
+size_tree_t Tree::getIdFunc () {
+    size_tree_t index = 0;
+    if (tokens_->data[point_read_].type == tokens_->TYPE_STRING) {
+        char name_func[100] = "$";
+        strcat(name_func, tokens_->data[point_read_].name);
+        index = createNewObject(name_func, 0, 0);
+        point_read_++;
+    }
+
+    return index;
+}
+
 

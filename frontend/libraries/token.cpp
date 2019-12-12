@@ -29,6 +29,7 @@ Tokens::~Tokens() {
 
 void Tokens::lexicalAnalysis(char **text) {
     int num_read = 1;
+
     while (num_read) {
         num_read = lexicalAnalysisWriteNumber (text);
 
@@ -38,8 +39,9 @@ void Tokens::lexicalAnalysis(char **text) {
             if (!num_read)
                 num_read = lexicalAnalysisWriteSymbols (text);
         }
+//        dump();
     }
-    createToken((char*) "\0", 0, TYPE_SYMBOLS, read_line_);
+    createToken((char*) "\0", 0, TYPE_STRING, read_line_);
     dump();
 }
 
@@ -70,7 +72,7 @@ void Tokens::autoLengthNamesIncrease (int factor) {
             for (int i = 0; i < last_length_names; i++)
                 new_names[i] = all_names_[i];
 
-            for (int i = 0; i < length_names_; i++) {
+            for (int i = 0; i < size_names_; i++) {
                 if (data[i].name != nullptr)
                     data[i].name = data[i].name - all_names_ + new_names;
             }
@@ -124,7 +126,7 @@ int Tokens::lexicalAnalysisWriteString(char **text) {
 //    Ј - \250      И - \270
 //              !!!IMPORTANT!!!
 
-    sscanf (*text, " %[Р-пр-џЈИ0-9]%n", string, &num_read);
+    sscanf (*text, "  %[Р-пр-џЈИ0-9A-Za-z]%n", string, &num_read);
 
     if (num_read) {
         read_line_ += nummemchr(*text, '\n', num_read);
@@ -171,7 +173,13 @@ int Tokens::lexicalAnalysisWriteSymbols(char **text) {
 
     if (num_read) {
         read_line_ += nummemchr(*text, '\n', num_read);
-        createToken(string, 0, TYPE_SYMBOLS, read_line_);
+//        createToken(string, 0, TYPE_SYMBOLS, read_line_);
+        createToken(string, 0, TYPE_STRING, read_line_);
+//-------------------------------------------------------------//
+//        I stay TYPE_STRING for more universal parsing text,
+//        so i can quickly replace from "+" to "sum"
+//-------------------------------------------------------------//
+
         *text += num_read;
     }
 

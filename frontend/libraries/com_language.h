@@ -3,8 +3,15 @@ CMD(здорова, name_begin, {})*/
 #ifndef FRONTEND_COM_LANGUAGE_H
 #define FRONTEND_COM_LANGUAGE_H
 
-static const char* name_begin = "здарова";
+static const char* name_begin = "здорова";
 static const char* name_create_var = "отжал";
+static const char* name_assignment = "=";
+static const char* name_addition = "+";
+static const char* name_subtraction = "-";
+static const char* name_multiplication = "*";
+static const char* name_division = "/";
+static const char* name_power = "^";
+
 
 
 #endif //FRONTEND_COM_LANGUAGE_H
