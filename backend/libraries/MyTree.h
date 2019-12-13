@@ -5,10 +5,10 @@
 #ifndef AKINATOR_MYtree_H
 #define AKINATOR_MYtree_H
 
-#include "../com_language.h"
+//#include "../com_language.h"
 #include "my_stack.h"
 
-#include "../token.h"
+//#include "../token.h"
 #include <ctype.h>
 #include <math.h>
 
@@ -70,7 +70,7 @@ struct Tree {
 
     Tree(const Tree& that) = delete;
 
-    bool readTreeFromTokens (Tokens *tokens);
+//    bool readTreeFromTokens (Tokens *tokens);
 
 private:
     elem *one_element;
@@ -82,9 +82,9 @@ private:
     size_tree_t root_;
     size_tree_t free_;
 
-    Tokens* tokens_;
-
-    token_names_t point_read_;
+//    Tokens* tokens_;
+//
+//    token_names_t point_read_;
 
     struct variables {
         bool x, y, z, t;
@@ -93,43 +93,17 @@ private:
 #include "diffur.h"
 
     //----recursive descent----//
-    size_tree_t getG ();
-    size_tree_t getBranch ();
-    size_tree_t getCreate ();
 
 
-    size_tree_t getE ();
-    size_tree_t getT ();
-    size_tree_t getO ();
-    size_tree_t getP ();
-    size_tree_t getN ();
+//    #define OPERS(func, name) size_tree_t func ();
+//    #include "../func_operators.h"
+//    #undef OPERS
 
-    size_tree_t getFunc ();
-    void createParent (size_tree_t* main_index, const size_tree_t* now_branch, size_tree_t* last_branch, bool branch_left = false);
-    size_tree_t getIdFunc ();
-    size_tree_t getOp ();
 
-    size_tree_t getComp ();
-
-    #define OPERS(func, name) size_tree_t func ();
-    #include "../func_operators.h"
-    #undef OPERS
-
-  /*  size_tree_t getE ();
-    size_tree_t getT ();
-    size_tree_t getO ();
-
-    size_tree_t getP ();
-
-    size_tree_t getN ();
-*/
-    size_tree_t getId ();
 
     //----recursive descent----//
 
     bool itIsCmd (const char* name_command); // conformityCommand
-
-    void writeErrorSyntax (const char* name_expected_command = nullptr);
 
     void deleteLastBracket (char *text);
 
