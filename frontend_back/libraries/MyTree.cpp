@@ -2,7 +2,10 @@
 // Created by texnar on 11/11/2019.
 //
 #include "MyTree.h"
-
+//#include <stdlib.h>
+//#include <stdio.h>
+//#include <assert.h>
+//#include <string.h>
 
 #define LEVEL_VERIFIC 1
 #include "my_stack.h"
@@ -13,11 +16,11 @@ Tree::Tree(size_tree_t DEFAULT_LENGTH, size_tree_t DEFAULT_LENGTH_NAMES) :
     all_names ((char *) calloc(DEFAULT_LENGTH_NAMES, sizeof(char))),
     size_ (0),
     size_names_ (0),
-    point_read_ (0),
     root_ (0),
     length_names_ (DEFAULT_LENGTH_NAMES),
     length_ (DEFAULT_LENGTH),
-    tokens_ (nullptr)
+    write_text_ (nullptr),
+    num_write_text_ (0)
 {
     fillingPoisonousValues();
 }
@@ -83,62 +86,76 @@ void Tree::loadingTree(char* text)
 
 void Tree::readTextTree(char *read_now)
 {
-    if (*read_now == '(')
+    if (*read_now == '{'){
+        read_now ++;
         readNewObject(&read_now);
+    }
     else
         printf("Error in read!\n");
 }
 
 void Tree::skipSymbols(char **read_now)
 {
-    assert(read_now != nullptr);
+  /*  assert(read_now != nullptr);
     while (isspace(**read_now))
         (*read_now)++;
-
+*/
 //    while (**read_now != ')' && **read_now != '('
 //            && **read_now != '\"' && **read_now != '\0') (*read_now)++;
 }
 
 size_tree_t Tree::readNewObject(char **read_now)
 {
-    (*read_now)++;
     size_tree_t left_temp = 0, right_temp = 0;
-
-//-- read left branch --//
-    if (**read_now == '(') {
-        left_temp = readNewObject(read_now);
-
-        skipSymbols(read_now);
-        assert(**read_now == ')');
-        (*read_now)++;
-    }
-//    if (**read_now == '(')
-//-- read left branch --//
-
-//    skipSymbols(read_now);
-
     char name[100] = {};
     readName(read_now, name);
     skipSymbols(read_now);
 
+//-- read left branch --//
+    if (**read_now == '@'){
+        left_temp = 0;
+        (*read_now)++;
+    }
+    else
+    if (**read_now == '{') {
+        (*read_now)++;
+        left_temp = readNewObject(read_now);
+
+        skipSymbols(read_now);
+        assert(**read_now == '}');
+        (*read_now)++;
+    }
+//    if (**read_now == '{')
+
+//-- read left branch --//
+
+    skipSymbols(read_now);
 
 //-- read right branch --//
-    if (**read_now == '(') {
+    if (**read_now == '@'){
+        right_temp = 0;
+        (*read_now)++;
+    }
+    else
+    if (**read_now == '{') {
+        (*read_now)++;
         right_temp = readNewObject(read_now);
 
         skipSymbols(read_now);
-        assert(**read_now == ')');
+        assert(**read_now == '}');
         (*read_now)++;
     }
 //-- read right branch --//
 
     skipSymbols(read_now);
-    if (**read_now == ')') {
+
+    if (**read_now == '}') {
         root_ = createNewObject(name, left_temp, right_temp);
+//        dump();
         return root_;
     }
 
-    if (**read_now != ')' && **read_now != '\n'){
+    if (**read_now != '}'/* && (left_temp == 0 || right_temp == 0)*/){
         printf("Error, don't found end of object!\n");
         abort();
     }
@@ -155,7 +172,7 @@ void Tree::readName(char **read_now, char *name)
     if (haveQuotes(read_now))
         num_read = (char) sscanf(*read_now, "\"%[^\"]\"%n", name, &read_symbol);
     else
-        num_read = (char) sscanf(*read_now, " %[^() \n\t]%n", name, &read_symbol);
+        num_read = (char) sscanf(*read_now, " %[^{}@ \n\t]%n", name, &read_symbol);
 
     if (num_read == 0) printf("Can't read name\n"); // should be test this function
     *read_now += read_symbol;
@@ -200,9 +217,9 @@ size_tree_t Tree::createNewObject(char name[], size_tree_t left, size_tree_t rig
 
 bool Tree::writeTreeInFile(const char *name_file)
 {
-    char *text = (char*) calloc(50000, sizeof(char));
-    writeTree(text, root_);
-    writeFulTreeInFile(text, name_file);
+    char *text = (char*) calloc (50000, sizeof(char));
+    writeTree (text, root_);
+    writeFulTreeInFile (text, name_file);
 
     free(text);
 }
@@ -252,6 +269,37 @@ void Tree::writeTree (char* text, size_tree_t index)
         }
         strcat(text, "}");
     }
+    /*if (one_element[index].left_ == 0 && one_element[index].right_ == 0){
+        strcat(text, open_bracket);
+//        strcat(text, one_element[index].name_);
+        writeNameInTextFromTree(text, one_element[index].name_);
+        strcat(text, close_bracket);
+    }
+    else
+    if (one_element[index].left_ == 0 && one_element[index].right_ != 0){
+        strcat(text, open_bracket);
+//        strcat(text, one_element[index].name_);
+        writeNameInTextFromTree(text, one_element[index].name_);
+        writeTree(text, one_element[index].right_);
+        strcat(text, close_bracket);
+    }
+    else
+    if (one_element[index].left_ != 0 && one_element[index].right_ == 0){
+        strcat(text, open_bracket);
+//        strcat(text, one_element[index].name_);
+        writeTree(text, one_element[index].left_);
+        writeNameInTextFromTree(text, one_element[index].name_);
+        strcat(text, close_bracket);
+    }
+
+    else {
+        strcat(text, open_bracket);
+
+        writeTree(text, one_element[index].left_);
+        writeNameInTextFromTree(text, one_element[index].name_);
+        writeTree(text, one_element[index].right_);
+        strcat(text, close_bracket);
+    }*/
 }
 
 void Tree::dump()
@@ -377,9 +425,7 @@ bool Tree::isOperator (char *name, size_tree_t index)
 
 bool Tree::haveQuotes(char **read_now) {
     char symbol[3] = {};
-    if (sscanf(*read_now, "%[\"]", symbol))
-        return true;
-    return false;
+    return sscanf (*read_now, "%[\"]", symbol) != 0;
 }
 
 bool Tree::isNumber(char *name, size_tree_t index) {
@@ -472,8 +518,7 @@ size_tree_t Tree::diff(Tree *diff_tree, const size_tree_t index, const char* var
                     if (!constLEFT && constRIGHT){
                         return MUL(cR, MUL(dL, POW(cL, MINUS(cR, crNum(1)))));
                     }
-//                    if (!constLEFT && !constRIGHT)
-//                        re
+
                 case OPERATOR_LN:
                     return MUL(dR, DIV(crNum(1), cR));
                 case OPERATOR_SIN:
@@ -1346,17 +1391,6 @@ void Tree::clearBranch(size_tree_t index) {
     clearNode(index);
 }
 
-size_tree_t Tree::getG (){
-    point_read_ = 0;
-    root_ = getBranch ();
-    if (*(tokens_->data[point_read_].name) != '\0')
-        writeErrorSyntax();
-    dump();
-//    root_ = getE();
-//    assert(*point_read_ == '\0'|| *point_read_ == '\n');
-    return root_;
-}
-
 
 void Tree::searchVariables(size_tree_t index) {
     if (!strcmp("x", one_element[index].name_))
@@ -1378,598 +1412,54 @@ void Tree::searchVariables(size_tree_t index) {
         searchVariables(one_element[index].right_);
 }
 
-bool Tree::readTreeFromTokens(Tokens *tokens) {
-    tokens_ = tokens;
-    getG ();
-    return true;
+bool Tree::readTreeFromFile(const char* name_file) {
+    FILE* file = fopen(name_file, "r+");
+    long length_of_file = ItLength(file) + 1;
+    char* text = (char*) calloc(length_of_file, sizeof(char));
+    fread(text, sizeof(char), length_of_file - 1, file);
+    text[length_of_file - 1] = '\0';
+
+    loadingTree(text);
 }
 
-//  We comparing token, whose we now read, with
-//  name of command in bracket
-bool Tree::itIsCmd (const char *name_command) {
-    token_names_t temp_pos = point_read_;
-    bool state = true;
-    if (tokens_->data[point_read_].name == nullptr)
-        return false;
-
-    int sum_read = 0;
-    while (true) {
-        char text[100] = {};
-        int num_read = 0;
-
-        if (sscanf (name_command + sum_read, "%s%n", text, &num_read) == -1)
-            break;
-        if (strcmp(text, tokens_->data[temp_pos].name) != 0) {
-            state = false;
-            break;
-        }
-
-        temp_pos++;
-        sum_read += num_read;
-    }
-
-    if (state)
-        point_read_ = temp_pos;
-    return state;
-}
-
-size_tree_t Tree::getBranch() {
-//writeErrorSyntax();
-    size_tree_t main_index = 0, last_branch = 0;
-    while (true) {
-        size_tree_t create_index = getCreate ();
-
-        if (create_index){
-            size_tree_t now_branch = createNewObject((char*) ";", create_index, 0);
-            createParent (&main_index, &now_branch, &last_branch);
-            /*if (main_index)
-                main_index = last_branch;
-            else {
-                one_element[now_branch].parent_ = last_branch;
-                one_element[last_branch].right_ = now_branch;
-            }
-            last_branch = now_branch;*/
-        }
-//        dump();
-
-        size_tree_t func_index = getFunc ();
-        if (func_index){
-            size_tree_t now_branch = createNewObject((char*) ";", func_index, 0);
-            createParent (&main_index, &now_branch, &last_branch);
-        }
-        if (!create_index && !func_index)
-            break;
-    }
-    return main_index;
-}
-
-size_tree_t Tree::getCreate() {
-    token_names_t save_point = point_read_;
-    point_read_++;
-    if (itIsCmd (name_assignment)){
-        point_read_ = save_point;
-        if (tokens_->data[point_read_].type != tokens_->TYPE_STRING)
-            writeErrorSyntax();
-
-        size_tree_t var_index = getId ();
-        itIsCmd (name_assignment);
-        size_tree_t rez_index = getE ();
-        return createNewObject ((char*)"=", var_index, rez_index);
-    }
-    point_read_ = save_point;
-    return 0;
-}
-
-size_tree_t Tree::getId () {
-    size_tree_t index = 0;
-    if (tokens_->data[point_read_].type == tokens_->TYPE_STRING){
-        index = createNewObject(tokens_->data[point_read_].name, 0, 0);
-        point_read_++;
-    }
-
-    return index;
-}
-
-void Tree::writeErrorSyntax (const char* name_expected_command) {
-    char text[300] = {};
-    strcat (text, "echo \"");
-    strcat (text, tokens_->name_file_);
-    strcat (text, ": line:");
-
-    char name[100] = {};
-    sprintf (name, "%d", tokens_->data[point_read_].line);
-
-    strcat (text, name);
-    strcat (text, ": \\e[1;31mError syntax\\e[0m ");
-    strcat (text, "\\e[4m");
-    strcat (text, tokens_->data[point_read_].name);
-    strcat (text, "\\e[0m");
-
-    if (name_expected_command) {
-        strcat (text, " , was expected \\e[1;36m");
-        strcat (text, name_expected_command);
-        strcat (text, "\\e[0m\"");
-    } else
-        strcat (text, "\"");
-
-    system (text);
-//    printf("-e ")
-}
-
-size_tree_t Tree::getFunc() {
-    token_names_t save_point = point_read_;
-    point_read_++;
-    if (itIsCmd ("(")) {
-        point_read_ = save_point;
-        char name_func[100] = "$";
-
-        if (tokens_->data[point_read_].type == tokens_->TYPE_STRING) {
-            strcat(name_func, tokens_->data[point_read_].name);
-            point_read_++;
-        } else
-            writeErrorSyntax("name of func");
-
-        itIsCmd("(");
-
-        size_tree_t main_arguments_index = 0, last_arguments_index = 0;
-        while (!itIsCmd(")")) {
-            size_tree_t return_index = getId ();
-
-            if (return_index) {
-                size_tree_t new_arguments_index = createNewObject ((char*) ",", 0, return_index);
-                createParent (&main_arguments_index, &new_arguments_index, &last_arguments_index, true);
-            } else
-                writeErrorSyntax("arguments of function");
-        }
-
-        size_tree_t op_index = getOp ();
-
-//        if (!itIsCmd (name_end))
-//            writeErrorSyntax("end of function");
-
-
-//        size_tree_t branch_index = 0, first_op_index = 0;
-
-       /* while (true) {
-            size_tree_t op_index = getOp();
-            if (op_index){
-                size_tree_t new_branch_index = createNewObject ((char*) "op", op_index, 0);
-                createParent (&first_op_index, &new_branch_index, &branch_index);
-                *//*if (!first_op_index){
-                    first_op_index = new_branch_index;
-                } else {
-                    one_element[branch_index].right_ = new_branch_index;
-                    one_element[new_branch_index].parent_ = branch_index;
-                }
-                branch_index = new_branch_index;*//*
-            }
-//        dump();
-
-            if (!op_index)
-                break;*/
-//        }
-        return createNewObject (name_func, main_arguments_index, op_index);
-
-    } else {
-        point_read_ = save_point;
-        return 0;
-    }
-}
-
-size_tree_t Tree::getE() {
-
-    size_tree_t first_index = getT(),
-            second_index = 0;
-    char* last_operator = tokens_->data[point_read_].name;
-
-//    while (*(tokens_->data[point_read_].name) == '+' || *(tokens_->data[point_read_].name) == '-') {
-    bool is_add = false, is_sub = false;
-    while ((is_add = itIsCmd(name_addition)) || (is_sub = itIsCmd(name_subtraction))) {
-//        char* str_operator = tokens_->data[point_read_].name;
-//        point_read_++;
-        second_index = getT();
-
-        if (!second_index)
-            printf("Don't found element after: %s\n", last_operator);
-
-
-        char str_operator[2] = {};
-        if (is_add)
-            str_operator[0] = '+';
-        if (is_sub)
-            str_operator[0] = '-';
-
-        first_index = createNewObject(str_operator, first_index, second_index);
-        last_operator = tokens_->data[point_read_].name;
-    }
-    return  first_index;
-}
-
-size_tree_t Tree::getT() {
-    #define operator *(tokens_->data[point_read_].name) // i don't use, but remove late
-
-    size_tree_t first_index = getO(),
-            second_index = 0;
-    bool is_mul = false, is_pow = false, is_div = false;
-    char* last_operator = tokens_->data[point_read_].name; // may be this i can remove
-    while ((is_mul = itIsCmd(name_multiplication)) // this may replace on "while(true)" and many "if"
-       || (is_div = itIsCmd(name_division))
-       || (is_pow = itIsCmd(name_power))) {
-
-        second_index = getO();
-
-        if (!second_index)
-            printf("Don't found element after: %c\n", operator);
-
-        char str_operator[2] = {};
-        if (is_mul)
-            str_operator[0] = '*';
-        if (is_div)
-            str_operator[0] = '/';
-        if (is_pow)
-            str_operator[0] = '^';
-
-        first_index = createNewObject(str_operator, first_index, second_index);
-        one_element[first_index].type_ = TYPE_OPERATOR;
-        if (is_mul)
-            one_element[first_index].value_ = OPERATOR_MUL;
-        if (is_div)
-            one_element[first_index].value_ = OPERATOR_DIV;
-        if (is_pow)
-            one_element[first_index].value_ = OPERATOR_POW;
-
-
-        last_operator = tokens_->data[point_read_].name;
-    }
-    return  first_index;
-
-    #undef operator
-}
-
-size_tree_t Tree::getO() { // this i don't touch, it is math
-    char* name_operator = tokens_->data[point_read_].name;
-    int num_read = 0;
-    size_tree_t new_index = 0;
-    if ((!strcmp("sin", name_operator) || !strcmp("cos", name_operator) || !strcmp("ln", name_operator)) ) {
-        point_read_++;
-        new_index = getP();
-        if (!new_index)
-            printf("Can't read after: %s\n", name_operator);
-
-
-        new_index = createNewObject(name_operator, 0, new_index);
-        one_element[new_index].type_ = TYPE_OPERATOR;
-        if (!strcmp("sin", name_operator))
-            one_element[new_index].value_ = OPERATOR_SIN;
-        else if (!strcmp("cos", name_operator))
-            one_element[new_index].value_ = OPERATOR_COS;
-        else if (!strcmp("ln", name_operator))
-            one_element[new_index].value_ = OPERATOR_LN;
-        return new_index;
-    } else {
-        new_index = getP();
-        if (!new_index)
-            printf("Can't read getO: %s\n", name_operator);
-        return new_index;
-    }
-
-}
-
-size_tree_t Tree::getP() {
-    #define operator *(tokens_->data[point_read_].name)
-
-    size_tree_t check_deriv_index = getDeriv ();
-    if (check_deriv_index)
-        return check_deriv_index;
-
-    size_tree_t temp_index = 0;
-    if (operator == '('){
-        point_read_++;
-        value_t value = getE();
-        if (operator != ')')
-//            printf("Error in syntax!\n");
-            writeErrorSyntax();
-        point_read_++;
-        return value;
-    } else {
-        temp_index = getN();
-        if (temp_index)
-            return temp_index;
-
-        temp_index = getId();
-        if (temp_index)
-            return temp_index;
-    }
-
-    return 0;
-
-    #undef operator
-}
-
-size_tree_t Tree::getN() {
-    bool first_state = false;
-
-    if (tokens_->data[point_read_].type == tokens_->TYPE_NUMBER)
-        first_state = true;
-
-    if (first_state){
-        /*char name[100] = {};
-        sprintf(name, "%lg", value);*/
-        size_tree_t new_index = createNewObject(tokens_->data[point_read_].name, 0, 0);
-        point_read_++;
-        return new_index;
-    } else
-        return 0;
-}
-
-size_tree_t Tree::getIdFunc () {
-    size_tree_t index = 0;
-    if (tokens_->data[point_read_].type == tokens_->TYPE_STRING) {
-        char name_func[100] = "$";
-        strcat(name_func, tokens_->data[point_read_].name);
-        index = createNewObject(name_func, 0, 0);
-        point_read_++;
-    }
-
-    return index;
-}
-
-size_tree_t Tree::getOp() {
-    /*#define OPERS(func, name) \
-    size_tree_t name##_index = func ();\
-    if (name##_index){\
-        return name##_index;\
-    }*/
-
-    size_tree_t return_index = 0;
-
-    #define OPERS(func, name) \
-    if (!return_index) {\
-        return_index = func ();\
-    }
-
-    if (!return_index) {
-        return_index = getCreate ();
-    }
-    #include "../func_operators.h"
-
-    if (return_index) {
-        if (!strcmp (one_element[return_index].name_, "op"))
-            return return_index;
+void Tree::mainLineView (size_tree_t index) {
+    if (strcmp(one_element[index].name_, ";")) {
+        if (one_element[index].left_ == 0)
+            printf ("Error in mainLineTraversal!\n");
         else
-        return createNewObject((char*) "op", return_index, 0);
+            treeView (one_element[index].left_);
 
+        if (one_element[index].right_)
+            mainLineView (index);
     }
-    #undef OPERS
-    return 0;
+
 }
 
-/*size_tree_t Tree::getOp() {
-    size_tree_t main_index = 0, last_branch = 0;
-    while (true) {
-        #define OPERS(func, name) \
-        size_tree_t name##_index = func ();\
-        if (name##_index){\
-            size_tree_t now_branch = createNewObject((char*) "op", name##_index, 0);\
-            createParent (&main_index, &now_branch, &last_branch);\
-        }
 
-        #include "../func_operators.h"
-       *//* size_tree_t assignment_index = getAssig();
-        if (assignment_index){
-            size_tree_t now_branch = createNewObject((char*) ";", create_index, 0);
-            createParent (&main_index, &now_branch, &last_branch);
-        }*//*
-//        dump();
+void Tree::treeView (size_tree_t index) {
 
-        size_tree_t func_index = getFunc ();
-        if (func_index){
-            size_tree_t now_branch = createNewObject((char*) ";", func_index, 0);
-            createParent (&main_index, &now_branch, &last_branch);
-        }
-        #undef OPERS
-
-        bool state = false;
-
-        #define OPERS(func, name) if (name##_index) state = true;
-        #include "../func_operators.h"
-        #undef OPERS
-
-        if (!state)
-            break;
-    }
-    return main_index;
-
-}*/
-
-void Tree::createParent (size_tree_t *main_index, const size_tree_t *now_branch,
-        size_tree_t *last_branch, bool branch_left) {
-    if (!*main_index)
-        *main_index = *now_branch;
-    else {
-        one_element[*now_branch].parent_ = *last_branch;
-        if (branch_left)
-            one_element[*last_branch].left_ = *now_branch;
-        else
-            one_element[*last_branch].right_ = *now_branch;
-    }
-    *last_branch = *now_branch;
 }
 
-size_tree_t Tree::getIf () {
-    if (itIsCmd(name_if)) {
-        if (!itIsCmd("("))
-            writeErrorSyntax("(");
-        size_tree_t conditions_index = getComp ();
-
-        if (!itIsCmd(")"))
-            writeErrorSyntax(")");
-
-        size_tree_t operators_index = getOp();
-
-        size_tree_t else_operators_index = 0;
-        if (itIsCmd (name_if_else))
-            else_operators_index = getOp();
-
-        size_tree_t what_do_index = createNewObject ((char*) "if-else",
-                operators_index, else_operators_index);
-
-        return createNewObject ((char*)"if", conditions_index, what_do_index);
-    }
-    return 0;
+void Tree::secondLineView(size_tree_t index) {
+     if (!functionsView (index) && !assignmentView (index))
+         printf ("Error, unknown branch from main line!\n");
 }
 
-size_tree_t Tree::getComp () {
-    size_tree_t left = getE();
+bool Tree::assignmentView(size_tree_t index) {
+    if (*one_element[index].name_ == '=') {
 
-    char name_comp[100] = {};
-    do {
-        if (itIsCmd(name_more)){
-            strcat(name_comp, ">");
-            break;
-        }
-
-        if (itIsCmd(name_less)){
-            strcat(name_comp, "<");
-            break;
-        }
-
-        if (itIsCmd(name_equaly)){
-            strcat(name_comp, "==");
-            break;
-        }
-    } while (false);
-
-    size_tree_t right = getE();
-
-    return createNewObject(name_comp, left, right);
-}
-
-size_tree_t Tree::getGet () {
-    if (itIsCmd (name_get)) {
-        size_tree_t variable_index = getId ();
-
-        if (!variable_index)
-            writeTreeInFile("variable");
-
-        return createNewObject ((char*) "get", variable_index, 0);
-    }
-    return 0;
-}
-
-size_tree_t Tree::getPut () {
-    if (itIsCmd (name_put)) {
-        size_tree_t write_index = getE ();
-
-        if (!write_index)
-            writeErrorSyntax("variable or number");
-
-        return createNewObject ((char*) "put", write_index, 0);
-    }
-    return 0;
-}
-
-size_tree_t Tree::getWhile () {
-    if (itIsCmd (name_while)) {
-        if (!itIsCmd("("))
-            writeErrorSyntax("(");
-        size_tree_t conditions_index = getComp ();
-
-        if (!itIsCmd(")"))
-            writeErrorSyntax(")");
-
-        size_tree_t operators_index = getOp();
-
-        return createNewObject ((char*) "while", conditions_index, operators_index);
-    }
-    return 0;
-}
-size_tree_t Tree::getOpCycle () {
-    if (itIsCmd (name_begin)) {
-        size_tree_t main_index = 0, last_index = 0;
-
-        while (!itIsCmd (name_end)) {
-            size_tree_t return_index = getOp ();
-
-            if (return_index){
-//                size_tree_t now_index = createNewObject((char*) "op", return_index, 0);
-                createParent (&main_index, &return_index, &last_index);
-            } else
-                writeErrorSyntax("end of function");
-        }
-        return main_index;
-    }
-    return 0;
-}
-
-size_tree_t Tree::getRet () {
-    if (itIsCmd (name_return)) {
-        size_tree_t return_index = getE ();
-
-        if (return_index)
-            return createNewObject((char*) "ret", return_index, 0);
-        else
-            writeErrorSyntax("number or variable");
     }
 }
 
-size_tree_t Tree::getCall () {
-    token_names_t save_point = point_read_;
-    point_read_++;
-    if (itIsCmd (name_assignment)) {
-        point_read_ = save_point;
-        size_tree_t variable_index = getId ();
-        itIsCmd(name_assignment);
+bool Tree::functionsView(size_tree_t index) {
+    if (*one_element[index].name_ == '$') {
 
-        size_tree_t func_index = getCall ();
-        return createNewObject((char*) "=", variable_index, func_index);
     }
-
-    point_read_ = save_point;
-
-    if (itIsCmd("(")) {
-
-        point_read_ = save_point;
-        char name_func[100] = "$";
-
-        if (tokens_->data[point_read_].type == tokens_->TYPE_STRING) {
-            strcat(name_func, tokens_->data[point_read_].name);
-            point_read_++;
-        } else
-            writeErrorSyntax("name of func");
-
-        itIsCmd("(");
-
-        size_tree_t main_arguments_index = 0, last_arguments_index = 0;
-        while (!itIsCmd(")")) {
-            size_tree_t return_index = getId ();
-
-            if (return_index) {
-                size_tree_t new_arguments_index = createNewObject ((char*) ",", 0, return_index);
-                createParent (&main_arguments_index, &new_arguments_index, &last_arguments_index, true);
-            } else
-                writeErrorSyntax("arguments of function");
-        }
-        return createNewObject (name_func, main_arguments_index, 0);
-    }
-    point_read_ = save_point;
-    return 0;
 }
 
-size_tree_t Tree::getDeriv () {
-    #define name(num) (tokens_->data[point_read_ + num].name)
-    if (!strcmp(name(0), "d") && !strcmp(name(1), "(")) {
-        point_read_ += 2;
-        size_tree_t return_index = getE ();
-        if (!itIsCmd (")"))
-            writeErrorSyntax(")");
-        if (!itIsCmd ("/"))
-            writeErrorSyntax("/");
-        if (!itIsCmd ("d"))
-            writeErrorSyntax("d");
-        size_tree_t variable_index = getId ();
-        return createNewObject((char*) "deriv", variable_index, return_index);
-    }
-    return 0;
-    #undef name
+void Tree::writeConvertCode(const char* name_file) {
+    char *text = (char*) calloc (50000, sizeof(char));
+    write_text_ = text;
+    num_write_text_ = 0;
 }
+
