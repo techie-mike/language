@@ -4,4 +4,4 @@ project(frontend_back)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(frontend_back main.cpp libraries/my_stack.cpp libraries/my_stack.h libraries/MyTree.h
-        libraries/MyTree.cpp)
+        libraries/MyTree.cpp ../../frontend/libraries/com_language.h)

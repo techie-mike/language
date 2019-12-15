@@ -20,7 +20,9 @@ Tree::Tree(size_tree_t DEFAULT_LENGTH, size_tree_t DEFAULT_LENGTH_NAMES) :
     length_names_ (DEFAULT_LENGTH_NAMES),
     length_ (DEFAULT_LENGTH),
     write_text_ (nullptr),
-    num_write_text_ (0)
+    num_write_text_ (0),
+    last_str_have_n_ (false),
+    num_tabs_ (0)
 {
     fillingPoisonousValues();
 }
@@ -505,7 +507,6 @@ size_tree_t Tree::diff(Tree *diff_tree, const size_tree_t index, const char* var
                 case OPERATOR_MUL:
                     return PLUS(MUL(dL,cR),MUL(cL,dR));
                     break;
-//                    return diff_add()
                 case OPERATOR_DIV:
                     return DIV(MINUS(MUL(dL,cR), MUL(cL,dR)), POW(cR,crNum(2)));
                     break;
@@ -1342,7 +1343,7 @@ void Tree::writeFunExplanations(char *text, int num_action) {
 
 void Tree::autoLengthIncrease(int factor) {
     if (size_ + 2 >= length_) {
-        size_tree_t last_length = length_;
+//        size_tree_t last_length = length_;
 //        elem* last_address = one_element;
         length_ *= factor;
         one_element = (elem*) realloc(one_element, length_*sizeof(one_element[0]));
@@ -1413,26 +1414,38 @@ void Tree::searchVariables(size_tree_t index) {
 }
 
 bool Tree::readTreeFromFile(const char* name_file) {
-    FILE* file = fopen(name_file, "r+");
+    char new_name_file[100] = {};
+    strcat (new_name_file, name_file);
+    strcat (new_name_file, "-win1251");
+
+    char system_command[200] = {"iconv -f utf-8 -t windows-1251 "};
+    strcat (system_command, name_file);
+    strcat (system_command, " -o ");
+    strcat (system_command, new_name_file);
+
+    system(system_command);
+
+    FILE* file = fopen(new_name_file, "r+");
     long length_of_file = ItLength(file) + 1;
     char* text = (char*) calloc(length_of_file, sizeof(char));
     fread(text, sizeof(char), length_of_file - 1, file);
     text[length_of_file - 1] = '\0';
 
     loadingTree(text);
+
+    char remove_temp_file[100]= {};
+    strcat (remove_temp_file, "rm ");
+    strcat (remove_temp_file, new_name_file);
+    strcat (remove_temp_file, "\n");
+    system (remove_temp_file);
 }
 
 void Tree::mainLineView (size_tree_t index) {
-    if (strcmp(one_element[index].name_, ";")) {
-        if (one_element[index].left_ == 0)
-            printf ("Error in mainLineTraversal!\n");
-        else
-            treeView (one_element[index].left_);
-
+    if (!strcmp(one_element[index].name_, ";")) {
+            secondLineView (one_element[index].left_);
         if (one_element[index].right_)
             mainLineView (index);
     }
-
 }
 
 
@@ -1440,26 +1453,163 @@ void Tree::treeView (size_tree_t index) {
 
 }
 
-void Tree::secondLineView(size_tree_t index) {
-     if (!functionsView (index) && !assignmentView (index))
+void Tree::secondLineView (size_tree_t index) {
+     if (index != 0 && !functionsView (index) && !assignmentView (index))
          printf ("Error, unknown branch from main line!\n");
 }
 
-bool Tree::assignmentView(size_tree_t index) {
-    if (*one_element[index].name_ == '=') {
+bool Tree::assignmentView (size_tree_t index) {
+    if (!strcmp (one_element[index].name_, "=") && *one_element[one_element[index].right_].name_ != '$') {
+        writeNameInTextCode (one_element[one_element[index].left_].name_);
 
+        assignmentWriteInTextCode ();
+
+        writeNameInTextCode (one_element[one_element[index].right_].name_);
+        writeNameInTextCode ("\n");
+        return true;
     }
+
+    return false;
 }
 
-bool Tree::functionsView(size_tree_t index) {
+bool Tree::functionsView (size_tree_t index, bool is_call) {
     if (*one_element[index].name_ == '$') {
+        if (!strcmp (one_element[index].name_ + 1, "main"))
+            writeNameInTextCode (name_main_function);
+        else
+            writeNameInTextCode (one_element[index].name_ + 1);
 
+        writeNameInTextCode (" (");
+        argumentsOfFunctionsView (one_element[index].left_);
+        writeNameInTextCode (") ");
+
+        if (!is_call){
+            writeNameInTextCode (name_begin);
+            writeNameInTextCode ("\n");
+
+            num_tabs_++;
+            lineOfFunctionsView (one_element[index].right_);
+            num_tabs_--;
+
+            writeNameInTextCode (name_end);
+            writeNameInTextCode ("\n");
+        }
+
+//        lineOfFunctionsView (one_element[index].right_);
+        return true;
     }
+
+    return false;
 }
 
-void Tree::writeConvertCode(const char* name_file) {
+void Tree::writeConvertCode (const char* name_file) {
     char *text = (char*) calloc (50000, sizeof(char));
     write_text_ = text;
     num_write_text_ = 0;
+    mainLineView (root_);
+
+    FILE* file_code = fopen (name_file, "wb");
+    fwrite (text, sizeof (char), num_write_text_, file_code);
+    fclose (file_code);
+}
+
+void Tree::writeNameInTextCode (char* name) {
+    int num_write = 0;
+
+    if (last_str_have_n_)
+        for (int i = 0; i < num_tabs_; i++) {
+            sprintf (write_text_ + num_write_text_, "%c", '\t');
+            num_write_text_++;
+        }
+
+    sprintf (write_text_ + num_write_text_, "%s%n", name, &num_write);
+    num_write_text_ += num_write;
+    num_write = 0;
+    last_str_have_n_ = (bool) strchr (name, '\n');
+}
+
+void Tree::writeNameInTextCode (const char* name) {
+    writeNameInTextCode ((char*) name);
+}
+
+void Tree::argumentsOfFunctionsView(size_tree_t index, bool first) {
+    if (index != 0) {
+        if (!first)
+            writeNameInTextCode (" ");
+        writeNameInTextCode (one_element[one_element[index].right_].name_);
+
+        argumentsOfFunctionsView (one_element[index].left_, false);
+    }
+}
+
+void Tree::lineOfFunctionsView(size_tree_t index) {
+    if (index) {
+        if (strcmp(one_element[index].name_, "op") != 0)
+            printf ("Error in operators of functions!\n");
+
+        operatorsView (one_element[index].left_);
+
+        lineOfFunctionsView (one_element[index].right_);
+    }
+}
+
+void Tree::operatorsView(size_tree_t index) {
+    if (index == 0)
+        printf ("Error, \"op\" haven't left knot!\n");
+    else {
+        if (callFunctionsView (index))
+            return;
+        if (assignmentView (index))
+            return;
+        if (operatorIfView (index))
+            return;
+    }
+}
+
+bool Tree::callFunctionsView (size_tree_t index) {
+    if (!strcmp(one_element[index].name_, "=") && *one_element[one_element[index].right_].name_ == '$') {
+        writeNameInTextCode (one_element[one_element[index].left_].name_);
+
+        assignmentWriteInTextCode ();
+
+        functionsView (one_element[index].right_, true);
+        writeNameInTextCode ("\n");
+        return true;
+    }
+    return false;
+}
+
+bool Tree::operatorIfView(size_tree_t index) {
+    if (!strcmp (one_element[index].name_, "if")) {
+        writeNameInTextCode (name_if);
+        writeNameInTextCode (" ");
+        compareView (one_element[index].left_);
+
+        writeNameInTextCode ("\n");
+    }
+    return false;
+}
+
+void Tree::compareView(size_tree_t index) {
+    writeNameInTextCode ("(");
+    writeNameInTextCode (one_element[one_element[index].left_].name_);
+    writeNameInTextCode (" ");
+    if (!strcmp (one_element[index].name_, "=="))
+        writeNameInTextCode (name_equaly);
+    if (!strcmp (one_element[index].name_, "<"))
+        writeNameInTextCode (name_less);
+    if (!strcmp (one_element[index].name_, ">"))
+        writeNameInTextCode (name_more);
+
+    writeNameInTextCode (" ");
+    writeNameInTextCode (one_element[one_element[index].right_].name_);
+    writeNameInTextCode (")");
+
+}
+
+void Tree::assignmentWriteInTextCode() {
+    writeNameInTextCode (" ");
+    writeNameInTextCode (name_assignment);
+    writeNameInTextCode (" ");
 }
 

@@ -19,7 +19,7 @@ static const char* name_if = "ну че там";
 static const char* name_if_else = "за базар ответь";
 
 static const char* name_more = "точняк больше";
-static const char* name_less = "<";
+static const char* name_less = "точняк меньше";
 static const char* name_equaly = "че реально";
 static const char* name_more_equaly = ">=";
 
