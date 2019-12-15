@@ -1446,16 +1446,17 @@ size_tree_t Tree::getBranch() {
 size_tree_t Tree::getCreate() {
     token_names_t save_point = point_read_;
     point_read_++;
-    if (itIsCmd (name_assignment)){
-        point_read_ = save_point;
-        if (tokens_->data[point_read_].type != tokens_->TYPE_STRING)
-            writeErrorSyntax();
+    if (itIsCmd (name_assignment))
+        if (*(tokens_->data[point_read_ + 1].name) != '(') {
+            point_read_ = save_point;
+            if (tokens_->data[point_read_].type != tokens_->TYPE_STRING)
+                writeErrorSyntax();
 
-        size_tree_t var_index = getId ();
-        itIsCmd (name_assignment);
-        size_tree_t rez_index = getE ();
-        return createNewObject ((char*)"=", var_index, rez_index);
-    }
+            size_tree_t var_index = getId ();
+            itIsCmd (name_assignment);
+            size_tree_t rez_index = getE ();
+            return createNewObject ((char*)"=", var_index, rez_index);
+        }
     point_read_ = save_point;
     return 0;
 }
@@ -1864,14 +1865,14 @@ size_tree_t Tree::getCall () {
     if (itIsCmd (name_assignment)) {
         point_read_ = save_point;
         size_tree_t variable_index = getId ();
-        itIsCmd(name_assignment);
+        itIsCmd (name_assignment);
 
         size_tree_t func_index = getCall ();
         return createNewObject((char*) "=", variable_index, func_index);
     }
 
     point_read_ = save_point;
-
+    point_read_++;
     if (itIsCmd("(")) {
         size_tree_t main_arguments_index = 0;
         char name_func[100] = {};
