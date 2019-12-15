@@ -30,6 +30,8 @@ static const char* name_while = "на кортах";
 
 static const char* name_return = "выкинуть";
 
+static const char* name_main_function = "муйн";
+
 
 
 #endif //FRONTEND_COM_LANGUAGE_H

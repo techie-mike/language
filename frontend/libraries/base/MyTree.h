@@ -169,6 +169,8 @@ private:
 
     void writeFulTreeInFile (char* text, const char *name_file);
 
+    void checkAndCreateFunctions (size_tree_t* main_arguments_index, char* name_func, size_tree_t save_point);
+
 };
 
 #endif //AKINATOR_MYtree_H

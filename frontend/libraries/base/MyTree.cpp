@@ -1500,28 +1500,9 @@ size_tree_t Tree::getFunc() {
     token_names_t save_point = point_read_;
     point_read_++;
     if (itIsCmd ("(")) {
-        point_read_ = save_point;
-        char name_func[100] = "$";
-
-        if (tokens_->data[point_read_].type == tokens_->TYPE_STRING) {
-            strcat(name_func, tokens_->data[point_read_].name);
-            point_read_++;
-        } else
-            writeErrorSyntax("name of func");
-
-        itIsCmd("(");
-
-        size_tree_t main_arguments_index = 0, last_arguments_index = 0;
-        while (!itIsCmd(")")) {
-            size_tree_t return_index = getId ();
-
-            if (return_index) {
-                size_tree_t new_arguments_index = createNewObject ((char*) ",", 0, return_index);
-                createParent (&main_arguments_index, &new_arguments_index, &last_arguments_index, true);
-            } else
-                writeErrorSyntax("arguments of function");
-        }
-
+        size_tree_t main_arguments_index = 0;
+        char name_func[100] = {};
+        checkAndCreateFunctions (&main_arguments_index, name_func, save_point);
         size_tree_t op_index = getOp ();
 
 //        if (!itIsCmd (name_end))
@@ -1744,43 +1725,7 @@ size_tree_t Tree::getOp() {
     return 0;
 }
 
-/*size_tree_t Tree::getOp() {
-    size_tree_t main_index = 0, last_branch = 0;
-    while (true) {
-        #define OPERS(func, name) \
-        size_tree_t name##_index = func ();\
-        if (name##_index){\
-            size_tree_t now_branch = createNewObject((char*) "op", name##_index, 0);\
-            createParent (&main_index, &now_branch, &last_branch);\
-        }
-
-        #include "../func_operators.h"
-       *//* size_tree_t assignment_index = getAssig();
-        if (assignment_index){
-            size_tree_t now_branch = createNewObject((char*) ";", create_index, 0);
-            createParent (&main_index, &now_branch, &last_branch);
-        }*//*
-//        dump();
-
-        size_tree_t func_index = getFunc ();
-        if (func_index){
-            size_tree_t now_branch = createNewObject((char*) ";", func_index, 0);
-            createParent (&main_index, &now_branch, &last_branch);
-        }
-        #undef OPERS
-
-        bool state = false;
-
-        #define OPERS(func, name) if (name##_index) state = true;
-        #include "../func_operators.h"
-        #undef OPERS
-
-        if (!state)
-            break;
-    }
-    return main_index;
-
-}*/
+/**/
 
 void Tree::createParent (size_tree_t *main_index, const size_tree_t *now_branch,
         size_tree_t *last_branch, bool branch_left) {
@@ -1928,28 +1873,9 @@ size_tree_t Tree::getCall () {
     point_read_ = save_point;
 
     if (itIsCmd("(")) {
-
-        point_read_ = save_point;
-        char name_func[100] = "$";
-
-        if (tokens_->data[point_read_].type == tokens_->TYPE_STRING) {
-            strcat(name_func, tokens_->data[point_read_].name);
-            point_read_++;
-        } else
-            writeErrorSyntax("name of func");
-
-        itIsCmd("(");
-
-        size_tree_t main_arguments_index = 0, last_arguments_index = 0;
-        while (!itIsCmd(")")) {
-            size_tree_t return_index = getId ();
-
-            if (return_index) {
-                size_tree_t new_arguments_index = createNewObject ((char*) ",", 0, return_index);
-                createParent (&main_arguments_index, &new_arguments_index, &last_arguments_index, true);
-            } else
-                writeErrorSyntax("arguments of function");
-        }
+        size_tree_t main_arguments_index = 0;
+        char name_func[100] = {};
+        checkAndCreateFunctions (&main_arguments_index, name_func, save_point);
         return createNewObject (name_func, main_arguments_index, 0);
     }
     point_read_ = save_point;
@@ -1972,4 +1898,33 @@ size_tree_t Tree::getDeriv () {
     }
     return 0;
     #undef name
+}
+
+void Tree::checkAndCreateFunctions(size_tree_t* main_arguments_index, char* name_func,size_tree_t save_point) {
+    point_read_ = save_point;
+//    char name_func[100] = "$";
+    strcat (name_func, "$");
+
+    if (tokens_->data[point_read_].type == tokens_->TYPE_STRING) {
+        if (!strcmp (name_func + 1, name_main_function))
+            strcat (name_func, "main");
+        else
+            strcat (name_func, tokens_->data[point_read_].name);
+        point_read_++;
+    } else
+        writeErrorSyntax ("name of func");
+
+    itIsCmd ("(");
+
+    size_tree_t last_arguments_index = 0;
+    while (!itIsCmd(")")) {
+        size_tree_t return_index = getId ();
+
+        if (return_index) {
+            size_tree_t new_arguments_index = createNewObject ((char*) ",", 0, return_index);
+            createParent (main_arguments_index, &new_arguments_index, &last_arguments_index, true);
+        } else
+            writeErrorSyntax("arguments of function");
+    }
+
 }
