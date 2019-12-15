@@ -1906,7 +1906,7 @@ void Tree::checkAndCreateFunctions(size_tree_t* main_arguments_index, char* name
     strcat (name_func, "$");
 
     if (tokens_->data[point_read_].type == tokens_->TYPE_STRING) {
-        if (!strcmp (name_func + 1, name_main_function))
+        if (!strcmp (tokens_->data[point_read_].name, name_main_function))
             strcat (name_func, "main");
         else
             strcat (name_func, tokens_->data[point_read_].name);
