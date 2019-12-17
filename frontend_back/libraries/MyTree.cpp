@@ -998,13 +998,7 @@ void Tree::clearNode(size_tree_t index) {
     if (one_element[one_element[index].parent_].left_ == index)
         {
         one_element[one_element[index].parent_].left_ = 0;
-//        one_element[index].parent_ = -1;
-//        one_element[index].type_ = -1;
-//        one_element[index].value_ = -1;
-//        one_element[index].right_ = free_;
-//        free_ = index;
-//
-//        one_element[index].name_ = nullptr;
+
         }else
     if (one_element[one_element[index].parent_].right_ == index)
         one_element[one_element[index].parent_].right_ = 0;
@@ -1343,12 +1337,9 @@ void Tree::writeFunExplanations(char *text, int num_action) {
 
 void Tree::autoLengthIncrease(int factor) {
     if (size_ + 2 >= length_) {
-//        size_tree_t last_length = length_;
-//        elem* last_address = one_element;
         length_ *= factor;
         one_element = (elem*) realloc(one_element, length_*sizeof(one_element[0]));
         if (one_element){
-//            one_element = new_address;
             fillingPoisonousValues();
 
         } else
@@ -1444,7 +1435,7 @@ void Tree::mainLineView (size_tree_t index) {
     if (!strcmp(one_element[index].name_, ";")) {
             secondLineView (one_element[index].left_);
         if (one_element[index].right_)
-            mainLineView (index);
+            mainLineView (one_element[index].right_);
     }
 }
 
@@ -1464,7 +1455,8 @@ bool Tree::assignmentView (size_tree_t index) {
 
         assignmentWriteInTextCode ();
 
-        writeNameInTextCode (one_element[one_element[index].right_].name_);
+        mathOperatorsView (one_element[index].right_);
+//        writeNameInTextCode (one_element[one_element[index].right_].name_);
         writeNameInTextCode ("\n");
         return true;
     }
@@ -1563,6 +1555,14 @@ void Tree::operatorsView(size_tree_t index) {
             return;
         if (operatorIfView (index))
             return;
+        if (operatorPutView (index))
+            return;
+        if (operatorGetView (index))
+            return;
+        if (operatorWhileView (index))
+            return;
+        if (operatorReturnView (index))
+            return;
     }
 }
 
@@ -1576,6 +1576,12 @@ bool Tree::callFunctionsView (size_tree_t index) {
         writeNameInTextCode ("\n");
         return true;
     }
+
+    if (*one_element[index].name_ == '$') {
+        functionsView (index, true);
+        writeNameInTextCode ("\n");
+        return true;
+    }
     return false;
 }
 
@@ -1584,8 +1590,13 @@ bool Tree::operatorIfView(size_tree_t index) {
         writeNameInTextCode (name_if);
         writeNameInTextCode (" ");
         compareView (one_element[index].left_);
+        writeNameInTextCode (" ");
 
-        writeNameInTextCode ("\n");
+        num_tabs_++;
+        allResultIfView (one_element[index].right_);
+        num_tabs_--;
+
+//        writeNameInTextCode ("\n");
     }
     return false;
 }
@@ -1600,6 +1611,10 @@ void Tree::compareView(size_tree_t index) {
         writeNameInTextCode (name_less);
     if (!strcmp (one_element[index].name_, ">"))
         writeNameInTextCode (name_more);
+    if (!strcmp (one_element[index].name_, ">="))
+        writeNameInTextCode (name_more_equaly);
+    if (!strcmp (one_element[index].name_, "<="))
+        writeNameInTextCode (name_less_equaly);
 
     writeNameInTextCode (" ");
     writeNameInTextCode (one_element[one_element[index].right_].name_);
@@ -1612,4 +1627,155 @@ void Tree::assignmentWriteInTextCode() {
     writeNameInTextCode (name_assignment);
     writeNameInTextCode (" ");
 }
+
+bool Tree::oneMathOperatorView (size_tree_t index, const char* name, size_tree_t type,
+        value_t value, const char* real_name, int last_priority) {
+    if (!strcmp (one_element[index].name_, name)) {
+        one_element[index].type_  = type;
+        one_element[index].value_ = value;
+        int now_priority = priorityFunction (index);
+        if (last_priority > now_priority) {
+            writeNameInTextCode ("(");
+            mathOperatorsView (one_element[index].left_, now_priority);
+            writeNameInTextCode (" ");
+            writeNameInTextCode (real_name);
+            writeNameInTextCode (" ");
+            mathOperatorsView (one_element[index].right_, now_priority);
+            writeNameInTextCode (")");
+        } else {
+            mathOperatorsView (one_element[index].left_, now_priority);
+            writeNameInTextCode (" ");
+            writeNameInTextCode (real_name);
+            writeNameInTextCode (" ");
+            mathOperatorsView (one_element[index].right_, now_priority);
+        }
+        return true;
+    }
+    return false;
+}
+
+void Tree::mathOperatorsView (size_tree_t index, int last_priority) {
+    if (!index)
+        return;
+    if (oneMathOperatorView (index, "+",   TYPE_OPERATOR, OPERATOR_ADD, name_addition,       last_priority))
+        return;
+    if (oneMathOperatorView (index, "-",   TYPE_OPERATOR, OPERATOR_SUB, name_subtraction,    last_priority))
+        return;
+    if (oneMathOperatorView (index, "*",   TYPE_OPERATOR, OPERATOR_MUL, name_multiplication, last_priority))
+        return;
+    if (oneMathOperatorView (index, "/",   TYPE_OPERATOR, OPERATOR_DIV, name_division,       last_priority))
+        return;
+    if (oneMathOperatorView (index, "^",   TYPE_OPERATOR, OPERATOR_POW, name_power,          last_priority))
+        return;
+    if (oneMathOperatorView (index, "sin", TYPE_OPERATOR, OPERATOR_SIN, "sin",               last_priority))
+        return;
+    if (oneMathOperatorView (index, "cos", TYPE_OPERATOR, OPERATOR_MUL, "cos",               last_priority))
+        return;
+
+    if (!strcmp (one_element[index].name_, "deriv")) {
+        operatorDerivView (index);
+        return;
+    }
+
+    if (*one_element[index].name_ == '$') {
+        callFunctionsView (index);
+        return;
+    }
+    writeNameInTextCode (one_element[index].name_);
+}
+
+void Tree::operatorDerivView(size_tree_t index) {
+    writeNameInTextCode ("d(");
+    mathOperatorsView (one_element[index].right_, 3);
+    writeNameInTextCode (")/d ");
+    writeNameInTextCode (one_element[one_element[index].left_].name_);
+
+}
+
+void Tree::allResultIfView(size_tree_t index) {
+    if (!one_element[index].left_)
+        printf ("Error, \"if\" haven't main result");
+
+   resultIfView (one_element[index].left_);
+
+    if (one_element[index].right_) {
+        num_tabs_--;
+        writeNameInTextCode (name_if_else);
+        num_tabs_++;
+
+        resultIfView (one_element[index].right_);
+
+    }
+}
+
+void Tree::resultIfView (size_tree_t index) {
+//    if (!index) return;
+    if (one_element[index].right_ == 0){
+        writeNameInTextCode ("\n");
+        lineOfFunctionsView (index);
+    } else {
+        writeNameInTextCode (name_begin);
+        writeNameInTextCode ("\n");
+
+        lineOfFunctionsView (index);
+        num_tabs_--;
+        writeNameInTextCode (name_end);
+        num_tabs_++;
+        writeNameInTextCode ("\n");
+    }
+}
+
+bool Tree::operatorPutView (size_tree_t index) {
+    if (!strcmp (one_element[index].name_, "put")) {
+        writeNameInTextCode (name_put);
+        writeNameInTextCode (" ");
+        writeNameInTextCode (one_element[one_element[index].left_].name_);
+        writeNameInTextCode ("\n");
+
+        return true;
+    }
+    return false;
+}
+
+bool Tree::operatorGetView (size_tree_t index) {
+    if (!strcmp (one_element[index].name_, "get")) {
+        writeNameInTextCode (name_get);
+        writeNameInTextCode (" ");
+        writeNameInTextCode (one_element[one_element[index].left_].name_);
+        writeNameInTextCode ("\n");
+
+        return true;
+    }
+    return false;
+}
+
+bool Tree::operatorWhileView (size_tree_t index) {
+    if (!strcmp (one_element[index].name_, "while")) {
+        writeNameInTextCode (name_while);
+        writeNameInTextCode (" ");
+        compareView (one_element[index].left_);
+        writeNameInTextCode (" ");
+
+        num_tabs_++;
+        resultIfView (one_element[index].right_);
+        num_tabs_--;
+
+        writeNameInTextCode ("\n");
+    }
+    return false;
+}
+
+bool Tree::operatorReturnView(size_tree_t index) {
+    if (!strcmp (one_element[index].name_, "ret")) {
+        writeNameInTextCode (name_return);
+        writeNameInTextCode (" ");
+//        writeNameInTextCode (one_element[one_element[index].left_].name_);
+        mathOperatorsView (one_element[index].left_);
+        writeNameInTextCode ("\n");
+        return true;
+    }
+    return false;
+}
+
+
 

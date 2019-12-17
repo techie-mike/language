@@ -116,9 +116,22 @@ private:
 
     //---------operators----------//
     bool callFunctionsView (size_tree_t index);
-    bool operatorIfView (size_tree_t index);
 
+    bool operatorIfView (size_tree_t index);
+    void allResultIfView (size_tree_t index);
+    void resultIfView (size_tree_t index);
     void compareView (size_tree_t index);
+
+    bool oneMathOperatorView (size_tree_t index, const char* name, size_tree_t type,
+                        value_t value, const char* real_name, int last_priority = 0);
+    void mathOperatorsView (size_tree_t index, int last_priority = 0);
+    void operatorDerivView (size_tree_t index);
+
+    bool operatorPutView (size_tree_t index);
+    bool operatorGetView (size_tree_t index);
+
+    bool operatorWhileView (size_tree_t index);
+    bool operatorReturnView (size_tree_t index);
 
     //---------operators----------//
 

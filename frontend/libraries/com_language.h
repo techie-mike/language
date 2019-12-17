@@ -3,6 +3,11 @@ CMD(здорова, name_begin, {})*/
 #ifndef FRONTEND_COM_LANGUAGE_H
 #define FRONTEND_COM_LANGUAGE_H
 
+/*#define NAME(var_name, string) static const char* var_name = string;
+#include "def_com_language.h"
+
+#undef NAME*/
+
 static const char* name_begin = "здорова";
 static const char* name_end = "вали";
 
@@ -21,7 +26,8 @@ static const char* name_if_else = "за базар ответь";
 static const char* name_more = "точняк больше";
 static const char* name_less = "точняк меньше";
 static const char* name_equaly = "че реально";
-static const char* name_more_equaly = ">=";
+static const char* name_more_equaly = "больше";
+static const char* name_less_equaly = "меньше";
 
 static const char* name_get = "базарь";
 static const char* name_put = "слышь";

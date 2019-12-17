@@ -1770,25 +1770,35 @@ size_tree_t Tree::getComp () {
 
     char name_comp[100] = {};
     do {
-        if (itIsCmd(name_more)){
-            strcat(name_comp, ">");
+        if (itIsCmd (name_more)){
+            strcat (name_comp, ">");
             break;
         }
 
-        if (itIsCmd(name_less)){
-            strcat(name_comp, "<");
+        if (itIsCmd (name_less)){
+            strcat (name_comp, "<");
             break;
         }
 
-        if (itIsCmd(name_equaly)){
-            strcat(name_comp, "==");
+        if (itIsCmd (name_equaly)){
+            strcat (name_comp, "==");
+            break;
+        }
+
+        if (itIsCmd (name_more_equaly)){
+            strcat (name_comp, ">=");
+            break;
+        }
+
+        if (itIsCmd (name_more_equaly)){
+            strcat (name_comp, "<=");
             break;
         }
     } while (false);
 
     size_tree_t right = getE();
 
-    return createNewObject(name_comp, left, right);
+    return createNewObject (name_comp, left, right);
 }
 
 size_tree_t Tree::getGet () {
