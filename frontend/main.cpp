@@ -7,6 +7,7 @@ int main() {
     tok.readFile ("test.gop");
     Tree tree;
     tree.readTreeFromTokens (&tok);
-    tree.writeTreeInFile("treee.txt");
+//    tree.writeTreeInFile("../treee.txt");
+    tree.writeTreeInFile("../workspace/treee.txt");
     return 0;
 }

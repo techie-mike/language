@@ -1579,7 +1579,8 @@ bool Tree::callFunctionsView (size_tree_t index) {
 
     if (*one_element[index].name_ == '$') {
         functionsView (index, true);
-        writeNameInTextCode ("\n");
+        if (one_element[one_element[index].parent_].type_ != TYPE_OPERATOR)
+            writeNameInTextCode ("\n");
         return true;
     }
     return false;

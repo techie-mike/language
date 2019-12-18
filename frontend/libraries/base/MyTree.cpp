@@ -1422,13 +1422,6 @@ size_tree_t Tree::getBranch() {
         if (create_index){
             size_tree_t now_branch = createNewObject((char*) ";", create_index, 0);
             createParent (&main_index, &now_branch, &last_branch);
-            /*if (main_index)
-                main_index = last_branch;
-            else {
-                one_element[now_branch].parent_ = last_branch;
-                one_element[last_branch].right_ = now_branch;
-            }
-            last_branch = now_branch;*/
         }
 //        dump();
 
@@ -1661,6 +1654,10 @@ size_tree_t Tree::getP() {
         temp_index = getId();
         if (temp_index)
             return temp_index;
+
+       /* temp_index = getRet();
+        if (temp_index)
+            return temp_index;*/
     }
 
     return 0;
@@ -1882,7 +1879,7 @@ size_tree_t Tree::getCall () {
     }
 
     point_read_ = save_point;
-    point_read_++;
+//    point_read_++;
     if (itIsCmd("(")) {
         size_tree_t main_arguments_index = 0;
         char name_func[100] = {};
