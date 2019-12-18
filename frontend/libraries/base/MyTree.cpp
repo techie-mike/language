@@ -1637,6 +1637,12 @@ size_tree_t Tree::getP() {
     if (check_deriv_index)
         return check_deriv_index;
 
+    size_tree_t check_call_func = getCall ();
+    if (check_call_func)
+        return check_call_func;
+
+
+
     size_tree_t temp_index = 0;
     if (operator == '('){
         point_read_++;
@@ -1659,6 +1665,10 @@ size_tree_t Tree::getP() {
         if (temp_index)
             return temp_index;*/
     }
+
+//    size_tree_t check_call_func = getCall ();
+//    if (check_call_func)
+//        return check_call_func;
 
     return 0;
 
@@ -1782,12 +1792,17 @@ size_tree_t Tree::getComp () {
             break;
         }
 
+        if (itIsCmd (name_not_equaly)){
+            strcat (name_comp, "!=");
+            break;
+        }
+
         if (itIsCmd (name_more_equaly)){
             strcat (name_comp, ">=");
             break;
         }
 
-        if (itIsCmd (name_more_equaly)){
+        if (itIsCmd (name_less_equaly)){
             strcat (name_comp, "<=");
             break;
         }
@@ -1879,7 +1894,7 @@ size_tree_t Tree::getCall () {
     }
 
     point_read_ = save_point;
-//    point_read_++;
+    point_read_++;
     if (itIsCmd("(")) {
         size_tree_t main_arguments_index = 0;
         char name_func[100] = {};
@@ -1926,7 +1941,7 @@ void Tree::checkAndCreateFunctions(size_tree_t* main_arguments_index, char* name
 
     size_tree_t last_arguments_index = 0;
     while (!itIsCmd(")")) {
-        size_tree_t return_index = getId ();
+        size_tree_t return_index = getE ();
 
         if (return_index) {
             size_tree_t new_arguments_index = createNewObject ((char*) ",", 0, return_index);

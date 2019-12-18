@@ -111,6 +111,8 @@ private:
 
     size_tree_t getComp ();
 
+//    size_tree_t gerCall ();
+
     #define OPERS(func, name) size_tree_t func ();
     #include "../func_operators.h"
     #undef OPERS

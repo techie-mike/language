@@ -150,6 +150,18 @@ extern long ItLength (FILE* file);
 
 void Tokens::readFile (const char *name_file) {
     name_file_ = name_file;
+
+/*    char system_command[100] = "iconv -f utf-8 -t  windows-1251 ";
+    strcat (system_command, name_file);
+    strcat (system_command, " -o ");
+    strcat (system_command, name_file);
+    strcat (system_command, "-utf8");
+
+    system (system_command);*/
+/*    char new_file[100] = {};
+    strcat (new_file, name_file);
+    strcat (new_file, "-utf8");*/
+
     FILE* file = fopen (name_file, "rb");
     if (file == nullptr) {
         printf ("Can't find/open file, please, check name of file!\n");

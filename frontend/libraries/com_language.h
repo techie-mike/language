@@ -26,8 +26,9 @@ static const char* name_if_else = "за базар ответь";
 static const char* name_more = "точняк больше";
 static const char* name_less = "точняк меньше";
 static const char* name_equaly = "че реально";
-static const char* name_more_equaly = "больше";
-static const char* name_less_equaly = "меньше";
+static const char* name_more_equaly = "побольше";
+static const char* name_less_equaly = "поменьше";
+static const char* name_not_equaly = "че реально не";
 
 static const char* name_get = "базарь";
 static const char* name_put = "слышь";

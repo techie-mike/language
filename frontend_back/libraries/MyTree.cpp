@@ -705,7 +705,7 @@ void Tree::latex(Tree* origin, const char* name)
 
 void Tree::startPrintLatex (FILE* file)
 {
-    fprintf(file, "\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage[russian]{babel}\n \\begin{document}\n\\section{Очень важное взятие ДИФФЕРЕНЦИАЛА этой хрени}\n\n");
+    fprintf(file, "\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage[russian]{babel}\n \\begin{document}\n\\section{РћС‡РµРЅСЊ РІР°Р¶РЅРѕРµ РІР·СЏС‚РёРµ Р”РР¤Р¤Р•Р Р•РќР¦РРђР›Рђ СЌС‚РѕР№ С…СЂРµРЅРё}\n\n");
 }
 
 void Tree::endPrintLatex (FILE* file)
@@ -891,7 +891,7 @@ void Tree::recordExpression(char *text) {
 }
 
 void Tree::allSimplifications(char *text) {
-    strcat(text, "Немного преобразуем полученную штуку, чтобы выражение выглядело ещё менее понятным.\n");
+    strcat(text, "РќРµРјРЅРѕРіРѕ РїСЂРµРѕР±СЂР°Р·СѓРµРј РїРѕР»СѓС‡РµРЅРЅСѓСЋ С€С‚СѓРєСѓ, С‡С‚РѕР±С‹ РІС‹СЂР°Р¶РµРЅРёРµ РІС‹РіР»СЏРґРµР»Рѕ РµС‰С‘ РјРµРЅРµРµ РїРѕРЅСЏС‚РЅС‹Рј.\n");
     recordExpression(text);
     while (true){
         int num_action = 0;
@@ -1283,13 +1283,13 @@ void Tree::writeFunExplanations(char *text, int num_action) {
         num_phrase = rand()%3;
         switch (num_phrase){
             case 0:
-                strcat(text, "Очевидно, что\n");
+                strcat(text, "РћС‡РµРІРёРґРЅРѕ, С‡С‚Рѕ\n");
                 break;
             case 1:
-                strcat(text, "Легко видеть, что\n");
+                strcat(text, "Р›РµРіРєРѕ РІРёРґРµС‚СЊ, С‡С‚Рѕ\n");
                 break;
             case 2:
-                strcat(text, "Я сам не понял как так получилось, но вот\n");
+                strcat(text, "РЇ СЃР°Рј РЅРµ РїРѕРЅСЏР» РєР°Рє С‚Р°Рє РїРѕР»СѓС‡РёР»РѕСЃСЊ, РЅРѕ РІРѕС‚\n");
                 break;
             default:
                 break;
@@ -1300,14 +1300,14 @@ void Tree::writeFunExplanations(char *text, int num_action) {
         num_phrase = rand() % 3;
         switch (num_phrase){
             case 0:
-                strcat(text, "Если найденная $n$-я производная нигде не используется в дальнейшем,"
-                             "то упрощать полученное выражение вряд ли имеет смысл, но мы это зачем-то делаем\n");
+                strcat(text, "Р•СЃР»Рё РЅР°Р№РґРµРЅРЅР°СЏ $n$-СЏ РїСЂРѕРёР·РІРѕРґРЅР°СЏ РЅРёРіРґРµ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ РґР°Р»СЊРЅРµР№С€РµРј,"
+                             "С‚Рѕ СѓРїСЂРѕС‰Р°С‚СЊ РїРѕР»СѓС‡РµРЅРЅРѕРµ РІС‹СЂР°Р¶РµРЅРёРµ РІСЂСЏРґ Р»Рё РёРјРµРµС‚ СЃРјС‹СЃР», РЅРѕ РјС‹ СЌС‚Рѕ Р·Р°С‡РµРј-С‚Рѕ РґРµР»Р°РµРј\n");
                 break;
             case 1:
-                strcat(text, "Аналогично получаем\n");
+                strcat(text, "РђРЅР°Р»РѕРіРёС‡РЅРѕ РїРѕР»СѓС‡Р°РµРј\n");
                 break;
             case 2:
-                strcat(text, "Из предыдущего преобразования закономерно вытекает следующее\n");
+                strcat(text, "РР· РїСЂРµРґС‹РґСѓС‰РµРіРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ Р·Р°РєРѕРЅРѕРјРµСЂРЅРѕ РІС‹С‚РµРєР°РµС‚ СЃР»РµРґСѓСЋС‰РµРµ\n");
                 break;
             default:
                 break;
@@ -1318,15 +1318,15 @@ void Tree::writeFunExplanations(char *text, int num_action) {
         num_phrase = rand() %3;
         switch (num_phrase){
             case 0:
-                strcat(text, "Дальнейшие преобразования намного сложнее, так как появлется неопределённость"
-                             ", решаемая с помощью Лагранжа\n");
+                strcat(text, "Р”Р°Р»СЊРЅРµР№С€РёРµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ РЅР°РјРЅРѕРіРѕ СЃР»РѕР¶РЅРµРµ, С‚Р°Рє РєР°Рє РїРѕСЏРІР»РµС‚СЃСЏ РЅРµРѕРїСЂРµРґРµР»С‘РЅРЅРѕСЃС‚СЊ"
+                             ", СЂРµС€Р°РµРјР°СЏ СЃ РїРѕРјРѕС‰СЊСЋ Р›Р°РіСЂР°РЅР¶Р°\n");
                 break;
             case 1:
-                strcat(text, "Следующие преобразования от нас потребуют 3 высших образования"
-                             " и наличие, как минимум, 2 красных дипломов\n");
+                strcat(text, "РЎР»РµРґСѓСЋС‰РёРµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ РѕС‚ РЅР°СЃ РїРѕС‚СЂРµР±СѓСЋС‚ 3 РІС‹СЃС€РёС… РѕР±СЂР°Р·РѕРІР°РЅРёСЏ"
+                             " Рё РЅР°Р»РёС‡РёРµ, РєР°Рє РјРёРЅРёРјСѓРј, 2 РєСЂР°СЃРЅС‹С… РґРёРїР»РѕРјРѕРІ\n");
                 break;
             case 2:
-                strcat(text, "Исходя из теормы 2.15 в 1 части Петровича получаем следующее\n");
+                strcat(text, "РСЃС…РѕРґСЏ РёР· С‚РµРѕСЂРјС‹ 2.15 РІ 1 С‡Р°СЃС‚Рё РџРµС‚СЂРѕРІРёС‡Р° РїРѕР»СѓС‡Р°РµРј СЃР»РµРґСѓСЋС‰РµРµ\n");
                 break;
             default:
                 break;
@@ -1476,6 +1476,7 @@ bool Tree::functionsView (size_tree_t index, bool is_call) {
         writeNameInTextCode (") ");
 
         if (!is_call){
+            writeNameInTextCode (" ");
             writeNameInTextCode (name_begin);
             writeNameInTextCode ("\n");
 
@@ -1528,7 +1529,8 @@ void Tree::argumentsOfFunctionsView(size_tree_t index, bool first) {
     if (index != 0) {
         if (!first)
             writeNameInTextCode (" ");
-        writeNameInTextCode (one_element[one_element[index].right_].name_);
+        mathOperatorsView (one_element[index].right_);
+//        writeNameInTextCode (one_element[one_element[index].right_].name_);
 
         argumentsOfFunctionsView (one_element[index].left_, false);
     }
@@ -1715,6 +1717,7 @@ void Tree::resultIfView (size_tree_t index) {
         writeNameInTextCode ("\n");
         lineOfFunctionsView (index);
     } else {
+        writeNameInTextCode (" ");
         writeNameInTextCode (name_begin);
         writeNameInTextCode ("\n");
 
@@ -1730,7 +1733,8 @@ bool Tree::operatorPutView (size_tree_t index) {
     if (!strcmp (one_element[index].name_, "put")) {
         writeNameInTextCode (name_put);
         writeNameInTextCode (" ");
-        writeNameInTextCode (one_element[one_element[index].left_].name_);
+//        writeNameInTextCode (one_element[one_element[index].left_].name_);
+        mathOperatorsView (one_element[index].left_);
         writeNameInTextCode ("\n");
 
         return true;
