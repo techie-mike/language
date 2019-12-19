@@ -5,6 +5,7 @@ int main() {
     Tokens tok;
 
     tok.readFile ("../workspace/programs/quad.gop");
+//    tok.
     Tree tree;
     tree.readTreeFromTokens (&tok);
 //    tree.writeTreeInFile("../treee.txt");

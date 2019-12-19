@@ -24,6 +24,7 @@ struct one_token {
 struct Tokens {
     one_token* data;
 
+    Tokens (const Tokens& that) = delete;
     const char* name_file_;
 
     void lexicalAnalysis (char** text);
@@ -35,10 +36,11 @@ struct Tokens {
     const int TYPE_NUMBER, TYPE_STRING, TYPE_SYMBOLS;
     const int LENGTH_NAME_TOKEN;
 
+    token_t size_token_;
 private:
     char* all_names_;
     token_t length_token_;
-    token_t size_token_;
+
     token_names_t length_names_;
     token_names_t size_names_;
 

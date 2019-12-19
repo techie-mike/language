@@ -1440,10 +1440,10 @@ size_tree_t Tree::getCreate() {
     token_names_t save_point = point_read_;
     point_read_++;
     if (itIsCmd (name_assignment))
-        if (*(tokens_->data[point_read_ + 1].name) != '(') {
+        if ((*(tokens_->data[point_read_ + 1].name) != '(') || (*(tokens_->data[point_read_].name) == '(')) {
             point_read_ = save_point;
             if (tokens_->data[point_read_].type != tokens_->TYPE_STRING)
-                writeErrorSyntax();
+                writeErrorSyntax("assignment");
 
             size_tree_t var_index = getId ();
             itIsCmd (name_assignment);
@@ -1487,6 +1487,7 @@ void Tree::writeErrorSyntax (const char* name_expected_command) {
         strcat (text, "\"");
 
     system (text);
+    abort();
 //    printf("-e ")
 }
 
@@ -1649,7 +1650,7 @@ size_tree_t Tree::getP() {
         value_t value = getE();
         if (operator != ')')
 //            printf("Error in syntax!\n");
-            writeErrorSyntax();
+            writeErrorSyntax(")");
         point_read_++;
         return value;
     } else {
@@ -1859,11 +1860,13 @@ size_tree_t Tree::getOpCycle () {
         while (!itIsCmd (name_end)) {
             size_tree_t return_index = getOp ();
 
-            if (return_index){
+            if (return_index) {
 //                size_tree_t now_index = createNewObject((char*) "op", return_index, 0);
                 createParent (&main_index, &return_index, &last_index);
-            } else
+            } else{
+                dump ();
                 writeErrorSyntax("end of function");
+            }
         }
         return main_index;
     }
@@ -1871,37 +1874,43 @@ size_tree_t Tree::getOpCycle () {
 }
 
 size_tree_t Tree::getRet () {
+    size_tree_t return_index = 0;
     if (itIsCmd (name_return)) {
-        size_tree_t return_index = getE ();
+        if (point_read_ < tokens_->size_token_
+         && tokens_->data[point_read_].line == tokens_->data[point_read_ - 1].line)
+            return_index = getE ();
 
-        if (return_index)
-            return createNewObject((char*) "ret", return_index, 0);
-        else
-            writeErrorSyntax("number or variable");
-    }
+        return createNewObject((char*) "ret", return_index, 0);
+        }
 }
 
 size_tree_t Tree::getCall () {
     token_names_t save_point = point_read_;
     point_read_++;
+
     if (itIsCmd (name_assignment)) {
+        if (*tokens_->data[point_read_].name != '('
+            && *tokens_->data[point_read_ + 1].name == '(') {
+                point_read_ = save_point;
+                size_tree_t variable_index = getId ();
+                itIsCmd (name_assignment);
+
+                size_tree_t func_index = getCall ();
+                return createNewObject ((char*) "=", variable_index, func_index);
+        }
+    }
+
+    point_read_ = save_point;
+    if (*tokens_->data[point_read_].name != '('){
+        point_read_++;
+        if (itIsCmd("(")) {
+            size_tree_t main_arguments_index = 0;
+            char name_func[100] = {};
+            checkAndCreateFunctions (&main_arguments_index, name_func, save_point);
+            return createNewObject (name_func, main_arguments_index, 0);
+        }
         point_read_ = save_point;
-        size_tree_t variable_index = getId ();
-        itIsCmd (name_assignment);
-
-        size_tree_t func_index = getCall ();
-        return createNewObject((char*) "=", variable_index, func_index);
     }
-
-    point_read_ = save_point;
-    point_read_++;
-    if (itIsCmd("(")) {
-        size_tree_t main_arguments_index = 0;
-        char name_func[100] = {};
-        checkAndCreateFunctions (&main_arguments_index, name_func, save_point);
-        return createNewObject (name_func, main_arguments_index, 0);
-    }
-    point_read_ = save_point;
     return 0;
 }
 

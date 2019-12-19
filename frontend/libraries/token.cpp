@@ -41,8 +41,9 @@ void Tokens::lexicalAnalysis(char **text) {
         }
 //        dump();
     }
+//    dump();
     createToken((char*) "\0", 0, TYPE_STRING, read_line_);
-    dump();
+
 }
 
 void Tokens::createToken (char *name, double number, int type, int line) {
@@ -66,13 +67,13 @@ void Tokens::autoLengthNamesIncrease (int factor) {
     if (size_names_ + LENGTH_NAME_TOKEN >= length_names_) {
         token_names_t last_length_names = length_names_;
         length_names_ *= factor;
-        char* new_names = (char*) calloc(length_names_, sizeof(char));
+        char* new_names = (char*) calloc (length_names_, sizeof(char));
 
         if (new_names) {
             for (int i = 0; i < last_length_names; i++)
                 new_names[i] = all_names_[i];
 
-            for (int i = 0; i < size_names_; i++) {
+            for (int i = 0; i < size_token_; i++) {
                 if (data[i].name != nullptr)
                     data[i].name = data[i].name - all_names_ + new_names;
             }
@@ -87,12 +88,22 @@ void Tokens::autoLengthNamesIncrease (int factor) {
 }
 
 void Tokens::autoLengthTokenIncrease (int factor) {
-    if (size_token_ >= length_token_) {
+    if (size_token_ + 50 >= length_token_) {
         length_token_ *= factor;
-        data = (one_token *) realloc (data, length_token_ * sizeof(data[0]));
+        data = (one_token *) realloc (data, length_token_ * sizeof(one_token));
+//        one_token* new_data = (one_token *) calloc (length_token_, sizeof(data[0]));
+//        if (new_data){
+//            for (int i = 0; i < size_token_; i++)
+//                new_data[i] = data[i];
+//            for (int i = size_token_; i < length_token_; i++)
+//                data[i] = {};
+//            free (data);
+//            data = new_data;
+//            }
         if (data)
             for (int i = size_token_; i < length_token_; i++)
                 data[i] = {};
+
         else
             printf("Error in new_address of autoLengthNamesIncrease\n");
     }
@@ -130,7 +141,7 @@ int Tokens::lexicalAnalysisWriteString(char **text) {
 
     if (num_read) {
         read_line_ += nummemchr(*text, '\n', num_read);
-        createToken(string, 0, TYPE_STRING, read_line_);
+        createToken (string, 0, TYPE_STRING, read_line_);
         *text += num_read;
     }
 
@@ -174,7 +185,7 @@ void Tokens::readFile (const char *name_file) {
     fread (text, sizeof (char), length_of_file - 1, file);
 
     lexicalAnalysis(&copy_text);
-
+    dump ();
     free (text);
 }
 
@@ -200,17 +211,18 @@ int Tokens::lexicalAnalysisWriteSymbols(char **text) {
 
 int Tokens::nummemchr(char *memptr, int val, size_t num_block) {
     char* copy_memptr = memptr;
-    num_block--;
-    memptr--;
+//    num_block--;
+//    memptr--;
 
     int num_enters = 0;
     while  (true) {
 
-        memptr = (char *) memchr ((void *) memptr, val, num_block - (memptr - copy_memptr) - 1 );
+//        memptr = (char *) memchr ((void *) memptr, val, num_block - (memptr - copy_memptr) - 1 );
+        memptr = (char *) memchr ((void *) memptr, val, num_block - 1);
         if (memptr == nullptr)
             break;
         memptr++;
-        num_block++;
+        num_block -= memptr - copy_memptr;
         num_enters++;
     }
     return num_enters;
