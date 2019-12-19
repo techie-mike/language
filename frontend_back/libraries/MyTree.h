@@ -64,7 +64,7 @@ struct Tree {
     void dump ();
     void latex (Tree* origin,const char* name);
 
-    bool readTreeFromFile (const char name_file[]);
+    bool readTreeFromFile (int num_arguments, char *strings[]);
     bool writeTreeInFile (const char name_file[]);
 
     void fullDifferential (Tree *diff_tree);

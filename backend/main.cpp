@@ -1,8 +1,8 @@
 #include "libraries/MyTree.h"
-int main() {
+int main (int num_arguments, char *strings[]) {
     Tree tree;
-    tree.readTreeFromFile ("../workspace/treee.txt-utf8");
-    tree.writeConvertCode ("test.nasm");
+    tree.readTreeFromFile (num_arguments, strings);
+    tree.writeConvertCode ("code.n");
     tree.dump ();
     return 0;
 }

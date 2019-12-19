@@ -1404,13 +1404,17 @@ void Tree::searchVariables(size_tree_t index) {
         searchVariables(one_element[index].right_);
 }
 
-bool Tree::readTreeFromFile(const char* name_file) {
+bool Tree::readTreeFromFile(int num_arguments, char *strings[]) {
+    if (num_arguments <= 1) {
+        printf ("File name not received\n");
+        abort ();
+    }
     char new_name_file[100] = {};
-    strcat (new_name_file, name_file);
+    strcat (new_name_file, strings[1]);
     strcat (new_name_file, "-win1251");
 
     char system_command[200] = {"iconv -f utf-8 -t windows-1251 "};
-    strcat (system_command, name_file);
+    strcat (system_command, strings[1]);
     strcat (system_command, " -o ");
     strcat (system_command, new_name_file);
 
@@ -1504,6 +1508,18 @@ void Tree::writeConvertCode (const char* name_file) {
     FILE* file_code = fopen (name_file, "wb");
     fwrite (text, sizeof (char), num_write_text_, file_code);
     fclose (file_code);
+
+    char new_name_file[200] = {};
+    strcat (new_name_file, name_file);
+    char* dot = strrchr (new_name_file, '.');
+    *dot = '\0';
+    strcat (new_name_file, "-utf8.gop");
+    char system_command[200] = {"iconv -f windows-1251 -t utf-8 "};
+    strcat (system_command, name_file);
+    strcat (system_command, " -o ");
+    strcat (system_command, new_name_file);
+    system (system_command);
+
 }
 
 void Tree::writeNameInTextCode (char* name) {

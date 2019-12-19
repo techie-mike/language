@@ -1440,7 +1440,8 @@ size_tree_t Tree::getCreate() {
     token_names_t save_point = point_read_;
     point_read_++;
     if (itIsCmd (name_assignment))
-        if ((*(tokens_->data[point_read_ + 1].name) != '(') || (*(tokens_->data[point_read_].name) == '(')) {
+        if (((*(tokens_->data[point_read_ + 1].name) != '(') || (*(tokens_->data[point_read_].name) == '('))
+           || (*(tokens_->data[point_read_].name) == 'd' && *(tokens_->data[point_read_ + 1].name) == '(')) {
             point_read_ = save_point;
             if (tokens_->data[point_read_].type != tokens_->TYPE_STRING)
                 writeErrorSyntax("assignment");

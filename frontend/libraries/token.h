@@ -28,7 +28,7 @@ struct Tokens {
     const char* name_file_;
 
     void lexicalAnalysis (char** text);
-    void readFile (const char* name_file);
+    void readFile (int num_arguments, char *strings[]);
     explicit Tokens (token_names_t DEFAULT_LENGTH = 50, token_names_t DEFAULT_LENGTH_NAMES = 200,
            token_names_t DEFAULT_LENGTH_NAME_TOKEN = 100);
     ~Tokens();

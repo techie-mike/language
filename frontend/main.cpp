@@ -1,14 +1,13 @@
 #include "libraries/token.h"
 #include "libraries/base/MyTree.h"
 
-int main() {
+int main(int num_arguments, char *strings[]) {
     Tokens tok;
 
-    tok.readFile ("../workspace/programs/quad.gop");
-//    tok.
+    tok.readFile (num_arguments, strings);
     Tree tree;
     tree.readTreeFromTokens (&tok);
 //    tree.writeTreeInFile("../treee.txt");
-    tree.writeTreeInFile("../workspace/treee.txt");
+    tree.writeTreeInFile("tree.txt");
     return 0;
 }

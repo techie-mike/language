@@ -159,21 +159,27 @@ extern long ItLength (FILE* file);
     return result;
 }*/
 
-void Tokens::readFile (const char *name_file) {
+void Tokens::readFile (int num_arguments, char *strings[]) {
+    if (num_arguments <= 1) {
+        printf ("File name not received!\n");
+        abort ();
+    }
+    char* name_file = strings[1];
     name_file_ = name_file;
 
-/*    char system_command[100] = "iconv -f utf-8 -t  windows-1251 ";
+    char new_name_file[200] = {};
+    strcat (new_name_file, name_file);
+    char* dot = strrchr (new_name_file, '.');
+    *dot = '\0';
+    strcat (new_name_file, "-win1251.gop");
+    char system_command[200] = {"iconv -f utf-8 -t windows-1251 "};
     strcat (system_command, name_file);
     strcat (system_command, " -o ");
-    strcat (system_command, name_file);
-    strcat (system_command, "-utf8");
+    strcat (system_command, new_name_file);
+    system (system_command);
 
-    system (system_command);*/
-/*    char new_file[100] = {};
-    strcat (new_file, name_file);
-    strcat (new_file, "-utf8");*/
 
-    FILE* file = fopen (name_file, "rb");
+    FILE* file = fopen (new_name_file, "rb");
     if (file == nullptr) {
         printf ("Can't find/open file, please, check name of file!\n");
         abort ();
@@ -185,8 +191,11 @@ void Tokens::readFile (const char *name_file) {
     fread (text, sizeof (char), length_of_file - 1, file);
 
     lexicalAnalysis(&copy_text);
-    dump ();
+//    dump ();
     free (text);
+    char command[100] = "rm ";
+    strcat (command, new_name_file);
+    system (command);
 }
 
 int Tokens::lexicalAnalysisWriteSymbols(char **text) {

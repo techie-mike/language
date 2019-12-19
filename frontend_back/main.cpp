@@ -1,10 +1,8 @@
 #include "libraries/MyTree.h"
 
-int main() {
+int main(int num_arguments, char *strings[]) {
     Tree tree;
-//    tree.readTreeFromFile ("../workspace/ruslan.txt");
-    tree.readTreeFromFile ("../workspace/treee.txt-utf8");
-    tree.dump();
-    tree.writeConvertCode ("../workspace/code.gop");
+    tree.readTreeFromFile (num_arguments, strings);
+    tree.writeConvertCode ("../workspace/back_code.gop");
     return 0;
 }
