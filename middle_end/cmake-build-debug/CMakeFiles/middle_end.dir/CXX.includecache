@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/texnar/CLionProjects/language/frontend/libraries/com_language.h
+def_com_language.h
+/home/texnar/CLionProjects/language/frontend/libraries/def_com_language.h
+
+/home/texnar/CLionProjects/language/frontend/libraries/def_com_language.h
+
+/home/texnar/CLionProjects/language/middle_end/libraries/MyTree.cpp
+MyTree.h
+/home/texnar/CLionProjects/language/middle_end/libraries/MyTree.h
+my_stack.h
+/home/texnar/CLionProjects/language/middle_end/libraries/my_stack.h
+
+/home/texnar/CLionProjects/language/middle_end/libraries/MyTree.h
+../../frontend/libraries/com_language.h
+/home/texnar/CLionProjects/language/frontend/libraries/com_language.h
+my_stack.h
+/home/texnar/CLionProjects/language/middle_end/libraries/my_stack.h
+ctype.h
+-
+math.h
+-
+stdlib.h
+-
+stdio.h
+-
+assert.h
+-
+string.h
+-
+../com_language.h
+/home/texnar/CLionProjects/language/middle_end/com_language.h
+diffur.h
+/home/texnar/CLionProjects/language/middle_end/libraries/diffur.h
+
+/home/texnar/CLionProjects/language/middle_end/libraries/diffur.h
+
+/home/texnar/CLionProjects/language/middle_end/libraries/my_stack.h
+

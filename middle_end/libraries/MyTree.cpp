@@ -275,7 +275,7 @@ void Tree::writeTree (char* text, size_tree_t index)
 
 void Tree::dump()
 {
-    FILE* file = fopen("text_picture.dot", "wb");
+    FILE* file = fopen("../logs/text_picture.dot", "wb");
     fprintf(file, "digraph structs {\n");
     fprintf(file, "rankdir=HR;\n");
 
@@ -326,8 +326,9 @@ void Tree::dump()
     fprintf(file, "}\n");
     fclose(file);
 
-    system("iconv -f windows-1251 -t utf-8 text_picture.dot -o text_picture_utf8.dot");
-    system("dot text_picture_utf8.dot -T png -o ../middle_end/middle_end.png");
+    system("iconv -f windows-1251 -t utf-8 ../logs/text_picture.dot -o ../logs/text_picture_utf8.dot");
+    system("dot ../logs/text_picture_utf8.dot -T png -o ../logs/middle_end.png");
+    system ("rm ../logs/text_picture.dot");
 }
 
 size_tree_t Tree::checkName(char *name)

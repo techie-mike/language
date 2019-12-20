@@ -1,0 +1,17 @@
+//
+// Created by texnar on 21/10/2019.
+//
+
+/*
+#ifndef INTERPRETER_REGISTER_H
+#define INTERPRETER_REGISTER_H
+
+#endif //INTERPRETER_REGISTER_H
+*/
+
+REGISTER(ax, 1)
+REGISTER(bx, 2)
+REGISTER(cx, 3)
+REGISTER(dx, 4)
+REGISTER(bp, 5)
+REGISTER(pc, 6)

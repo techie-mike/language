@@ -1,0 +1,310 @@
+push 1
+pop bp
+call :1
+
+end
+; start function "main"
+:1
+in
+push 0
+push bp
+add
+pop dx
+pop [dx]; assignment in variable "a"
+
+in
+push 1
+push bp
+add
+pop dx
+pop [dx]; assignment in variable "b"
+
+in
+push 2
+push bp
+add
+pop dx
+pop [dx]; assignment in variable "c"
+
+push 0
+push bp
+add
+pop dx
+push [dx]; variable "a"
+push 0
+je :2
+push 1
+push bp
+add
+pop dx
+push [dx]; variable "b"
+push 0
+je :3
+push 2
+push bp
+add
+pop dx
+push [dx]; variable "c"
+push 0
+je :4
+push 0
+out
+
+push 0
+out
+
+push 0
+out
+
+:4
+:3
+push 0
+push 2
+push bp
+add
+pop dx
+push [dx]; variable "c"
+sub
+push 1
+push bp
+add
+pop dx
+push [dx]; variable "b"
+div
+push 3
+push bp
+add
+pop dx
+pop [dx]; assignment in variable "ans"
+
+
+push 3
+push bp
+add
+pop dx
+push [dx]; variable "ans"
+out
+
+:2
+push bp
+push 2
+add
+pop dx
+push [dx]; original c
+
+push bp
+push 5
+add
+pop dx
+pop [dx]; copy c
+
+push bp
+push 1
+add
+pop dx
+push [dx]; original b
+
+push bp
+push 6
+add
+pop dx
+pop [dx]; copy b
+
+push bp
+push 0
+add
+pop dx
+push [dx]; original a
+
+push bp
+push 7
+add
+pop dx
+pop [dx]; copy a
+
+push bp
+push bp
+push 8
+add
+pop dx
+pop [dx]; write old bp
+push bp
+push 9
+add
+pop bp; index in ram on new function
+
+call :0; call function "GetD"
+
+push bp; return last bp
+push -1
+add
+pop dx
+push [dx]
+pop bp
+
+push cx
+push 4
+push bp
+add
+pop dx
+pop [dx]; assignment in variable "d"
+
+push 4
+push bp
+add
+pop dx
+push [dx]; variable "d"
+push 0
+je :5
+push 0
+push 1
+push bp
+add
+pop dx
+push [dx]; variable "b"
+sub
+push 2
+div
+push 0
+push bp
+add
+pop dx
+push [dx]; variable "a"
+div
+push 3
+push bp
+add
+pop dx
+pop [dx]; assignment in variable "ans"
+
+
+push 3
+push bp
+add
+pop dx
+push [dx]; variable "ans"
+out
+
+:5
+push 4
+push bp
+add
+pop dx
+push [dx]; variable "d"
+push 0
+jae :6
+push 0
+push 1
+push bp
+add
+pop dx
+push [dx]; variable "b"
+sub
+push 4
+push bp
+add
+pop dx
+push [dx]; variable "d"
+push 0.5
+pow
+sub
+push 2
+div
+push 0
+push bp
+add
+pop dx
+push [dx]; variable "a"
+div
+push 3
+push bp
+add
+pop dx
+pop [dx]; assignment in variable "ans"
+
+
+push 3
+push bp
+add
+pop dx
+push [dx]; variable "ans"
+out
+
+push 0
+push 1
+push bp
+add
+pop dx
+push [dx]; variable "b"
+sub
+push 4
+push bp
+add
+pop dx
+push [dx]; variable "d"
+push 0.5
+pow
+sub
+push 2
+div
+push 0
+push bp
+add
+pop dx
+push [dx]; variable "a"
+div
+push 3
+push bp
+add
+pop dx
+pop [dx]; assignment in variable "ans"
+
+
+push 3
+push bp
+add
+pop dx
+push [dx]; variable "ans"
+out
+
+:6
+; end function "main"
+end
+; start function "GetD"
+:0
+push -3
+push bp
+add
+pop dx
+push [dx]; variable "b"
+push 2
+pow
+push 4
+push -2
+push bp
+add
+pop dx
+push [dx]; variable "a"
+mul
+push -4
+push bp
+add
+pop dx
+push [dx]; variable "c"
+mul
+sub
+push 0
+push bp
+add
+pop dx
+pop [dx]; assignment in variable "dd"
+
+
+push 0
+push bp
+add
+pop dx
+push [dx]; variable "dd"
+pop cx
+ret
+; end function "GetD"

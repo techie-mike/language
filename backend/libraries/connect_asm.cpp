@@ -30,7 +30,7 @@ nameTable::~nameTable() {
 }
 
 void nameTable::autoLengthIncrease(int factor) {
-    if (size_ + 2 >= length_) {
+    if (size_ + 5 >= length_) {
         length_ *= factor;
         var = (variable*) realloc (var, length_ * sizeof(variable));
         if (var){
@@ -43,7 +43,7 @@ void nameTable::autoLengthIncrease(int factor) {
 }
 
 void nameTable::autoLengthNamesIncrease(int factor) {
-    if (size_ + 50 >= length_names_) {
+    if (size_names_ + 50 >= length_names_) {
         ntable_t last_length_names = length_names_;
         length_names_ *= factor;
 //        all_names_ = (char*) realloc(all_names_, length_names_*sizeof(char));

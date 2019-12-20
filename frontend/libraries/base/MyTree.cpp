@@ -213,13 +213,23 @@ void Tree::writeFulTreeInFile (char* text, const char *name_file)
     int length = strlen (text);
     fwrite (text, sizeof(char), length, file);
     fclose (file);
+
     char system_command[100] = "iconv -f windows-1251 -t utf-8 ";
     strcat (system_command, name_file);
     strcat (system_command, " -o ");
     strcat (system_command, name_file);
-    strcat (system_command, "-utf8");
 
     system (system_command);
+    /*char new_name_file[200] = {};
+    strcat (new_name_file, name_file);
+    char* dot = strrchr (new_name_file, '.');
+    *dot = '\0';
+    strcat (new_name_file, "-utf8.gop");
+    char system_command[200] = {"iconv -f windows-1251 -t utf-8 "};
+    strcat (system_command, name_file);
+    strcat (system_command, " -o ");
+    strcat (system_command, new_name_file);
+    system (system_command);*/
 }
 
 void Tree::writeTree (char* text, size_tree_t index)
@@ -256,7 +266,7 @@ void Tree::writeTree (char* text, size_tree_t index)
 
 void Tree::dump()
 {
-    FILE* file = fopen("text_picture.dot", "wb");
+    FILE* file = fopen("../logs/text_picture.dot", "wb");
     fprintf(file, "digraph structs {\n");
     fprintf(file, "rankdir=HR;\n");
 
@@ -307,8 +317,9 @@ void Tree::dump()
     fprintf(file, "}\n");
     fclose(file);
 
-    system("iconv -f windows-1251 -t utf-8 text_picture.dot -o text_picture_utf8.dot");
-    system("dot text_picture_utf8.dot -T png -o test.png");
+    system ("iconv -f windows-1251 -t utf-8 ../logs/text_picture.dot -o ../logs/text_picture_utf8.dot");
+    system ("dot ../logs/text_picture_utf8.dot -T png -o ../logs/frontend.png");
+    system ("rm ../logs/text_picture.dot");
 }
 
 size_tree_t Tree::checkName(char *name)
@@ -858,7 +869,7 @@ void Tree::allSimplifications(char *text) {
 
 int Tree::optimisationOfConstants(char *text) {
     int num_optimisation = 0;
-    dump();
+//    dump();
     while (true) {
         size_tree_t branch = searchConstNode(this, root_);
         if (!branch) break;
@@ -986,7 +997,7 @@ size_tree_t Tree::createNumber(Tree* tree, value_t value) {
 
 int Tree::optimisationUnusedMembers(char *text) {
     int num_optimisation = 0;
-    dump();
+//    dump();
     while (true) {
         size_tree_t branch = searchUnusedNode(this, root_);
         if (!branch) break;
@@ -1351,7 +1362,7 @@ size_tree_t Tree::getG (){
     root_ = getBranch ();
     if (*(tokens_->data[point_read_].name) != '\0')
         writeErrorSyntax();
-    dump();
+//    dump();
 //    root_ = getE();
 //    assert(*point_read_ == '\0'|| *point_read_ == '\n');
     return root_;

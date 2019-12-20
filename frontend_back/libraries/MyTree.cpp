@@ -306,7 +306,7 @@ void Tree::writeTree (char* text, size_tree_t index)
 
 void Tree::dump()
 {
-    FILE* file = fopen("text_picture.dot", "wb");
+    FILE* file = fopen("../logs/text_picture.dot", "wb");
     fprintf(file, "digraph structs {\n");
     fprintf(file, "rankdir=HR;\n");
 
@@ -357,8 +357,9 @@ void Tree::dump()
     fprintf(file, "}\n");
     fclose(file);
 
-    system("iconv -f windows-1251 -t utf-8 text_picture.dot -o text_picture_utf8.dot");
-    system("dot text_picture_utf8.dot -T png -o test.png");
+    system("iconv -f windows-1251 -t utf-8 ../logs/text_picture.dot -o ../logs/text_picture_utf8.dot");
+    system("dot ../logs/text_picture_utf8.dot -T png -o ../logs/frontend_back.png");
+    system("rm ../logs/text_picture.dot");
 }
 
 size_tree_t Tree::checkName(char *name)
@@ -1420,7 +1421,7 @@ bool Tree::readTreeFromFile(int num_arguments, char *strings[]) {
 
     system(system_command);
 
-    FILE* file = fopen(new_name_file, "r+");
+    FILE* file = fopen(new_name_file, "rb+");
     long length_of_file = ItLength(file) + 1;
     char* text = (char*) calloc(length_of_file, sizeof(char));
     fread(text, sizeof(char), length_of_file - 1, file);
@@ -1510,14 +1511,14 @@ void Tree::writeConvertCode (const char* name_file) {
     fclose (file_code);
 
     char new_name_file[200] = {};
-    strcat (new_name_file, name_file);
-    char* dot = strrchr (new_name_file, '.');
-    *dot = '\0';
-    strcat (new_name_file, "-utf8.gop");
+//    strcat (new_name_file, name_file);
+//    char* dot = strrchr (new_name_file, '.');
+//    *dot = '\0';
+//    strcat (new_name_file, "-utf8.gop");
     char system_command[200] = {"iconv -f windows-1251 -t utf-8 "};
     strcat (system_command, name_file);
     strcat (system_command, " -o ");
-    strcat (system_command, new_name_file);
+    strcat (system_command, name_file);
     system (system_command);
 
 }
@@ -1606,6 +1607,13 @@ bool Tree::callFunctionsView (size_tree_t index) {
 
 bool Tree::operatorIfView(size_tree_t index) {
     if (!strcmp (one_element[index].name_, "if")) {
+
+        num_tabs_--;
+        writeNameInTextCode (name_begin);
+        writeNameInTextCode ("\n");
+        num_tabs_++;
+
+
         writeNameInTextCode (name_if);
         writeNameInTextCode (" ");
         compareView (one_element[index].left_);
@@ -1614,6 +1622,12 @@ bool Tree::operatorIfView(size_tree_t index) {
         num_tabs_++;
         allResultIfView (one_element[index].right_);
         num_tabs_--;
+
+        num_tabs_--;
+        writeNameInTextCode (name_end);
+        writeNameInTextCode ("\n");
+        num_tabs_++;
+
 
 //        writeNameInTextCode ("\n");
     }
