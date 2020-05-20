@@ -1,0 +1,45 @@
+     1                                  ; Written on nasm + ld + WinAPI
+     2                                  
+     3                                  ;	./nasm printf_scanf.asm -f win64 -l printf_scanf.lst
+     4                                  ;	./ld64 printf_scanf.obj user32.dll kernel32.dll
+     5                                  
+     6                                  
+     7                                  extern GetStdHandle
+     8                                  extern WriteConsoleA
+     9                                  extern ReadConsoleA
+    10                                  extern ExitProcess
+    11                                  
+    12                                  global Start
+    13                                  
+    14                                  ;STD_OUTPUT_HANDLE	equ	-11
+    15                                  
+    16                                  section .data
+    17 00000000 48656C6C6F2C20776F-     text	db	"Hello, world!\n"
+    17 00000009 726C64215C6E       
+    18                                  
+    19                                  
+    20                                  section .text
+    21                                  Start:        
+    22 00000000 4883EC08                		sub rsp, 8
+    23 00000004 4889E7                  		mov rdi, rsp
+    24                                  		
+    25 00000007 4883EC20                		sub rsp, 32
+    26 0000000B 48C7C1F5FFFFFF          		mov rcx, -11
+    27 00000012 E8(00000000)            		call GetStdHandle
+    28 00000017 4889C1                  		mov rcx, rax
+    29                                  		
+    30 0000001A 4883C420                		add rsp, 32			;	end of shadow space
+    31                                  		
+    32                                  	
+    33 0000001E 4883EC30                		sub rsp, 32 + 8 + 8			;	new 32 bytes of shadow space 
+    34 00000022 C744242000000000        		mov dword [rsp + 32], 0
+    35 0000002A 41B900000000            		mov r9, 0
+    36 00000030 41B805000000            		mov r8, 5
+    37 00000036 488D1425[00000000]      		lea rdx, [text]
+    38 0000003E E8(00000000)            		call WriteConsoleA
+    39                                  		
+    40 00000043 4883C430                		add rsp, 48
+    41                                  		
+    42 00000047 4831C9                  		xor rcx, rcx
+    43 0000004A E8(00000000)            		call ExitProcess
+    44                                  	
