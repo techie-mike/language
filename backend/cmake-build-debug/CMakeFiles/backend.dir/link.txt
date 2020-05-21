@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/backend.dir/main.cpp.o CMakeFiles/backend.dir/libraries/my_stack.cpp.o CMakeFiles/backend.dir/libraries/MyTree.cpp.o CMakeFiles/backend.dir/libraries/connect_asm.cpp.o  -o backend 

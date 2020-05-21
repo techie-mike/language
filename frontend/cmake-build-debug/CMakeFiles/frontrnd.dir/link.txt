@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/frontrnd.dir/libraries/base/MyTree.cpp.o CMakeFiles/frontrnd.dir/libraries/base/my_stack.cpp.o  -o frontrnd 

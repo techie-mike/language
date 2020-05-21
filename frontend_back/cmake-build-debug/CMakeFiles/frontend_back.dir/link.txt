@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/frontend_back.dir/main.cpp.o CMakeFiles/frontend_back.dir/libraries/my_stack.cpp.o CMakeFiles/frontend_back.dir/libraries/MyTree.cpp.o  -o frontend_back 
