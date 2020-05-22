@@ -9,11 +9,12 @@
 #include <cassert>
 #include <cstring>
 
+#define LEVEL_VERIFIC 0
 #include "my_stack.h"
 
 
 typedef int    tree_st;     // tree size type
-typedef double value_t;
+typedef long long value_t;
 
 struct Node {
     char   *name   ;
@@ -23,6 +24,8 @@ struct Node {
     tree_st left   ;
     tree_st right  ;
     tree_st parent ;
+
+
 };
 
 struct Tree {
@@ -31,51 +34,52 @@ private:
     char        *all_names_     ;
 
     tree_st     size_           ;
-    tree_st     length_         ;
     tree_st     size_names_     ;
-    tree_st     length_names_   ;
     tree_st     root_           ;
     tree_st     free_           ;
+    tree_st     length_         ;
+    tree_st     length_names_   ;
 
 public:
     Tree (tree_st DEFAULT_LENGTH       = 50 ,
           tree_st DEFAULT_LENGTH_NAMES = 200);
     ~Tree ();
-
-    void dump ();
-
-    void readTreeFromFile (char*      name_file  );
-    bool writeTreeInFile  (const char name_file[]);
-    void writeConvertCode (const char name_file[]);
-
     Tree (const Tree& that) = delete;
 
+    void readTreeFromFile (char* name_file  );
+    void dump (void (*colorFunction)(FILE* file, Node* node)); // Pass the function to change the colors of the blocks
+
+    void fullVisit (void (*func)(Node* node));
 
     void externalFunction (tree_st index, void (*func)(Node& node));
-    //  Function for launch external functions, not from Tree.
-    //  func parametr REFERENCE!!!
+            //  Function for launch external functions, not from Tree.
+            //  "func" parametr REFERENCE!!!
 
 private:
 //----------------------------FUNCTIONS----------------------------//
     static char* readTextFromFile (char* name_file);
+    static long  itLength         (FILE* file);
 
-    //--------------LOADING-TREE--------------//
+    void visit (tree_st index, void (*func)(Node* node));
+
+
+    //----------------LOADING-TREE----------------//
     void loadingTree  (char  text[]  );    // load tree from text in this struct
     void readTextTree (char* read_now);
 
-    //-------------------------------------------
+    //----------------------------------------------
     tree_st readNewObject          (char** read_now);
     tree_st readNewObjectBranch    (char** read_now);
 
     inline static bool haveQuotes  (char** read_now);
     static void        readName    (char** read_now, char name[]);
-    //-------------------------------------------
+    //----------------------------------------------
 
     tree_st createNewObject (char    name[]     ,
                              tree_st left       ,
                              tree_st right      ,
                              tree_st parent = 0);
-
+    //----------------LOADING-TREE----------------//
 
 
     //--------------SERVICE-DYNAMIC--------------//
@@ -85,9 +89,6 @@ private:
     //--------------SERVICE-DYNAMIC--------------//
 };
 
-//-------------STATIC-FUNCTION-------------//
-
-//-------------STATIC-FUNCTION-------------//
 
 #define MYTREE_H
 

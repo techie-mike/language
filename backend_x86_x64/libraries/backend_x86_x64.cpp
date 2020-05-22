@@ -6,18 +6,18 @@
 
 
 
-void backend::whatItIs (Node& node) {
+void backend::whatItIs (Node* node) {
     if (isOperator (node)) return;
     if (isNumber   (node)) return;
     if (isVariable (node)) return;
 }
 
-bool backend::isOperator (Node& node)
+bool backend::isOperator (Node* node)
 {
 //----------------------------DEFINE----------------------------//
-#define OPER(str, num) if (!strcmp( #str , node.name)) {\
-    node.type = TYPE_OPERATOR;\
-    node.value = num;\
+#define OPER(str, num) if (!strcmp( #str , node->name)) {\
+    node->type = TYPE_OPERATOR;\
+    node->value = num;\
     return true;\
 }
 //----------------------------DEFINE----------------------------//
@@ -37,36 +37,25 @@ bool backend::isOperator (Node& node)
     return false;
 }
 
-bool backend::isNumber (Node& node) {
-    value_t number = 0;
-    int num_read = 0;
-    sscanf (node.name, "%lg%n", &number, &num_read);
-    if (strlen(node.name) == num_read){
-        node.type = TYPE_NUMBER;
-        node.value = number;
+bool backend::isNumber   (Node* node) {
+    double  temp_number = 0;
+    int     num_read    = 0;
+
+    sscanf (node->name, "%lg%n", &temp_number, &num_read);
+    temp_number *= CONVERSION_FACTOR_DOUBLE;
+    value_t number = (value_t) temp_number;
+
+    if (strlen (node->name) == (size_t) num_read) {
+        node->type  = TYPE_NUMBER;
+        node->value = number;
         return true;
     }
     return false;
 }
 
-bool backend::isVariable (Node& node) {
-/*
-#define VAR(str, num) if (!strcmp( #str , name)) {\
-        one_element[index].type_ = TYPE_VARIABLE;\
-        one_element[index].value_ = num;\
-        return true;\
-    }
-
-    VAR(x , VARIABLE_X)
-    VAR(y , VARIABLE_Y)
-    VAR(z , VARIABLE_Z)
-    VAR(t , VARIABLE_T)
-
-#undef VAR
-*/
-
+bool backend::isVariable (Node* node) {
 //----------------------------DEFINE----------------------------//
-#define NAME(name_var) if (!strcmp(node.name , name_var)) {\
+#define NAME(name_var) if (!strcmp(node->name , name_var)) {\
         return false;\
     } else
 //----------------------------DEFINE----------------------------//
@@ -98,11 +87,27 @@ bool backend::isVariable (Node& node) {
     NAME (",")
 #undef NAME
 
-    if (*node.name == '$'){
-        node.type = TYPE_FUNCTION;
+    if (*node->name == '$'){
+        node->type = TYPE_FUNCTION;
         return true;
     } else {
-        node.type = TYPE_VARIABLE;
+        node->type = TYPE_VARIABLE;
         return true;
     }
+}
+
+void backend::treeColoring (FILE* file, Node* node) {
+    switch (node->type) {
+                case TYPE_OPERATOR:
+                    fprintf(file, "style=\"filled\", fillcolor=\"lightgrey\" ");
+                    break;
+                case TYPE_NUMBER:
+                    fprintf(file, "style=\"filled\", fillcolor=\"yellow\" ");
+                    break;
+                case TYPE_VARIABLE:
+                    fprintf(file, "style=\"filled\", fillcolor=\"lightblue\" ");
+                    break;
+                default:
+                    break;
+            }
 }

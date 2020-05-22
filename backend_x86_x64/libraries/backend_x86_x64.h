@@ -8,21 +8,31 @@
 #include "MyTree.h"
 
 struct backend {
+private:
     //------------------------------CONSTANTS------------------------------//
-    const char TYPE_OPERATOR = 1, TYPE_NUMBER   = 2,
-               TYPE_VARIABLE = 3, TYPE_FUNCTION = 4;
+    static const char TYPE_OPERATOR = 1, TYPE_NUMBER   = 2,
+                      TYPE_VARIABLE = 3, TYPE_FUNCTION = 4;
 
-    enum      {OPERATOR_ADD = 1, OPERATOR_SUB, OPERATOR_MUL, OPERATOR_DIV,
-               OPERATOR_POW,     OPERATOR_SIN, OPERATOR_COS, OPERATOR_LN };
+    enum             {OPERATOR_ADD = 1, OPERATOR_SUB, OPERATOR_MUL, OPERATOR_DIV,
+                      OPERATOR_POW,     OPERATOR_SIN, OPERATOR_COS, OPERATOR_LN };
+
+
+              static const long long  CONVERSION_FACTOR_LONG   = 100;
+    constexpr static const double     CONVERSION_FACTOR_DOUBLE = (const double) CONVERSION_FACTOR_LONG;
     //------------------------------CONSTANTS------------------------------//
-
+public:
     Tree tree;
 
-    void whatItIs   (Node& node);     // check what type this Node
+    //------------------------------FUNCTION-------------------------------//
+    static void whatItIs (Node* node);     // check what type this Node
 
-    bool isOperator (Node& node);
-    bool isNumber   (Node& node);
-    bool isVariable (Node& node);
+    static void treeColoring (FILE* file, Node* node);
+
+
+private:
+    static bool isOperator (Node* node);
+    static bool isNumber   (Node* node);
+    static bool isVariable (Node* node);
 
 };
 

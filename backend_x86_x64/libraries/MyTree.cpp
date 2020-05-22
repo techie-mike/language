@@ -3,9 +3,8 @@
 //
 
 #include "MyTree.h"
-#define LEVEL_VERIFIC 1
 
-long ItLength(FILE* file)
+long Tree::itLength(FILE* file)
 {
     assert (file != nullptr);
 
@@ -23,7 +22,6 @@ void Tree::readTreeFromFile(char *name_file) {
     }
 
     char* text = readTextFromFile (name_file);
-
     loadingTree (text);
 }
 
@@ -33,7 +31,7 @@ char* Tree::readTextFromFile (char* name_file) {
     FILE* file = fopen (name_file, "rb");
     assert (file != nullptr);
 
-    long length_of_file = ItLength (file) + 1;
+    long length_of_file = itLength (file) + 1;
 
     char* text = (char*) calloc (length_of_file, sizeof(char));
     fread (text, sizeof(char), length_of_file - 1, file);
@@ -43,12 +41,13 @@ char* Tree::readTextFromFile (char* name_file) {
     return text;
 }
 
-void Tree::loadingTree (char* text)
-{
+void Tree::loadingTree (char* text) {
     assert(text != nullptr);
 
-    if (text[0] == 0xEF && text[1] == 0xBB && text[2] == 0xBF)      //  '0xEF 0xBB 0xBF' - it is special character
-        text += 3;                                                  //  in start file of encoding UTF-8
+    if (((unsigned char) text[0] == 0xEF)       //  '0xEF 0xBB 0xBF' - it is special character
+     && ((unsigned char) text[1] == 0xBB)       //  in start file of encoding UTF-8
+     && ((unsigned char) text[2] == 0xBF))
+        text += 3;
 
     readTextTree (text);
 }
@@ -77,8 +76,7 @@ tree_st Tree::readNewObject (char **read_now)
         root_ = createNewObject (name, left_temp, right_temp);
         return root_;
     }
-
-    if (**read_now != '}'){
+    else {
         printf("Error, don't found end of object!\n");
         abort();
     }
@@ -106,13 +104,12 @@ void Tree::readName (char **read_now, char *name) {
     char num_read    = 0;
 
     if (haveQuotes (read_now))
-        num_read = (char) sscanf (*read_now, "\"%[^\"]\"%n",    name,  &read_symbol);
+        num_read = (char) sscanf (*read_now, "\"%[^\"]\"%n",   name,  &read_symbol);    // write name if use text quotes
     else
-        num_read = (char) sscanf (*read_now, "%[^{}@ \n\t]%n",  name,  &read_symbol);
+        num_read = (char) sscanf (*read_now, "%[^{}@ \n\t]%n", name,  &read_symbol);    // write name
 
-
-
-    if (num_read == 0) printf ("Can't read name\n");
+    if (num_read == 0)
+        printf ("Can't read name\n");
     *read_now += read_symbol;
 }
 
@@ -132,8 +129,9 @@ tree_st Tree::createNewObject (char    name[],
     tree_st new_index = free_;
     free_ = node_[free_].right;
 
+//--------------------------------------------
 //    externalFunction (new_index, whatItIs);     // will be do that
-                                                  // in other realisation
+//--------------------------------------------    // in other realisation
 
     node_[new_index].right = right;
     node_[new_index].left = left;
@@ -159,7 +157,7 @@ tree_st Tree::createNewObject (char    name[],
 void Tree::autoLengthIncrease(int factor) {
     if (size_ + 2 >= length_) {
         length_ *= factor;
-        node_ = (Node*) realloc (node_, length_*sizeof(node_[0]));
+        node_ = (Node*) realloc (node_, length_ * sizeof(node_[0]));
         if (node_){
             fillingPoisonousValues();
 
@@ -181,7 +179,7 @@ void Tree::fillingPoisonousValues() {
     free_ = size_ + 1;
 }
 
-void Tree::autoLengthNamesIncrease(int factor) {
+void Tree::autoLengthNamesIncrease (int factor) {
     if (size_names_ + 100 >= length_names_) {
         tree_st last_length_names = length_names_;
         length_names_ *= factor;
@@ -210,21 +208,21 @@ void Tree::externalFunction (tree_st index, void (*func)(Node& node)) {
 }
 
 
-Tree::Tree(tree_st DEFAULT_LENGTH, tree_st DEFAULT_LENGTH_NAMES):
+Tree::Tree (tree_st DEFAULT_LENGTH      ,
+            tree_st DEFAULT_LENGTH_NAMES):
         node_         ((Node*) calloc (DEFAULT_LENGTH,       sizeof(node_[0]))),
         all_names_    ((char*) calloc (DEFAULT_LENGTH_NAMES, sizeof(char))    ),
-        free_         (0),
         size_         (0),
         size_names_   (0),
         root_         (0),
-        length_names_ (DEFAULT_LENGTH_NAMES),
-        length_       (DEFAULT_LENGTH)
+        free_         (0),
+        length_       (DEFAULT_LENGTH),
+        length_names_ (DEFAULT_LENGTH_NAMES)
 {
     fillingPoisonousValues();
 }
 
-Tree::~Tree()
-{
+Tree::~Tree() {
     free (node_);
     free (all_names_);
     size_       = 0;
@@ -235,9 +233,7 @@ Tree::~Tree()
 }
 
 
-
-
-void Tree::dump()
+void Tree::dump (void (*colorFunction) (FILE* file, Node* node))
 {
 //    FILE* file = fopen("../../logs/text_picture_refactor.dot", "wb");
     FILE* file = fopen("text_picture_refactor.dot", "wb");
@@ -248,13 +244,15 @@ void Tree::dump()
     for (tree_st i = 1; i < length_; i++){
         if (node_[i].parent != -1){
             if (*(node_[i].name) == '>' || *(node_[i].name) == '<')
-                fprintf(file, "Index%d [shape=record, label=\" <left>  %d | {'\\%s' | Par: %d} | {Index: %d | Type: %d | Value: %lg} | <right> %d \",",
+                fprintf(file, "Index%d [shape=record, label=\" <left>  %d | {'\\%s' | Par: %d} | {Index: %d | Type: %d | Value: %lld} | <right> %d \",",
                         i, node_[i].left, node_[i].name, node_[i].parent, i, node_[i].type, node_[i].value, node_[i].right);
             else
-                fprintf(file, "Index%d [shape=record, label=\" <left>  %d | {'%s' | Par: %d} | {Index: %d | Type: %d | Value: %lg} | <right> %d \",",
+                fprintf(file, "Index%d [shape=record, label=\" <left>  %d | {'%s' | Par: %d} | {Index: %d | Type: %d | Value: %lld} | <right> %d \",",
                         i, node_[i].left, node_[i].name, node_[i].parent, i, node_[i].type, node_[i].value, node_[i].right);
 
 
+            colorFunction (file, &(node_[i]));
+            //------------------------------------//
             // May be add colors in dot in future //
 //---------------------------------------------------------------------------------
 //            switch (node_[i].type){
@@ -296,4 +294,14 @@ void Tree::dump()
 
 //    system ("dot ../../logs/text_picture_refactor.dot -T png -o ../../logs/text_picture_refactor.png");
     system ("dot text_picture_refactor.dot -T png -o text_picture_refactor.png");
+}
+
+void Tree::fullVisit (void (*func)(Node* node)) {
+    visit (root_, func);
+}
+
+void Tree::visit (tree_st index, void (*func)(Node* node)) {
+    if (node_[index].left )     visit (node_[index].left,  func);    // Visiting all node in tree and
+    func (&(node_[index]));                                          // tree doesn't know what function we use.
+    if (node_[index].right)     visit (node_[index].right, func);
 }
