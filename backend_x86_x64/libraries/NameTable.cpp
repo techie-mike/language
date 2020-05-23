@@ -2,7 +2,8 @@
 // Created by texnar on 16/12/2019.
 //
 
-#include "connect_asm.h"
+#include "NameTable.h"
+
 
 nameTable::nameTable():
     var           (nullptr),
@@ -16,8 +17,8 @@ nameTable::nameTable():
 {
     length_names_ = DEFAULT_LENGTH_NAMES;
     length_       = DEFAULT_LENGTH;
-    var           = (variable*) calloc (sizeof (variable), DEFAULT_LENGTH);
-    all_names_    = (char*)     calloc (sizeof (char),     DEFAULT_LENGTH_NAMES);
+    var           = (element*) calloc (sizeof (element), DEFAULT_LENGTH);
+    all_names_    = (char*)    calloc (sizeof (char),    DEFAULT_LENGTH_NAMES);
 
     if (!var || !all_names_) {
         printf ("Error in calloc nameTable!");
@@ -32,7 +33,7 @@ nameTable::~nameTable() {
 void nameTable::autoLengthIncrease (int factor) {
     if (size_ + 5 >= length_) {
         length_ *= factor;
-        var = (variable*) realloc (var, length_ * sizeof (variable));
+        var = (element*) realloc (var, length_ * sizeof (element));
         if (var){
             fillingPoisonousValues();
 

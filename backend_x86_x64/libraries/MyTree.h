@@ -41,6 +41,8 @@ private:
     tree_st     length_names_   ;
 
 public:
+    enum { NO_BRANCH = 0, ONLY_LEFT_BRANCH, ONLY_RIGHT_BRANCH, BOTH_BRANCH };
+
     Tree (tree_st DEFAULT_LENGTH       = 50 ,
           tree_st DEFAULT_LENGTH_NAMES = 200);
     ~Tree ();
@@ -51,9 +53,23 @@ public:
 
     void fullVisit (void (*func)(Node* node));
 
-    void externalFunction (tree_st index, void (*func)(Node& node));
+//    void externalFunction (tree_st index, void (*func)(Node& node));
             //  Function for launch external functions, not from Tree.
             //  "func" parametr REFERENCE!!!
+
+    void controlledExternalFunction (tree_st index, int (*func)(Node* node));
+        //                             !!!IMPOTANT!!!                                    //
+        //  Function "controlledExternalFunction" goes into the branches (left & right)  //
+        //  depending on the return value of the "func":                                 //
+        //       return  NO_BRANCH           don't go anywhere                           //
+        //       return  ONLY_LEFT_BRANCH    go into ONLY left  branch                   //
+        //       return  ONLY_RIGHT_BRANCH   go into ONLY right branch                   //
+        //       return  BOTH_BRANCH         go into both branch                         //
+        //-------------------------------------------------------------------------------//
+
+    void controlledExternalFunctionFromRoot (int (*func)(Node* node));
+        //  Based on "controlledExternalFunction", but this function
+        //  always start from "root" index
 
 private:
 //----------------------------FUNCTIONS----------------------------//

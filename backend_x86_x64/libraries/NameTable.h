@@ -5,19 +5,24 @@
 #ifndef BACKEND_CONNECT_ASM_H
 #define BACKEND_CONNECT_ASM_H
 
-#include <stdlib.h>
-#include <stdio.h>
-//#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
 typedef int ntable_t;
 
-struct variable {
-    char* name;
-    bool  state;            // local or global
+struct element {
+    static const int DEFAULT_LENGTH_OF_ARRAY_POINTER = 50;
+    char*  name;
+    char*  point_object;
+    char*  point_depended[DEFAULT_LENGTH_OF_ARRAY_POINTER];  // temporary solution
+    int    free_places;
+
+    bool   state;            // local or global
 };
 
 struct nameTable {
-    variable* var;
+    element* var;
 
     ntable_t num_arg_;      // it include 1 num for "bp" !!!
 
@@ -28,7 +33,7 @@ struct nameTable {
     void     createNameInTable (      char* name);
     void     createNameInTable (const char* name);
 
-	operator = (const nameTable&) = delete;
+    nameTable& operator=(const nameTable&) = delete;
     ntable_t size_;
 private:
     char*    all_names_;

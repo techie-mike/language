@@ -34,7 +34,7 @@ char* Tree::readTextFromFile (char* name_file) {
     long length_of_file = itLength (file) + 1;
 
     char* text = (char*) calloc (length_of_file, sizeof(char));
-    fread (text, sizeof(char), length_of_file - 1, file);
+    fread   (text, sizeof(char), length_of_file - 1, file);
     text[length_of_file - 1] = '\0';
 
     fclose (file);
@@ -129,10 +129,6 @@ tree_st Tree::createNewObject (char    name[],
     tree_st new_index = free_;
     free_ = node_[free_].right;
 
-//--------------------------------------------
-//    externalFunction (new_index, whatItIs);     // will be do that
-//--------------------------------------------    // in other realisation
-
     node_[new_index].right = right;
     node_[new_index].left = left;
     node_[new_index].name = all_names_ + size_names_;
@@ -162,7 +158,7 @@ void Tree::autoLengthIncrease(int factor) {
             fillingPoisonousValues();
 
         } else
-            printf("Error in new_adress\n");
+            printf("Error in new_address\n");
     }
 
 }
@@ -203,11 +199,6 @@ void Tree::autoLengthNamesIncrease (int factor) {
 
 }
 
-void Tree::externalFunction (tree_st index, void (*func)(Node& node)) {
-    func (node_[index]);
-}
-
-
 Tree::Tree (tree_st DEFAULT_LENGTH      ,
             tree_st DEFAULT_LENGTH_NAMES):
         node_         ((Node*) calloc (DEFAULT_LENGTH,       sizeof(node_[0]))),
@@ -235,7 +226,6 @@ Tree::~Tree() {
 
 void Tree::dump (void (*colorFunction) (FILE* file, Node* node))
 {
-//    FILE* file = fopen("../../logs/text_picture_refactor.dot", "wb");
     FILE* file = fopen("text_picture_refactor.dot", "wb");
     fprintf (file, "digraph structs {\n");
     fprintf (file, "rankdir=HR;\n");
@@ -250,26 +240,7 @@ void Tree::dump (void (*colorFunction) (FILE* file, Node* node))
                 fprintf(file, "Index%d [shape=record, label=\" <left>  %d | {'%s' | Par: %d} | {Index: %d | Type: %d | Value: %lld} | <right> %d \",",
                         i, node_[i].left, node_[i].name, node_[i].parent, i, node_[i].type, node_[i].value, node_[i].right);
 
-
             colorFunction (file, &(node_[i]));
-            //------------------------------------//
-            // May be add colors in dot in future //
-//---------------------------------------------------------------------------------
-//            switch (node_[i].type){
-//                case 1:      // TYPE_OPERATOR
-//                    fprintf(file, "style=\"filled\", fillcolor=\"lightgrey\" ");
-//                    break;
-//                case 2:      // TYPE_NUMBER
-//                    fprintf(file, "style=\"filled\", fillcolor=\"yellow\" ");
-//                    break;
-//                case 3:      // TYPE_VARIABLE
-//                    fprintf(file, "style=\"filled\", fillcolor=\"lightblue\" ");
-//                    break;
-//                default:
-//                    break;
-//            }
-//---------------------------------------------------------------------------------
-
             fprintf(file, "];\n");
 
         }
@@ -290,9 +261,7 @@ void Tree::dump (void (*colorFunction) (FILE* file, Node* node))
     fclose(file);
 
 //    system("iconv -f windows-1251 -t utf-8 ../logs/text_picture.dot -o ../logs/text_picture_utf8.dot");
-//    system("dot ../logs/text_picture_utf8.dot -T png -o ../logs/test.png");
 
-//    system ("dot ../../logs/text_picture_refactor.dot -T png -o ../../logs/text_picture_refactor.png");
     system ("dot text_picture_refactor.dot -T png -o text_picture_refactor.png");
 }
 
@@ -304,4 +273,34 @@ void Tree::visit (tree_st index, void (*func)(Node* node)) {
     if (node_[index].left )     visit (node_[index].left,  func);    // Visiting all node in tree and
     func (&(node_[index]));                                          // tree doesn't know what function we use.
     if (node_[index].right)     visit (node_[index].right, func);
+}
+
+void Tree::controlledExternalFunction (tree_st index, int (*func)(Node* node)) {
+//#define CHECK_INDEX(index, branch) \
+//    if (node_[index].branch <= 0) {\
+//        printf ("Attempt to enter an empty node from node with index: %d in " #branch "\n", index);\
+//        abort();\
+//    }
+    if (index <= 0) return;
+    int return_value = func (&node_[index]);
+
+    if (return_value == ONLY_LEFT_BRANCH ||
+        return_value == BOTH_BRANCH)
+    {
+//        CHECK_INDEX (index, left)
+        controlledExternalFunction (node_[index].left, func);
+    }
+
+    if (return_value == ONLY_RIGHT_BRANCH ||
+        return_value == BOTH_BRANCH)
+    {
+//        CHECK_INDEX (index, right)
+        controlledExternalFunction (node_[index].right, func);
+    }
+
+#undef CHECK_INDEX
+}
+
+void Tree::controlledExternalFunctionFromRoot (int (*func)(Node* node)) {
+    controlledExternalFunction (root_, func);
 }
