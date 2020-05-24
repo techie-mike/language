@@ -9,22 +9,23 @@
 #include <cstdio>
 #include <cstring>
 
-typedef int ntable_t;
+typedef long long ntable_t;
 
 struct element {
     static const int DEFAULT_LENGTH_OF_ARRAY_POINTER = 50;
     char*  name;
-    char*  point_object;
-    char*  point_depended[DEFAULT_LENGTH_OF_ARRAY_POINTER];  // temporary solution
-    int    free_places;
+    ntable_t  position_object;
+    ntable_t  position_depended[DEFAULT_LENGTH_OF_ARRAY_POINTER];  // temporary solution
+    int       free_places;
 
     bool   state;            // local or global
 };
 
+
 struct nameTable {
     element* var;
 
-    ntable_t num_arg_;      // it include 1 num for "bp" !!!
+    ntable_t num_arguments_;      // it include 1 num for "bp" !!!
 
     nameTable ();
    ~nameTable ();
@@ -34,6 +35,7 @@ struct nameTable {
     void     createNameInTable (const char* name);
 
     nameTable& operator=(const nameTable&) = delete;
+    nameTable (const nameTable&) = delete;
     ntable_t size_;
 private:
     char*    all_names_;
@@ -44,7 +46,7 @@ private:
     ntable_t free_;
 
     const int DEFAULT_LENGTH       = 5 ;
-    const int DEFAULT_LENGTH_NAMES = 20;
+    const int DEFAULT_LENGTH_NAMES = 40;
 
     void autoLengthIncrease      (int factor = 2);
     void autoLengthNamesIncrease (int factor = 2);

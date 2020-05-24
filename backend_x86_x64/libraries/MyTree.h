@@ -10,10 +10,10 @@
 #include <cstring>
 
 #define LEVEL_VERIFIC 0
-#include "my_stack.h"
+//#include "my_stack.h"
 
 
-typedef int    tree_st;     // tree size type
+typedef int       tree_st;     // tree size type
 typedef long long value_t;
 
 struct Node {
@@ -53,9 +53,8 @@ public:
 
     void fullVisit (void (*func)(Node* node));
 
-//    void externalFunction (tree_st index, void (*func)(Node& node));
-            //  Function for launch external functions, not from Tree.
-            //  "func" parametr REFERENCE!!!
+    tree_st getRoot();
+    Node*   getNodes();
 
     void controlledExternalFunction (tree_st index, int (*func)(Node* node));
         //                             !!!IMPOTANT!!!                                    //

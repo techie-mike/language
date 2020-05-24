@@ -7,6 +7,9 @@
 
 #include "MyTree.h"
 #include "NameTable.h"
+//#include <cstring>
+
+
 
 struct _backend {
 private:
@@ -30,11 +33,38 @@ public:
     //==============================COMPILER===============================//
     struct _compiler {  // struct for function and variable for binary compiler
         void compilingCode ();
+
     private:
+        int optimization_ {};
         static char* text_obj_;
+        size_t       record_position_{};
+        tree_st root_ {};
+        Node*   node_ {};
 
         inline void createAllFunctionLabel ();
         static int  createOneFunctionLabel (Node* node);
+
+        void uploadDataFromTree ();
+
+        //-------------------------WRITE-OBJ-TEXT-----------------------------
+        void searchMainFunctionView (tree_st index);
+        bool functionView           (tree_st index);
+
+        void searchAllVariablesInFunctionView (nameTable* table, tree_st index);
+        bool checkNameVariable                (nameTable* table, char* name);
+
+        void lineOfFunctionsView (nameTable* table, tree_st index);
+
+        //.................................................................//
+        void operatorsView           (nameTable* table, tree_st index);
+
+        bool callFunctionsView       (nameTable* table, tree_st index);
+        //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
+        #include "declComFunctions.h"
+
+        //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
+        void writeInObjText (const unsigned char* command, size_t num_bytes);
+
     } compiler;
 
     static nameTable functions;

@@ -6,13 +6,14 @@
 
 
 nameTable::nameTable():
-    var           (nullptr),
-    size_         (0),
-    all_names_    (nullptr),
-    size_names_   (0),
-    length_       (0),
-    length_names_ (0),
-    free_         (0)
+        var            (nullptr),
+        num_arguments_ (1),
+        size_          (0),
+        all_names_     (nullptr),
+        size_names_    (0),
+        length_        (0),
+        length_names_  (0),
+        free_          (0)
 
 {
     length_names_ = DEFAULT_LENGTH_NAMES;
@@ -31,7 +32,7 @@ nameTable::~nameTable() {
 }
 
 void nameTable::autoLengthIncrease (int factor) {
-    if (size_ + 5 >= length_) {
+    if (size_ + 2 >= length_) {
         length_ *= factor;
         var = (element*) realloc (var, length_ * sizeof (element));
         if (var){
@@ -44,17 +45,17 @@ void nameTable::autoLengthIncrease (int factor) {
 }
 
 void nameTable::autoLengthNamesIncrease (int factor) {
-    if (size_names_ + 50 >= length_names_) {
-        ntable_t last_length_names = length_names_;
+    if (size_names_ + 20 >= length_names_) {
+//        ntable_t last_length_names = length_names_;
         length_names_ *= factor;
 //        all_names_ = (char*) realloc(all_names_, length_names_*sizeof(char));
         char* new_names = (char*) calloc (length_names_, sizeof(char));
 
         if (new_names) {
-            for (int i = 0; i < size_names_; i++)
+            for (ntable_t i = 0; i < size_names_; i++)
                 new_names[i] = all_names_[i];
 
-            for (int i = 0; i < size_; i++) {
+            for (ntable_t i = 0; i < size_; i++) {
                 if (var[i].name != nullptr)
                     var[i].name = var[i].name - all_names_ + new_names;
             }
@@ -71,12 +72,14 @@ void nameTable::autoLengthNamesIncrease (int factor) {
 void nameTable::fillingPoisonousValues()
 {
     for (ntable_t i = size_ + 1; i < length_; i++){
-        var[i].state = false;
-        var[i].name = nullptr;
+        var[i].position_object = 0;
+        var[i].free_places     = 0;
+        var[i].state           = false;
+        var[i].name            = nullptr;
     }
 }
 
-ntable_t nameTable::searchNameInTable(char* name) {
+ntable_t nameTable::searchNameInTable (char* name) {
     for (ntable_t i = 0; i < size_; i++) {
         if (!strcmp (name, var[i].name))
             return i;
@@ -84,7 +87,11 @@ ntable_t nameTable::searchNameInTable(char* name) {
     return -1;
 }
 
-void nameTable::createNameInTable(char* name) {
+void nameTable::createNameInTable (char* name) {
+    createNameInTable ((const char*) name);
+}
+
+void nameTable::createNameInTable (const char* name) {
     autoLengthNamesIncrease ();
     autoLengthIncrease ();
     var[free_].name = all_names_ + size_names_;
@@ -93,8 +100,4 @@ void nameTable::createNameInTable(char* name) {
 
     size_++;
     free_++;
-}
-
-void nameTable::createNameInTable(const char* name) {
-    createNameInTable ((char*) name);
 }

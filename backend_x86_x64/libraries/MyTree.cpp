@@ -304,3 +304,11 @@ void Tree::controlledExternalFunction (tree_st index, int (*func)(Node* node)) {
 void Tree::controlledExternalFunctionFromRoot (int (*func)(Node* node)) {
     controlledExternalFunction (root_, func);
 }
+
+tree_st Tree::getRoot() {
+    return root_;
+}
+
+Node* Tree::getNodes() {
+    return node_;
+}
