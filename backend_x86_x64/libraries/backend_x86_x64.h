@@ -35,11 +35,11 @@ public:
         void compilingCode ();
 
     private:
-        int optimization_ {};
+        int optimization_             {};
         static char* text_obj_;
-        size_t       record_position_{};
-        tree_st root_ {};
-        Node*   node_ {};
+        size_t       record_position_ {};
+        tree_st      root_            {};
+        Node*        node_            {};
 
         inline void createAllFunctionLabel ();
         static int  createOneFunctionLabel (Node* node);
@@ -50,16 +50,19 @@ public:
         void searchMainFunctionView (tree_st index);
         bool functionView           (tree_st index);
 
-        void searchAllVariablesInFunctionView (nameTable* table, tree_st index);
+        void searchAllVariablesInFunctionView (nameTable* variables, tree_st index);
         bool checkNameVariable                (nameTable* table, char* name);
 
-        void lineOfFunctionsView (nameTable* table, tree_st index);
-
         //.................................................................//
-        void operatorsView           (nameTable* table, tree_st index);
+        void operatorsView           (nameTable* variables, tree_st index);
 
-        bool callFunctionsView       (nameTable* table, tree_st index);
-        //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
+        bool callFunctionsView       (nameTable* variables, tree_st index);
+        int  writeArgumentFunction   (nameTable* variables, tree_st index);
+        void lineOfFunctionsView     (nameTable* variables, tree_st index);
+
+
+
+            //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
         #include "declComFunctions.h"
 
         //---------------------INCLUDE-COMMAND-FUNCTION--------------------//

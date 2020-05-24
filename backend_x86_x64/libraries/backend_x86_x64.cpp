@@ -176,7 +176,7 @@ bool _backend::_compiler::functionView (tree_st index) {
         variable.num_arguments_ = variable.size_;   // deteted +1
         searchAllVariablesInFunctionView (&variable, node_[index].right);
 
-        start_function_0 (&variable, index, variable.size_ - variable.num_arguments_);
+        startFunction_0 (&variable, index);
 
         lineOfFunctionsView (&variable, node_[index].right);
 
@@ -185,13 +185,13 @@ bool _backend::_compiler::functionView (tree_st index) {
 
 }
 
-void _backend::_compiler::searchAllVariablesInFunctionView (nameTable* table, tree_st index) {
+void _backend::_compiler::searchAllVariablesInFunctionView (nameTable* variables, tree_st index) {
     if (index) {
         if (node_[index].type == TYPE_VARIABLE &&
-           !checkNameVariable (table, node_[index].name))
-            table->createNameInTable(node_[index].name);
-        searchAllVariablesInFunctionView (table, node_[index].left );
-        searchAllVariablesInFunctionView (table, node_[index].right);
+           !checkNameVariable (variables, node_[index].name))
+            variables->createNameInTable (node_[index].name);
+        searchAllVariablesInFunctionView (variables, node_[index].left );
+        searchAllVariablesInFunctionView (variables, node_[index].right);
     }
 }
 
@@ -215,73 +215,84 @@ void _backend::_compiler::writeInObjText (const byte* command, size_t num_bytes)
     record_position_ += num_bytes;
 }
 
-void _backend::_compiler::lineOfFunctionsView (nameTable* table, tree_st index) {
+void _backend::_compiler::lineOfFunctionsView (nameTable* variables, tree_st index) {
     if (index) {
         if (strcmp (node_[index].name, "op") != 0)
             printf ("Error in operators of functions!\n");
 
-//        operatorsView (table, node_[index].left);
-        lineOfFunctionsView (table, node_[index].right);
+        operatorsView       (variables, node_[index].left );
+        lineOfFunctionsView (variables, node_[index].right);
     }
 }
 
-/*      IN WORK
-void _backend::_compiler::operatorsView (nameTable* table, tree_st index) {
+//      IN WORK
+void _backend::_compiler::operatorsView (nameTable* variables, tree_st index) {
     if (index == 0)
         printf ("Error, \"op\" haven't left knot!\n");
     else {
-        if (callFunctionsView (table, index))
+        if (callFunctionsView (variables, index))
             return;
-        if (assignmentView (table, index))
-            return;
-        if (operatorIfView (table, index))
-            return;
-        if (operatorPutView (table, index))
-            return;
-        if (operatorGetView (table, index))
-            return;
-        if (operatorWhileView (table, index))
-            return;
-        if (operatorReturnView (table, index))
-            return;
+//        if (assignmentView (variables, index))
+//            return;
+//        if (operatorIfView (variables, index))
+//            return;
+//        if (operatorPutView (variables, index))
+//            return;
+//        if (operatorGetView (variables, index))
+//            return;
+//        if (operatorWhileView (variables, index))
+//            return;
+//        if (operatorReturnView (variables, index))
+//            return;
     }
 }
-*/
 
-/*      IN WORK
-bool _backend::_compiler::callFunctionsView (nameTable* table, tree_st index) {
-    if ((node_[index].type == TYPE_OPERATOR && !strcmp(node_[index].name, "="))     // should be check second condition
+//      IN WORK
+bool _backend::_compiler::callFunctionsView (nameTable* variables, tree_st index) {
+    if ((node_[index].type == TYPE_OPERATOR && !strcmp (node_[index].name, "="))     // should be check second condition
     && (*node_[node_[index].right].name == '$')) {
-//        writeNameInTextCode (one_element[one_element[index].left_].name_);
 
-//        assignmentWriteInTextCode ();
-
-        callFunctionsView (table, node_[index].right);
-//        writeNameInTextCode ("push cx\n");
-        writeAssignmentVariable (table, node_[index].left);
+        callFunctionsView (variables, node_[index].right);
+        assignmentVariable_0 (variables, node_[index].left);
+//        writeAssignmentVariable (variables, node_[index].left);
         return true;
     }
 
     if (*node_[index].name == '$') {
-        int num_offset = writeArgumentFunction (table, index);
-        createNewValueBp (table, num_offset);
+        int num_offset = writeArgumentFunction (variables, index);
 
+        callFunction_0 (variables, index, num_offset);
 
-        // call function
-
-//        writeNameInTextCode ("call :");
-//        writeNameInTextCode (label.searchNameInTable (one_element[index].name_ + 1));
-//        writeNameInTextCode ("; call function \"");
-//        writeNameInTextCode (one_element[index].name_ + 1);
-//        writeNameInTextCode ("\"\n\n");
-        // call function
-
-        returnOldValueBp (table);
-
-        if (strcmp (one_element[one_element[index].parent_].name_, "op") != 0)
-            writeNameInTextCode ("push cx\n");
+//        if (strcmp (node_[node_[index].parent].name, "op") != 0)
+//            writeNameInTextCode ("push cx\n");
         return true;
     }
     return false;
 }
-*/
+
+//  Write finction argiments when call and return number arguments
+int _backend::_compiler::writeArgumentFunction (nameTable* variables, tree_st index) {
+    int num_offset = 0;
+    if (index) {
+        tree_st end_index = index;
+        while (node_[index].left != 0)  //  Go down to the far argument
+            index = node_[index].left;
+
+        while (index != end_index) {    //  Raise from bottom to top argument
+            if (node_[node_[index].right].type == TYPE_VARIABLE)
+                copyArgument_0 (variables, index);
+            if (node_[node_[index].right].type == TYPE_OPERATOR) {
+//                mathOperatorsView (variables, node_[index].right);
+
+//                writeCopyArgument (variables, index, num_offset);
+//                copyArgument_0 (variables, index);
+            }
+
+            index = node_[index].parent;
+            num_offset++;
+        }
+//  In new version program it isn't use
+//        writeOldValueBp (variables, num_offset);
+    }
+    return num_offset;
+}

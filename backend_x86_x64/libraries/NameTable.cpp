@@ -7,7 +7,7 @@
 
 nameTable::nameTable():
         var            (nullptr),
-        num_arguments_ (1),
+        num_arguments_ (0),
         size_          (0),
         all_names_     (nullptr),
         size_names_    (0),
@@ -100,4 +100,13 @@ void nameTable::createNameInTable (const char* name) {
 
     size_++;
     free_++;
+}
+
+void element::loadNewDependedPosition (ntable_t new_position) {
+    if (DEFAULT_LENGTH_OF_ARRAY_POINTER >= free_places + 1) {
+        printf ("Error, not enough free space for position_depended for element in nameTable!\n");
+        assert (DEFAULT_LENGTH_OF_ARRAY_POINTER <= free_places + 1);
+    }
+    position_depended[free_places] = new_position;
+    free_places++;
 }

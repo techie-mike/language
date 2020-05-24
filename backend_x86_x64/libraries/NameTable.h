@@ -8,9 +8,11 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <assert.h>
 
 typedef long long ntable_t;
 
+// Not optimal use for variable!!!
 struct element {
     static const int DEFAULT_LENGTH_OF_ARRAY_POINTER = 50;
     char*  name;
@@ -19,6 +21,8 @@ struct element {
     int       free_places;
 
     bool   state;            // local or global
+
+    void loadNewDependedPosition (ntable_t new_position);
 };
 
 
@@ -26,6 +30,7 @@ struct nameTable {
     element* var;
 
     ntable_t num_arguments_;      // it include 1 num for "bp" !!!
+    ntable_t size_;
 
     nameTable ();
    ~nameTable ();
@@ -36,7 +41,6 @@ struct nameTable {
 
     nameTable& operator=(const nameTable&) = delete;
     nameTable (const nameTable&) = delete;
-    ntable_t size_;
 private:
     char*    all_names_;
     ntable_t size_names_;
