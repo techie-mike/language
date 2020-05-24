@@ -214,12 +214,15 @@ void Tree::writeFulTreeInFile (char* text, const char *name_file)
     fwrite (text, sizeof(char), length, file);
     fclose (file);
 
+#ifndef _WIN64
     char system_command[100] = "iconv -f windows-1251 -t utf-8 ";
     strcat (system_command, name_file);
     strcat (system_command, " -o ");
     strcat (system_command, name_file);
 
     system (system_command);
+#endif
+
     /*char new_name_file[200] = {};
     strcat (new_name_file, name_file);
     char* dot = strrchr (new_name_file, '.');
@@ -317,9 +320,14 @@ void Tree::dump()
     fprintf(file, "}\n");
     fclose(file);
 
+#ifndef _WIN64
     system ("iconv -f windows-1251 -t utf-8 ../logs/text_picture.dot -o ../logs/text_picture_utf8.dot");
     system ("dot ../logs/text_picture_utf8.dot -T png -o ../logs/frontend.png");
     system ("rm ../logs/text_picture.dot");
+#else
+    system ("dot ../logs/text_picture.dot -T png -o ../logs/frontend.png -Gcharset=latin1");
+#endif
+
 }
 
 size_tree_t Tree::checkName(char *name)

@@ -2,6 +2,12 @@
 // Created by texnar on 03/12/2019.
 //
 
+//#ifdef __GNUC__
+//#define LINUX
+//#else
+//#define WINDOWS
+//#endif
+
 #ifndef FRONTEND_TOKEN_H
 #define FRONTEND_TOKEN_H
 

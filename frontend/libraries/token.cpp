@@ -169,6 +169,7 @@ void Tokens::readFile (int num_arguments, char *strings[]) {
 
     char new_name_file[200] = {};
     strcat (new_name_file, name_file);
+#ifndef _WIN64
     char* dot = strrchr (new_name_file, '.');
     *dot = '\0';
     strcat (new_name_file, "-win1251.gop");
@@ -177,13 +178,14 @@ void Tokens::readFile (int num_arguments, char *strings[]) {
     strcat (system_command, " -o ");
     strcat (system_command, new_name_file);
     system (system_command);
-
+#endif
 
     FILE* file = fopen (new_name_file, "rb");
     if (file == nullptr) {
         printf ("Can't find/open file, please, check name of file!\n");
         abort ();
     }
+
 
     long length_of_file = ItLength (file) + 1;
     char* text = (char*) calloc (length_of_file, sizeof(char));
@@ -193,9 +195,12 @@ void Tokens::readFile (int num_arguments, char *strings[]) {
     lexicalAnalysis(&copy_text);
 //    dump ();
     free (text);
+#ifndef _WIN64
     char command[100] = "rm ";
     strcat (command, new_name_file);
     system (command);
+#endif
+
 }
 
 int Tokens::lexicalAnalysisWriteSymbols(char **text) {
