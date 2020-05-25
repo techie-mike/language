@@ -43,7 +43,7 @@ void _backend::_compiler::callFunction_0 (nameTable* variables, tree_st index, i
 
 // DONE
 void _backend::_compiler::assignmentVariable_0 (nameTable* variables, tree_st index) {
-    LOADCOMMAND (command, assignment_variable_0);
+    LOADCOMMAND (command, com_assignment_variable_0);
     ntable_t index_in_ram = loadElementIndex (variables, index);
 
     *(type_proc*)(&command[4]) = (type_proc) index_in_ram;
@@ -52,9 +52,7 @@ void _backend::_compiler::assignmentVariable_0 (nameTable* variables, tree_st in
 
 // DONE
 void _backend::_compiler::copyArgument_0 (nameTable* variables, tree_st index) {
-    byte command[sizeof (com_copy_arguments_0)] = {};
-    memcpy (command, com_copy_arguments_0,
-             sizeof (com_copy_arguments_0));
+    LOADCOMMAND (command, com_push_arguments_0);
 
     ntable_t index_in_ram = loadElementIndex (variables, index);
 
@@ -72,8 +70,49 @@ void _backend::_compiler::copyArgument_0 (nameTable* variables, tree_st index) {
 
 // DONE
 ntable_t _backend::_compiler::loadElementIndex (nameTable* variables, tree_st index) {
+    ntable_t index_variable = variables->searchNameInTable (node_[index].name);
+    if (index_variable == -1) {
+        printf ("Error in loadElement index, search not exist variable: %s\n", node_[index].name);
+        assert (index_variable != -1);
+    }
     ntable_t num_variable = 8 * (variables->searchNameInTable (node_[index].name) - variables->num_arguments_ + 1);
     if (num_variable <= 0)
         num_variable -= 16;
     return num_variable;
+}
+
+void _backend::_compiler::operatorAdd_0 () {
+    writeInObjText (com_operator_add_0, sizeof (com_operator_add_0));
+}
+
+void _backend::_compiler::operatorSub_0 () {
+    writeInObjText (com_operator_sub, sizeof (com_operator_sub));
+}
+
+void _backend::_compiler::operatorMul_0 () {
+    writeInObjText (com_operator_mul_0, sizeof (com_operator_mul_0));
+}
+void _backend::_compiler::operatorDiv_0 () {
+    writeInObjText (com_operator_div_0, sizeof (com_operator_div_0));
+}
+
+void _backend::_compiler::operatorPow_0 () {
+    writeInObjText (com_operator_pow, sizeof (com_operator_pow));
+}
+
+void _backend::_compiler::operatorSin_0 () {
+    writeInObjText (com_operator_sin, sizeof (com_operator_sin));
+}
+
+void _backend::_compiler::operatorCos_0 () {
+    writeInObjText (com_operator_cos, sizeof (com_operator_cos));
+}
+
+void _backend::_compiler::writeValueVariable (nameTable* variables, tree_st index) {
+    copyArgument_0 (variables, index);
+}
+
+void _backend::_compiler::writeValueNumber (nameTable* variables, tree_st index) {
+    LOADCOMMAND(command, com_push_number);
+    *(type_proc*)(&command[2]) = (type_proc) node_[index].value;
 }

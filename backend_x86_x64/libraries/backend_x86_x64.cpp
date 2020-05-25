@@ -179,10 +179,9 @@ bool _backend::_compiler::functionView (tree_st index) {
         startFunction_0 (&variable, index);
 
         lineOfFunctionsView (&variable, node_[index].right);
-
-
+        return true;
     }
-
+    return false;
 }
 
 void _backend::_compiler::searchAllVariablesInFunctionView (nameTable* variables, tree_st index) {
@@ -198,7 +197,8 @@ void _backend::_compiler::searchAllVariablesInFunctionView (nameTable* variables
 bool _backend::_compiler::checkNameVariable (nameTable* table, char* name) {
     if (table->searchNameInTable (name) != -1)
         return true;
-    else return false;
+    else
+        return false;
 }
 
 void _backend::_compiler::writeInObjText (const byte* command, size_t num_bytes) {
@@ -280,9 +280,9 @@ int _backend::_compiler::writeArgumentFunction (nameTable* variables, tree_st in
 
         while (index != end_index) {    //  Raise from bottom to top argument
             if (node_[node_[index].right].type == TYPE_VARIABLE)
-                copyArgument_0 (variables, index);
+                copyArgument_0 (variables, node_[index].right);
             if (node_[node_[index].right].type == TYPE_OPERATOR) {
-//                mathOperatorsView (variables, node_[index].right);
+                mathOperatorsView (variables, node_[index].right);
 
 //                writeCopyArgument (variables, index, num_offset);
 //                copyArgument_0 (variables, index);
@@ -295,4 +295,126 @@ int _backend::_compiler::writeArgumentFunction (nameTable* variables, tree_st in
 //        writeOldValueBp (variables, num_offset);
     }
     return num_offset;
+}
+
+void _backend::_compiler::writeInObjFile (const char* name_file) {
+    FILE* file_obj = fopen (name_file, "wb");
+
+    fwrite (text_obj_, sizeof (char), record_position_, file_obj);
+    fclose (file_obj);
+}
+
+void _backend::_compiler::mathOperatorsView (nameTable* table, tree_st index) {
+    if (!index)
+        return;
+    if (oneMathOperatorView (table, index, "+",   OPERATOR_ADD))
+        return;
+    if (oneMathOperatorView (table, index, "-",   OPERATOR_SUB))
+        return;
+    if (oneMathOperatorView (table, index, "*",   OPERATOR_MUL))
+        return;
+    if (oneMathOperatorView (table, index, "/",   OPERATOR_DIV))
+        return;
+    if (oneMathOperatorView (table, index, "^",   OPERATOR_POW))
+        return;
+    if (oneMathOperatorView (table, index, "sin", OPERATOR_SIN))
+        return;
+    if (oneMathOperatorView (table, index, "cos", OPERATOR_COS))
+        return;
+
+    if (*node_[index].name == '$') {
+        callFunctionsView (table, index);
+        return;
+    }
+    if (node_[index].type == TYPE_VARIABLE){
+        writeValueVariable (table, index);
+        return;
+    }
+    if (node_[index].type == TYPE_NUMBER){
+        writeValueNumber (table, index);
+        return;
+    }
+}
+
+bool _backend::_compiler::oneMathOperatorView (nameTable* table, tree_st index, const char* name, value_t value) {
+    if (!strcmp (node_[index].name, name)) {
+        node_[index].type  = TYPE_OPERATOR;
+        node_[index].value = value;
+        int now_priority = priorityFunction (index);
+        mathOperatorsView (table, node_[index].left);
+        mathOperatorsView (table, node_[index].right);
+
+        //  Because math operation now not optemazed, so commands write directly, without
+        //  function wrappers
+
+
+        //      Special case!      //
+        if (value == OPERATOR_POW
+        && (node_[node_[index].right].type  != TYPE_NUMBER
+        ||  node_[node_[index].right].value != 50)) {     // 50 it is = 1/2 * 100
+            printf ("Error, can be only pow = 0.5, only as a number!\n");
+            abort ();
+        }
+
+        //-------------------------------Calling-functions-------------------------------//
+
+        //  In this situation we can't use jmptable
+        switch (value) {
+            case OPERATOR_ADD:
+                operatorAdd_0 ();
+                break;
+            case OPERATOR_SUB:
+                operatorSub_0 ();
+                break;
+            case OPERATOR_MUL:
+                operatorMul_0 ();
+                break;
+            case OPERATOR_DIV:
+                operatorDiv_0 ();
+                break;
+            case OPERATOR_POW:
+                operatorPow_0 ();
+                break;
+            case OPERATOR_SIN:
+                operatorSin_0 ();
+                break;
+            case OPERATOR_COS:
+                operatorCos_0 ();
+                break;
+            default:
+                break;
+        }
+
+        return true;
+    }
+    return false;
+}
+
+int _backend::_compiler::priorityFunction(tree_st index) {
+    if (node_[index].type == 0)
+        return 1;
+    if (node_[index].type == TYPE_NUMBER ||
+        node_[index].type == TYPE_VARIABLE)
+           return 1;
+
+    if (node_[index].type == TYPE_OPERATOR &&
+        (node_[index].value == OPERATOR_ADD ||
+         node_[index].value == OPERATOR_SUB))
+        return 2;
+
+    if (node_[index].type == TYPE_OPERATOR &&
+        (node_[index].value == OPERATOR_MUL ||
+         node_[index].value == OPERATOR_DIV))
+        return 3;
+
+    if (node_[index].type == TYPE_OPERATOR &&
+        (node_[index].value == OPERATOR_POW))
+        return 4;
+
+    if (node_[index].type == TYPE_OPERATOR &&
+        (node_[index].value == OPERATOR_LN
+       ||node_[index].value == OPERATOR_SIN
+       ||node_[index].value == OPERATOR_COS))
+        return 5;
+    printf("Error in priority function %d\n", node_[index].type);
 }

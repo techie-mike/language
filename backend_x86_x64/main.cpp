@@ -12,6 +12,8 @@ int main (int num_arguments, char *strings[])
     back.tree.dump      (_backend::treeColoring);
 
     back.compiler.compilingCode ();
+    back.compiler.writeInObjFile ("obj_text_log.obj");
+
 
     return 0;
 }

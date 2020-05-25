@@ -33,6 +33,7 @@ public:
     //==============================COMPILER===============================//
     struct _compiler {  // struct for function and variable for binary compiler
         void compilingCode ();
+        void writeInObjFile (const char* name_file);
 
     private:
         int optimization_             {};
@@ -54,11 +55,18 @@ public:
         bool checkNameVariable                (nameTable* table, char* name);
 
         //.................................................................//
-        void operatorsView           (nameTable* variables, tree_st index);
+        void operatorsView          (nameTable* variables, tree_st index);
 
-        bool callFunctionsView       (nameTable* variables, tree_st index);
-        int  writeArgumentFunction   (nameTable* variables, tree_st index);
-        void lineOfFunctionsView     (nameTable* variables, tree_st index);
+        bool callFunctionsView      (nameTable* variables, tree_st index);
+        int  writeArgumentFunction  (nameTable* variables, tree_st index);
+        void lineOfFunctionsView    (nameTable* variables, tree_st index);
+
+        void mathOperatorsView      (nameTable* table, tree_st index);
+
+        bool oneMathOperatorView    (nameTable* table, tree_st index, const char* name, value_t value);
+        int  priorityFunction       (tree_st index);
+        void writeValueVariable     (nameTable* table, tree_st index);
+        void writeValueNumber       (nameTable* variables, tree_st index);
 
 
 
@@ -67,7 +75,6 @@ public:
 
         //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
         void writeInObjText (const unsigned char* command, size_t num_bytes);
-
     } compiler;
 
     static nameTable functions;
