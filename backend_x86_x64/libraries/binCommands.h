@@ -172,8 +172,8 @@ const byte com_compare_and_jmp[] =
         0x5B,                   // pop rbx
         0x58,                   // pop rax
         0x48, 0x39, 0xD8,       // cmp rax, rbx
-        0x0F, 0x84,             // je 0
 
+        0x0F, 0x84,             // je 0
         0x00, 0x00, 0x00, 0x00  // relative address for jmp
         };
 
@@ -190,5 +190,19 @@ const byte com_return[] =
 const byte com_return_value[] =
         {
         0x58    // pop rax
+        };
+
+const byte com_call_get_0[] =
+        {
+        0xE8,                   // call 0
+        0x00, 0x00, 0x00, 0x00, // relative address for jmp
+
+        0x50                    // push 0x50
+        };
+
+const byte com_call_put_0[] =
+        {
+        0x51,                           // push rcx
+        0xE8, 0x00, 0x00, 0x00, 0x00    // call 0x0 (relative address)
         };
 #endif //BACKEND_X86_X64_BINCOMMANDS_H

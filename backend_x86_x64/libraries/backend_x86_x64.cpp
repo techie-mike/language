@@ -232,17 +232,17 @@ void _backend::_compiler::operatorsView (nameTable* variables, tree_st index) {
     if (index == 0)
         printf ("Error, \"op\" haven't left knot!\n");
     else {
-        if (callFunctionsView (variables, index))
+        if (callFunctionsView  (variables, index))
             return;
-        if (assignmentView (variables, index))
+        if (assignmentView     (variables, index))
             return;
-        if (operatorIfView (variables, index))
+        if (operatorIfView     (variables, index))
             return;
-//        if (operatorPutView (variables, index))
-//            return;
-//        if (operatorGetView (variables, index))
-//            return;
-        if (operatorWhileView (variables, index))
+        if (operatorPutView    (variables, index))
+            return;
+        if (operatorGetView    (variables, index))
+            return;
+        if (operatorWhileView  (variables, index))
             return;
         if (operatorReturnView (variables, index))
             return;
@@ -281,16 +281,10 @@ int _backend::_compiler::writeArgumentFunction (nameTable* variables, tree_st in
                 copyArgument_0 (variables, node_[index].right);
             if (node_[node_[index].right].type == TYPE_OPERATOR) {
                 mathOperatorsView (variables, node_[index].right);
-
-//                writeCopyArgument (variables, index, num_offset);
-//                copyArgument_0 (variables, index);
             }
-
             index = node_[index].parent;
             num_offset++;
         }
-//  In new version program it isn't use
-//        writeOldValueBp (variables, num_offset);
     }
     return num_offset;
 }
@@ -474,12 +468,12 @@ void _backend::_compiler::compareView (nameTable* variables, tree_st index, jmpb
     jump[0].from = record_position_ - 4;
 }
 
-//  Now compare only variable and number //
 void _backend::_compiler::writeCopmareValues (nameTable* variables, tree_st index) {
-    if (node_[index].type == TYPE_VARIABLE)
-        writeValueVariable (variables, index);
-    if (node_[index].type == TYPE_NUMBER)
-        writeValueNumber   (variables, index);
+    mathOperatorsView (variables, index);
+//    if (node_[index].type == TYPE_VARIABLE)
+//        writeValueVariable (variables, index);
+//    if (node_[index].type == TYPE_NUMBER)
+//        writeValueNumber   (variables, index);
 }
 
 void _backend::_compiler::allResultIfView (nameTable* variables, tree_st index, jmpblock* jump) {
@@ -536,6 +530,24 @@ bool _backend::_compiler::operatorWhileView (nameTable* variables, tree_st index
 
         uploadValueFromJmpBlock (&jump[0]);
         uploadValueFromJmpBlock (&jump[1]);
+    }
+    return false;
+}
+
+bool _backend::_compiler::operatorPutView (nameTable* variables, tree_st index) {
+    if (!strcmp (node_[index].name, "put")) {
+        mathOperatorsView (variables, node_[index].left);
+        callPutFunction_0 (variables, index);
+        return true;
+    }
+    return false;
+}
+
+bool _backend::_compiler::operatorGetView (nameTable* variables, tree_st index) {
+    if (!strcmp (node_[index].name, "get")) {
+        callGetFunction_0    (variables, index);
+        assignmentVariable_0 (variables, node_[index].left);
+        return true;
     }
     return false;
 }

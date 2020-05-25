@@ -88,6 +88,9 @@ public:
         bool operatorReturnView     (nameTable* variables, tree_st index);
 
         bool operatorWhileView      (nameTable* variables, tree_st index);
+        bool operatorPutView        (nameTable* variables, tree_st index);
+        bool operatorGetView        (nameTable* variables, tree_st index);
+
 
 
         void uploadValueFromJmpBlock (jmpblock* jump);

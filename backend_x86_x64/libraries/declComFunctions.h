@@ -14,6 +14,10 @@ void copyArgument_0       (nameTable* variables, tree_st index);
 ntable_t loadElementIndex (nameTable* variables, tree_st index);
 size_t   writeCompare();
 
+void callGetFunction_0      (nameTable* variables, tree_st index);
+void callPutFunction_0      (nameTable* variables, tree_st index);
+
+
 //------------------MATH-OPERATOR-FUNCTIONS------------------//
     void operatorAdd_0 ();
     void operatorSub_0 ();

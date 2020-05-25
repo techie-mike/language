@@ -126,3 +126,20 @@ size_t _backend::_compiler::writeCompare() {
     writeInObjText (com_compare_and_jmp, sizeof (com_compare_and_jmp));
     return record_position_ - 5;
 }
+
+void _backend::_compiler::callGetFunction_0 (nameTable* variables, tree_st index) {
+    writeInObjText (com_call_get_0, sizeof (com_call_get_0));
+
+    if (functions.searchNameInTable (node_[index].name) == -1)
+        functions.createNameInTable (node_[index].name);
+    ntable_t index_function = functions.searchNameInTable (node_[index].name);
+    functions.var[index_function].loadNewDependedPosition ((long long) (record_position_ - 5));
+}
+
+void _backend::_compiler::callPutFunction_0 (nameTable* variables, tree_st index) {
+    writeInObjText (com_call_put_0, sizeof (com_call_put_0));
+    if (functions.searchNameInTable (node_[index].name) == -1)
+        functions.createNameInTable (node_[index].name);
+    ntable_t index_function = functions.searchNameInTable (node_[index].name);
+    functions.var[index_function].loadNewDependedPosition ((long long) (record_position_ - 4));
+}

@@ -11,9 +11,23 @@ extern ExitProcess
 global Start
 
 section .text
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
 print:    
-	mov rcx, 23000
-	call Start
 	
 ;	Ret: RAX	input value
 ;---------------SCAN--------------------
@@ -74,7 +88,12 @@ print:
 		
 		ret
 ;---------------SCAN--------------------
-
+	nop
+	nop
+	nop
+	nop
+	nop
+;---------------------------------------
 ;	Write in console number with 
 ;	fixed accuracy 
 ;---------------------------------------
@@ -151,4 +170,14 @@ Start:
 		
 ;---------------PRINT-------------------		
 		
+	nop
+	nop
+	nop
+	nop
+	nop
 		
+;	Exit from program
+;-----------------EXIT------------------
+	Exit:
+		xor rcx, rcx
+		call ExitProcess
