@@ -8,9 +8,9 @@
 
 
 //---------------DEFINITION-OF-THE-STATIC-DATA-MEMBER---------------//
-char*     _backend::_compiler::text_obj_;
-Tree      _backend::tree;
-nameTable _backend::functions;
+unsigned char*     _backend::_compiler::text_obj_;
+         Tree      _backend::tree;
+         nameTable _backend::functions;
 //---------------DEFINITION-OF-THE-STATIC-DATA-MEMBER---------------//
 
 
@@ -121,7 +121,7 @@ void _backend::treeColoring (FILE* file, Node* node) {
 }
 
 void _backend::_compiler::compilingCode () {
-    text_obj_ = (char*) calloc (DEFAULT_LENGTH_BIN_CODE, sizeof (char));
+    text_obj_ = (unsigned char*) calloc (DEFAULT_LENGTH_BIN_CODE, sizeof (unsigned char));
     if (!text_obj_) {
         printf ("Error in calloc in compiler!\n");
         abort ();
@@ -129,8 +129,10 @@ void _backend::_compiler::compilingCode () {
 
     createAllFunctionLabel ();
     uploadDataFromTree ();
+    coprocessorInitialization ();
 
     searchMainFunctionView (root_);
+    mainLineView (root_);
 }
 
 void _backend::_compiler::createAllFunctionLabel () {
@@ -232,10 +234,10 @@ void _backend::_compiler::operatorsView (nameTable* variables, tree_st index) {
     else {
         if (callFunctionsView (variables, index))
             return;
-//        if (assignmentView (variables, index))
-//            return;
-//        if (operatorIfView (variables, index))
-//            return;
+        if (assignmentView (variables, index))
+            return;
+        if (operatorIfView (variables, index))
+            return;
 //        if (operatorPutView (variables, index))
 //            return;
 //        if (operatorGetView (variables, index))
@@ -262,9 +264,6 @@ bool _backend::_compiler::callFunctionsView (nameTable* variables, tree_st index
         int num_offset = writeArgumentFunction (variables, index);
 
         callFunction_0 (variables, index, num_offset);
-
-//        if (strcmp (node_[node_[index].parent].name, "op") != 0)
-//            writeNameInTextCode ("push cx\n");
         return true;
     }
     return false;
@@ -417,4 +416,99 @@ int _backend::_compiler::priorityFunction(tree_st index) {
        ||node_[index].value == OPERATOR_COS))
         return 5;
     printf("Error in priority function %d\n", node_[index].type);
+}
+
+bool _backend::_compiler::assignmentView (nameTable* variables, tree_st index) {
+    if (!strcmp (node_[index].name, "=") && *node_[node_[index].right].name != '$') {
+        if (variables == nullptr) {
+            printf ("YOU DON'T ADD GLOBAL VARIABLE!");
+        }
+        mathOperatorsView (variables, node_[index].right);
+
+        assignmentVariable_0 (variables, node_[index].left);
+        return true;
+    }
+
+    return false;
+}
+
+void _backend::_compiler::mainLineView (tree_st index) {
+    if (!strcmp(node_[index].name, ";")) {
+        secondLineView (node_[index].left);
+        if (node_[index].right)
+            mainLineView (node_[index].right);
+    } else
+        printf ("Error first line program");
+}
+
+void _backend::_compiler::secondLineView (tree_st index) {
+    if (strcmp(node_[index].name, "$main") != 0)
+        if (index != 0 && !functionView (index) && !assignmentView (0, index))
+            printf ("Error, unknown branch from main line!\n");
+}
+
+bool _backend::_compiler::operatorIfView (nameTable* table, tree_st index) {
+    if (!strcmp (node_[index].name, "if")) {
+        block jump[2] = {};
+
+        compareView     (table, node_[index].left,  jump);
+        allResultIfView (table, node_[index].right, jump);
+    }
+    return false;
+}
+
+void _backend::_compiler::compareView (nameTable* table, tree_st index, block* jump) {
+    writeCopmareValues (table, node_[index].left);
+    writeCopmareValues (table, node_[index].right);
+
+    size_t byte_type = writeCompare ();
+
+    if (!strcmp (node_[index].name, "=="))
+        text_obj_[byte_type] = (byte) 0x85; //  jne
+    if (!strcmp (node_[index].name, "!="))
+        text_obj_[byte_type] = (byte) 0x84; //  je
+    if (!strcmp (node_[index].name, "<"))
+        text_obj_[byte_type] = (byte) 0x8D; //  jge
+    if (!strcmp (node_[index].name, ">"))
+        text_obj_[byte_type] = (byte) 0x8E; //  jle
+    if (!strcmp (node_[index].name, ">="))
+        text_obj_[byte_type] = (byte) 0x8C; //  jl
+    if (!strcmp (node_[index].name, "<="))
+        text_obj_[byte_type] = (byte) 0x8F; //  jg
+
+    jump[0].from = record_position_ - 4;
+}
+
+//  Now compare only variable and number //
+void _backend::_compiler::writeCopmareValues (nameTable* variable, tree_st index) {
+    if (node_[index].type == TYPE_VARIABLE)
+        writeValueVariable (variable, index);
+    if (node_[index].type == TYPE_NUMBER)
+        writeValueNumber   (variable, index);
+}
+
+void _backend::_compiler::allResultIfView (nameTable* variable, tree_st index, block* jump) {
+    if (!node_[index].left)
+        printf ("Error, \"if\" haven't main result");
+
+    lineOfFunctionsView (variable, node_[index].left);
+    writeInObjText (com_jmp, sizeof (com_jmp));
+
+    jump[1].from = record_position_ - 4;
+    jump[0].to   = record_position_;
+    uploadValueFromJmpBlock (&jump[0]);
+
+    if (node_[index].right) {
+        lineOfFunctionsView (variable, node_[index].right);
+        jump[1].to = record_position_;
+        uploadValueFromJmpBlock (&jump[1]);
+    }
+
+}
+
+void _backend::_compiler::uploadValueFromJmpBlock (block* jump) {
+    if (!jump->from || !jump->to) {
+        printf ("There is not enough data in the jumping block!\n");
+    }
+    *(unsigned int*)(&text_obj_[jump->from]) = (unsigned int)(jump->to - jump->from - 4);
 }

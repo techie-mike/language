@@ -116,3 +116,13 @@ void _backend::_compiler::writeValueNumber (nameTable* variables, tree_st index)
     LOADCOMMAND(command, com_push_number);
     *(type_proc*)(&command[2]) = (type_proc) node_[index].value;
 }
+
+void _backend::_compiler::coprocessorInitialization () {
+    writeInObjText (com_init_coproc, sizeof (com_init_coproc));
+}
+
+//  Returns byte position where jump type changes
+size_t _backend::_compiler::writeCompare() {
+    writeInObjText (com_compare_and_jmp, sizeof (com_compare_and_jmp));
+    return record_position_ - 5;
+}

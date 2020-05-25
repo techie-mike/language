@@ -1,3 +1,4 @@
 /backend/cmake-build-debug/
 /frontend/cmake-build-debug/
 /frontend_back/cmake-build-debug/
+*.dot

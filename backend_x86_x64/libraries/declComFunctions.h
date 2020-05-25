@@ -12,13 +12,15 @@ void assignmentVariable_0 (nameTable* variables, tree_st index);
 void copyArgument_0       (nameTable* variables, tree_st index);
 
 ntable_t loadElementIndex (nameTable* variables, tree_st index);
+size_t   writeCompare();
 
 //------------------MATH-OPERATOR-FUNCTIONS------------------//
-void operatorAdd_0 ();
-void operatorSub_0 ();
-void operatorMul_0 ();
-void operatorDiv_0 ();
-void operatorPow_0 ();
-void operatorSin_0 ();
-void operatorCos_0 ();
+    void operatorAdd_0 ();
+    void operatorSub_0 ();
+    void operatorMul_0 ();
+    void operatorDiv_0 ();
+    void operatorPow_0 ();
+    void operatorSin_0 ();
+    void operatorCos_0 ();
+
 #endif //BACKEND_X86_X64_DECLCOMFUNCTIONS_H

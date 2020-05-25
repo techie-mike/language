@@ -37,7 +37,7 @@ public:
 
     private:
         int optimization_             {};
-        static char* text_obj_;
+        static unsigned char* text_obj_;
         size_t       record_position_ {};
         tree_st      root_            {};
         Node*        node_            {};
@@ -49,10 +49,17 @@ public:
 
         //-------------------------WRITE-OBJ-TEXT-----------------------------
         void searchMainFunctionView (tree_st index);
+        struct block {
+            size_t from;
+            size_t to;
+        };
+
         bool functionView           (tree_st index);
 
         void searchAllVariablesInFunctionView (nameTable* variables, tree_st index);
         bool checkNameVariable                (nameTable* table, char* name);
+
+        void coprocessorInitialization ();
 
         //.................................................................//
         void operatorsView          (nameTable* variables, tree_st index);
@@ -62,13 +69,26 @@ public:
         void lineOfFunctionsView    (nameTable* variables, tree_st index);
 
         void mathOperatorsView      (nameTable* table, tree_st index);
-
         bool oneMathOperatorView    (nameTable* table, tree_st index, const char* name, value_t value);
         int  priorityFunction       (tree_st index);
+
         void writeValueVariable     (nameTable* table, tree_st index);
         void writeValueNumber       (nameTable* variables, tree_st index);
 
+        bool assignmentView         (nameTable* variables, tree_st index);
 
+        void mainLineView           (tree_st index);
+        void secondLineView         (tree_st index);
+
+        bool operatorIfView         (nameTable* table, tree_st index);
+
+        void compareView            (nameTable* table, tree_st index, block* jump);
+        void writeCopmareValues     (nameTable* variable, tree_st index);
+
+        void allResultIfView (nameTable* variable, tree_st index, block* jump);
+
+
+        void uploadValueFromJmpBlock (block* jump);
 
             //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
         #include "declComFunctions.h"

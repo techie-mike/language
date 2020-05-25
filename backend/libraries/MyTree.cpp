@@ -1771,7 +1771,7 @@ void Tree::mathOperatorsView (nameTable* table, size_tree_t index, int last_prio
         return;
     if (oneMathOperatorView (table, index, "sin", TYPE_OPERATOR, OPERATOR_SIN, "sin\n",               last_priority))
         return;
-    if (oneMathOperatorView (table, index, "cos", TYPE_OPERATOR, OPERATOR_MUL, "cos\n",               last_priority))
+    if (oneMathOperatorView (table, index, "cos", TYPE_OPERATOR, OPERATOR_COS, "cos\n",               last_priority))
         return;
 
 /*    if (!strcmp (one_element[index].name_, "deriv")) {

@@ -20,7 +20,11 @@ const byte com_start_function_0[] =
         0x00, 0x00, 0x00, 0x00, // imm64
         0x00, 0x00, 0x00, 0x00, //
 
-        0x48, 0x29, 0xC4,       // sub  rsp, rax
+        0x48, 0x29, 0xC4       // sub  rsp, rax
+        };
+
+const byte com_init_coproc[] =
+        {
         0x9B, 0xDB, 0xE3        // finit
         };
 
@@ -161,6 +165,22 @@ const byte com_push_number[] =
         0x00, 0x00, 0x00, 0x00,
 
         0x53                    // push rbx
+        };
+
+const byte com_compare_and_jmp[] =
+        {
+        0x5B,                   // pop rbx
+        0x58,                   // pop rax
+        0x48, 0x39, 0xD8,       // cmp rax, rbx
+        0x0F, 0x84,             // je 0
+
+        0x00, 0x00, 0x00, 0x00  // relative address for jmp
+        };
+
+const byte com_jmp[] =
+        {
+        0xE9,                   // jmp 0
+        0x00, 0x00, 0x00, 0x00  // relative address for jmp
         };
 
 #endif //BACKEND_X86_X64_BINCOMMANDS_H

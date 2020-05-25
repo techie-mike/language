@@ -1,1 +1,1 @@
-{;{$fact{,@{сиги}}{op{if{<={сиги}{1}}{if-else{op{ret{1}@}@}@}}{op{ret{*{сиги}{$fact{,@{-{сиги}{1}}}@}}@}@}}}{;{$main@{op{={код}{228}}{op{get{код}@}{op{put{$fact{,@{код}}@}@}{op{ret}@}}}}}@}}
+{;{$func{,@{a}}{op{ret{a}@}@}}{;{$main@{op{={phone}{*{2}{+{5}{sin@{7}}}}}{op{={pen}{1}}{op{if{=={phone}{0}}{if-else{op{$func{,@{phone}}@}@}{op{={pen}{5}}@}}}{op{ret}@}}}}}@}}
