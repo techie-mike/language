@@ -183,4 +183,12 @@ const byte com_jmp[] =
         0x00, 0x00, 0x00, 0x00  // relative address for jmp
         };
 
+const byte com_return[] =
+        {
+        0xC3    // ret
+        };
+const byte com_return_value[] =
+        {
+        0x58    // pop rax
+        };
 #endif //BACKEND_X86_X64_BINCOMMANDS_H

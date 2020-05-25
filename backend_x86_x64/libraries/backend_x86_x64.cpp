@@ -132,7 +132,7 @@ void _backend::_compiler::compilingCode () {
     coprocessorInitialization ();
 
     searchMainFunctionView (root_);
-    mainLineView (root_);
+    mainLineView           (root_);
 }
 
 void _backend::_compiler::createAllFunctionLabel () {
@@ -242,10 +242,10 @@ void _backend::_compiler::operatorsView (nameTable* variables, tree_st index) {
 //            return;
 //        if (operatorGetView (variables, index))
 //            return;
-//        if (operatorWhileView (variables, index))
-//            return;
-//        if (operatorReturnView (variables, index))
-//            return;
+        if (operatorWhileView (variables, index))
+            return;
+        if (operatorReturnView (variables, index))
+            return;
     }
 }
 
@@ -256,7 +256,6 @@ bool _backend::_compiler::callFunctionsView (nameTable* variables, tree_st index
 
         callFunctionsView (variables, node_[index].right);
         assignmentVariable_0 (variables, node_[index].left);
-//        writeAssignmentVariable (variables, node_[index].left);
         return true;
     }
 
@@ -342,10 +341,6 @@ bool _backend::_compiler::oneMathOperatorView (nameTable* table, tree_st index, 
         int now_priority = priorityFunction (index);
         mathOperatorsView (table, node_[index].left);
         mathOperatorsView (table, node_[index].right);
-
-        //  Because math operation now not optemazed, so commands write directly, without
-        //  function wrappers
-
 
         //      Special case!      //
         if (value == OPERATOR_POW
@@ -447,19 +442,19 @@ void _backend::_compiler::secondLineView (tree_st index) {
             printf ("Error, unknown branch from main line!\n");
 }
 
-bool _backend::_compiler::operatorIfView (nameTable* table, tree_st index) {
+bool _backend::_compiler::operatorIfView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "if")) {
-        block jump[2] = {};
+        jmpblock jump[2] = {};
 
-        compareView     (table, node_[index].left,  jump);
-        allResultIfView (table, node_[index].right, jump);
+        compareView     (variables, node_[index].left, jump);
+        allResultIfView (variables, node_[index].right, jump);
     }
     return false;
 }
 
-void _backend::_compiler::compareView (nameTable* table, tree_st index, block* jump) {
-    writeCopmareValues (table, node_[index].left);
-    writeCopmareValues (table, node_[index].right);
+void _backend::_compiler::compareView (nameTable* variables, tree_st index, jmpblock* jump) {
+    writeCopmareValues (variables, node_[index].left);
+    writeCopmareValues (variables, node_[index].right);
 
     size_t byte_type = writeCompare ();
 
@@ -480,18 +475,18 @@ void _backend::_compiler::compareView (nameTable* table, tree_st index, block* j
 }
 
 //  Now compare only variable and number //
-void _backend::_compiler::writeCopmareValues (nameTable* variable, tree_st index) {
+void _backend::_compiler::writeCopmareValues (nameTable* variables, tree_st index) {
     if (node_[index].type == TYPE_VARIABLE)
-        writeValueVariable (variable, index);
+        writeValueVariable (variables, index);
     if (node_[index].type == TYPE_NUMBER)
-        writeValueNumber   (variable, index);
+        writeValueNumber   (variables, index);
 }
 
-void _backend::_compiler::allResultIfView (nameTable* variable, tree_st index, block* jump) {
+void _backend::_compiler::allResultIfView (nameTable* variables, tree_st index, jmpblock* jump) {
     if (!node_[index].left)
         printf ("Error, \"if\" haven't main result");
 
-    lineOfFunctionsView (variable, node_[index].left);
+    lineOfFunctionsView (variables, node_[index].left);
     writeInObjText (com_jmp, sizeof (com_jmp));
 
     jump[1].from = record_position_ - 4;
@@ -499,16 +494,48 @@ void _backend::_compiler::allResultIfView (nameTable* variable, tree_st index, b
     uploadValueFromJmpBlock (&jump[0]);
 
     if (node_[index].right) {
-        lineOfFunctionsView (variable, node_[index].right);
+        lineOfFunctionsView (variables, node_[index].right);
         jump[1].to = record_position_;
         uploadValueFromJmpBlock (&jump[1]);
     }
 
 }
 
-void _backend::_compiler::uploadValueFromJmpBlock (block* jump) {
+void _backend::_compiler::uploadValueFromJmpBlock (jmpblock* jump) {
     if (!jump->from || !jump->to) {
-        printf ("There is not enough data in the jumping block!\n");
+        printf ("There is not enough data in the jumping jmpblock!\n");
     }
     *(unsigned int*)(&text_obj_[jump->from]) = (unsigned int)(jump->to - jump->from - 4);
+}
+
+bool _backend::_compiler::operatorReturnView (nameTable* variables, tree_st index) {
+    if (!strcmp (node_[index].name, "ret")) {
+        mathOperatorsView (variables, node_[index].left);
+        if (node_[index].left != 0)
+            writeInObjText (com_return_value, sizeof (com_return_value));
+
+        writeInObjText (com_return, sizeof (com_return));
+        return true;
+    }
+    return false;
+}
+
+bool _backend::_compiler::operatorWhileView (nameTable* variables, tree_st index) {
+    if (!strcmp (node_[index].name, "while")) {
+        jmpblock jump[2] = {};
+
+        jump[1].to = record_position_;
+        compareView (variables, node_[index].left, jump);
+
+        //  Enter in code in while
+        lineOfFunctionsView (variables, node_[index].right);
+
+        writeInObjText (com_jmp, sizeof (com_jmp));
+        jump[1].from = record_position_ - 4;
+        jump[0].to   = record_position_;
+
+        uploadValueFromJmpBlock (&jump[0]);
+        uploadValueFromJmpBlock (&jump[1]);
+    }
+    return false;
 }

@@ -49,7 +49,7 @@ public:
 
         //-------------------------WRITE-OBJ-TEXT-----------------------------
         void searchMainFunctionView (tree_st index);
-        struct block {
+        struct jmpblock {
             size_t from;
             size_t to;
         };
@@ -80,15 +80,17 @@ public:
         void mainLineView           (tree_st index);
         void secondLineView         (tree_st index);
 
-        bool operatorIfView         (nameTable* table, tree_st index);
+        bool operatorIfView         (nameTable* variables, tree_st index);
+        void compareView            (nameTable* variables, tree_st index, jmpblock* jump);
+        void writeCopmareValues     (nameTable* variables, tree_st index);
 
-        void compareView            (nameTable* table, tree_st index, block* jump);
-        void writeCopmareValues     (nameTable* variable, tree_st index);
+        void allResultIfView        (nameTable* variables, tree_st index, jmpblock* jump);
+        bool operatorReturnView     (nameTable* variables, tree_st index);
 
-        void allResultIfView (nameTable* variable, tree_st index, block* jump);
+        bool operatorWhileView      (nameTable* variables, tree_st index);
 
 
-        void uploadValueFromJmpBlock (block* jump);
+        void uploadValueFromJmpBlock (jmpblock* jump);
 
             //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
         #include "declComFunctions.h"
