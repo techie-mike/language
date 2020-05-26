@@ -43,12 +43,15 @@ const byte com_push_arguments_0[] =
 
 const byte com_call_function_0[] =
         {
-        0x48, 0xB8,             // mov  rax, imm64
+//        0x48, 0xB8,             // mov  rax, imm64
+//
+//        0x00, 0x00, 0x00, 0x00, // imm64
+//        0x00, 0x00, 0x00, 0x00,
+//
+//        0xFF, 0xD0,             // call rax
 
-        0x00, 0x00, 0x00, 0x00, // imm64
-        0x00, 0x00, 0x00, 0x00,
+        0xE8, 0x00, 0x00, 0x00, 0x00, // call 0x0
 
-        0xFF, 0xD0,             // call rax
         0x48, 0xBB,             // mov  rbx, imm64
 
         0x00, 0x00, 0x00, 0x00, // imm64
@@ -194,8 +197,7 @@ const byte com_return_value[] =
 
 const byte com_call_get_0[] =
         {
-        0xE8,                   // call 0
-        0x00, 0x00, 0x00, 0x00, // relative address for jmp
+        0xE8, 0x00, 0x00, 0x00, 0x00, // call 0x0 (relative address for jmp)
 
         0x50                    // push 0x50
         };
@@ -204,5 +206,17 @@ const byte com_call_put_0[] =
         {
         0x51,                           // push rcx
         0xE8, 0x00, 0x00, 0x00, 0x00    // call 0x0 (relative address)
+        };
+
+const byte com_call_exit[] =
+        {
+        0xE8, 0x00, 0x00, 0x00, 0x00    // call 0x0 (relative address)
+        };
+
+const byte com_return_rbp[] =
+        {
+        0x55,   // push rbp
+        0x5C,   // pop rsp
+        0x5D    // pop rbp
         };
 #endif //BACKEND_X86_X64_BINCOMMANDS_H

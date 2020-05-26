@@ -133,6 +133,9 @@ void _backend::_compiler::compilingCode () {
 
     searchMainFunctionView (root_);
     mainLineView           (root_);
+
+    connectionOfAdditionalFunctions ("add_func.obj");
+    allFunctionAddressFilling ();
 }
 
 void _backend::_compiler::createAllFunctionLabel () {
@@ -162,6 +165,7 @@ void _backend::_compiler::searchMainFunctionView (tree_st index) {
     if (!strcmp (node_[index].name, ";")) {
         if (!strcmp (node_[node_[index].left].name, "$main")) {
             functionView (node_[index].left);
+            callExit();
             return;
         }
         if (node_[index].right)
@@ -332,7 +336,7 @@ bool _backend::_compiler::oneMathOperatorView (nameTable* table, tree_st index, 
     if (!strcmp (node_[index].name, name)) {
         node_[index].type  = TYPE_OPERATOR;
         node_[index].value = value;
-        int now_priority = priorityFunction (index);
+//        int now_priority = priorityFunction (index);
         mathOperatorsView (table, node_[index].left);
         mathOperatorsView (table, node_[index].right);
 
@@ -378,6 +382,7 @@ bool _backend::_compiler::oneMathOperatorView (nameTable* table, tree_st index, 
     return false;
 }
 
+/*
 int _backend::_compiler::priorityFunction(tree_st index) {
     if (node_[index].type == 0)
         return 1;
@@ -406,6 +411,7 @@ int _backend::_compiler::priorityFunction(tree_st index) {
         return 5;
     printf("Error in priority function %d\n", node_[index].type);
 }
+*/
 
 bool _backend::_compiler::assignmentView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "=") && *node_[node_[index].right].name != '$') {
@@ -470,10 +476,6 @@ void _backend::_compiler::compareView (nameTable* variables, tree_st index, jmpb
 
 void _backend::_compiler::writeCopmareValues (nameTable* variables, tree_st index) {
     mathOperatorsView (variables, index);
-//    if (node_[index].type == TYPE_VARIABLE)
-//        writeValueVariable (variables, index);
-//    if (node_[index].type == TYPE_NUMBER)
-//        writeValueNumber   (variables, index);
 }
 
 void _backend::_compiler::allResultIfView (nameTable* variables, tree_st index, jmpblock* jump) {
@@ -492,7 +494,6 @@ void _backend::_compiler::allResultIfView (nameTable* variables, tree_st index, 
         jump[1].to = record_position_;
         uploadValueFromJmpBlock (&jump[1]);
     }
-
 }
 
 void _backend::_compiler::uploadValueFromJmpBlock (jmpblock* jump) {
@@ -502,12 +503,14 @@ void _backend::_compiler::uploadValueFromJmpBlock (jmpblock* jump) {
     *(unsigned int*)(&text_obj_[jump->from]) = (unsigned int)(jump->to - jump->from - 4);
 }
 
+//  You can't have ret in main
 bool _backend::_compiler::operatorReturnView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "ret")) {
         mathOperatorsView (variables, node_[index].left);
         if (node_[index].left != 0)
             writeInObjText (com_return_value, sizeof (com_return_value));
 
+        writeInObjText (com_return_rbp, sizeof (com_return_rbp));
         writeInObjText (com_return, sizeof (com_return));
         return true;
     }
@@ -550,4 +553,61 @@ bool _backend::_compiler::operatorGetView (nameTable* variables, tree_st index) 
         return true;
     }
     return false;
+}
+
+long itLength(FILE* file)
+{
+    assert (file != nullptr);
+
+    fseek (file, 0, SEEK_END);
+    long result = ftell (file);
+    fseek (file, 0, SEEK_SET);
+
+    return result;
+}
+
+void _backend::_compiler::connectionOfAdditionalFunctions (const char* name_func_file) {
+    FILE* func_file = fopen (name_func_file, "rb");
+    if (func_file == nullptr) {
+        printf ("Not found file with functions!\n");
+        abort();
+    }
+    long length_file = itLength (func_file) - 16;
+
+    if (length_file + record_position_ >= DEFAULT_LENGTH_BIN_CODE) {
+        printf ("Error in length of binary code, not enough space\n");
+        abort ();
+    }
+
+    char file_hader[16] = {};
+    fread (file_hader, 16, sizeof (char), func_file);
+
+    if (file_hader[0] != 'M' || file_hader[1] != 'K') {
+        printf ("Error, signature in file with function not true!\n");
+        abort();
+    }
+
+    ntable_t index_get_func = functions.searchNameInTable ("get");
+    if (index_get_func != -1)
+        functions.var[index_get_func].position_object = ((ntable_t)*(int*)(&file_hader[4]) + (ntable_t)record_position_);
+
+    ntable_t index_put_func = functions.searchNameInTable ("put");
+    if (index_get_func != -1)
+        functions.var[index_get_func].position_object = ((ntable_t)*(int*)(&file_hader[8]) + (ntable_t)record_position_);
+
+    // Check sem length main program + add function
+
+    fread (text_obj_ + record_position_, length_file, sizeof (char), func_file);
+    record_position_ += length_file;
+}
+
+void _backend::_compiler::allFunctionAddressFilling () {
+    ntable_t size = functions.size_;
+    for (ntable_t i = 0; i < size; i++) {
+        element* func = &functions.var[i];
+        for (ntable_t j = 0; j < func->free_places; j++) {
+            *(int*)(&text_obj_[func->position_depended[j]]) =
+                    (int)(func->position_object - func->position_depended[j] - 4);
+        }                           // We sub 4, because point for counter to jmp counted down from next command
+    }
 }

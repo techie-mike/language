@@ -27,15 +27,15 @@ void _backend::_compiler::startFunction_0 (nameTable* variables, tree_st index) 
     writeInObjText (command, sizeof (command));
 }
 
-// DONE
+// DONE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 void _backend::_compiler::callFunction_0 (nameTable* variables, tree_st index, int num_parameters) {
     ntable_t block_function = functions.searchNameInTable (node_[index].name + 1);
     element* call_func      = &functions.var[block_function];
 
     LOADCOMMAND (command, com_call_function_0);
-    *(type_proc*)(&command[14]) = (type_proc) (8 * num_parameters);
+    *(type_proc*)(&command[7]) = (type_proc) (8 * num_parameters);
 
-    type_proc position_call_in_text = record_position_ + 2;
+    type_proc position_call_in_text = record_position_ + 1;
     call_func->loadNewDependedPosition ((long long) position_call_in_text);
 
     writeInObjText (command, sizeof (command));
@@ -141,5 +141,13 @@ void _backend::_compiler::callPutFunction_0 (nameTable* variables, tree_st index
     if (functions.searchNameInTable (node_[index].name) == -1)
         functions.createNameInTable (node_[index].name);
     ntable_t index_function = functions.searchNameInTable (node_[index].name);
+    functions.var[index_function].loadNewDependedPosition ((long long) (record_position_ - 4));
+}
+
+void _backend::_compiler::callExit () {
+    writeInObjText (com_call_exit, sizeof (com_call_exit));
+
+    functions.createNameInTable ("exit");
+    ntable_t index_function = functions.searchNameInTable ("exit");
     functions.var[index_function].loadNewDependedPosition ((long long) (record_position_ - 4));
 }

@@ -7,7 +7,6 @@ int main (int num_arguments, char *strings[])
 {
     _backend back = {};
     back.tree.readTreeFromFile (strings[1]);
-
     back.tree.fullVisit (_backend::whatItIs);
     back.tree.dump      (_backend::treeColoring);
 

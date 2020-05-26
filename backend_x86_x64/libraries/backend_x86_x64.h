@@ -70,7 +70,7 @@ public:
 
         void mathOperatorsView      (nameTable* table, tree_st index);
         bool oneMathOperatorView    (nameTable* table, tree_st index, const char* name, value_t value);
-        int  priorityFunction       (tree_st index);
+//        int  priorityFunction       (tree_st index);
 
         void writeValueVariable     (nameTable* table, tree_st index);
         void writeValueNumber       (nameTable* variables, tree_st index);
@@ -95,11 +95,13 @@ public:
 
         void uploadValueFromJmpBlock (jmpblock* jump);
 
-            //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
+        //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
         #include "declComFunctions.h"
 
         //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
         void writeInObjText (const unsigned char* command, size_t num_bytes);
+        void connectionOfAdditionalFunctions (const char* name_func_file);
+        void allFunctionAddressFilling ();
     } compiler;
 
     static nameTable functions;
