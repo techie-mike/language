@@ -199,12 +199,12 @@ const byte com_call_get_0[] =
         {
         0xE8, 0x00, 0x00, 0x00, 0x00, // call 0x0 (relative address for jmp)
 
-        0x50                    // push 0x50
+        0x50                          // push rax
         };
 
 const byte com_call_put_0[] =
         {
-        0x51,                           // push rcx
+        0x59,                           // pop  rcx
         0xE8, 0x00, 0x00, 0x00, 0x00    // call 0x0 (relative address)
         };
 

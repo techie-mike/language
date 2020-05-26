@@ -13,7 +13,7 @@ typedef unsigned long long type_proc;
 //#include "declComFunctions.h"
 
 // DONE
-void _backend::_compiler::startFunction_0 (nameTable* variables, tree_st index) {
+void backend::compiler::startFunction_0 (nameTable* variables, tree_st index) {
     byte command[sizeof (com_start_function_0)] = {};   // Copy commnad from data base
     memcpy (command, com_start_function_0,
              sizeof (com_start_function_0));
@@ -28,8 +28,12 @@ void _backend::_compiler::startFunction_0 (nameTable* variables, tree_st index) 
 }
 
 // DONE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-void _backend::_compiler::callFunction_0 (nameTable* variables, tree_st index, int num_parameters) {
+void backend::compiler::callFunction_0 (nameTable* variables, tree_st index, int num_parameters) {
     ntable_t block_function = functions.searchNameInTable (node_[index].name + 1);
+    if (block_function == -1) {
+        printf ("no function implementation!\n");
+        abort();
+    }
     element* call_func      = &functions.var[block_function];
 
     LOADCOMMAND (command, com_call_function_0);
@@ -42,7 +46,7 @@ void _backend::_compiler::callFunction_0 (nameTable* variables, tree_st index, i
 }
 
 // DONE
-void _backend::_compiler::assignmentVariable_0 (nameTable* variables, tree_st index) {
+void backend::compiler::assignmentVariable_0 (nameTable* variables, tree_st index) {
     LOADCOMMAND (command, com_assignment_variable_0);
     ntable_t index_in_ram = loadElementIndex (variables, index);
 
@@ -51,7 +55,7 @@ void _backend::_compiler::assignmentVariable_0 (nameTable* variables, tree_st in
 }
 
 // DONE
-void _backend::_compiler::copyArgument_0 (nameTable* variables, tree_st index) {
+void backend::compiler::copyArgument_0 (nameTable* variables, tree_st index) {
     LOADCOMMAND (command, com_push_arguments_0);
 
     ntable_t index_in_ram = loadElementIndex (variables, index);
@@ -69,7 +73,7 @@ void _backend::_compiler::copyArgument_0 (nameTable* variables, tree_st index) {
 }
 
 // DONE
-ntable_t _backend::_compiler::loadElementIndex (nameTable* variables, tree_st index) {
+ntable_t backend::compiler::loadElementIndex (nameTable* variables, tree_st index) {
     ntable_t index_variable = variables->searchNameInTable (node_[index].name);
     if (index_variable == -1) {
         printf ("Error in loadElement index, search not exist variable: %s\n", node_[index].name);
@@ -81,53 +85,54 @@ ntable_t _backend::_compiler::loadElementIndex (nameTable* variables, tree_st in
     return num_variable;
 }
 
-void _backend::_compiler::operatorAdd_0 () {
+void backend::compiler::operatorAdd_0 () {
     writeInObjText (com_operator_add_0, sizeof (com_operator_add_0));
 }
 
-void _backend::_compiler::operatorSub_0 () {
+void backend::compiler::operatorSub_0 () {
     writeInObjText (com_operator_sub, sizeof (com_operator_sub));
 }
 
-void _backend::_compiler::operatorMul_0 () {
+void backend::compiler::operatorMul_0 () {
     writeInObjText (com_operator_mul_0, sizeof (com_operator_mul_0));
 }
-void _backend::_compiler::operatorDiv_0 () {
+void backend::compiler::operatorDiv_0 () {
     writeInObjText (com_operator_div_0, sizeof (com_operator_div_0));
 }
 
-void _backend::_compiler::operatorPow_0 () {
+void backend::compiler::operatorPow_0 () {
     writeInObjText (com_operator_pow, sizeof (com_operator_pow));
 }
 
-void _backend::_compiler::operatorSin_0 () {
+void backend::compiler::operatorSin_0 () {
     writeInObjText (com_operator_sin, sizeof (com_operator_sin));
 }
 
-void _backend::_compiler::operatorCos_0 () {
+void backend::compiler::operatorCos_0 () {
     writeInObjText (com_operator_cos, sizeof (com_operator_cos));
 }
 
-void _backend::_compiler::writeValueVariable (nameTable* variables, tree_st index) {
+void backend::compiler::writeValueVariable (nameTable* variables, tree_st index) {
     copyArgument_0 (variables, index);
 }
 
-void _backend::_compiler::writeValueNumber (nameTable* variables, tree_st index) {
+void backend::compiler::writeValueNumber (nameTable* variables, tree_st index) {
     LOADCOMMAND(command, com_push_number);
     *(type_proc*)(&command[2]) = (type_proc) node_[index].value;
+    writeInObjText (command, sizeof (command));
 }
 
-void _backend::_compiler::coprocessorInitialization () {
+void backend::compiler::coprocessorInitialization () {
     writeInObjText (com_init_coproc, sizeof (com_init_coproc));
 }
 
 //  Returns byte position where jump type changes
-size_t _backend::_compiler::writeCompare() {
+size_t backend::compiler::writeCompare() {
     writeInObjText (com_compare_and_jmp, sizeof (com_compare_and_jmp));
     return record_position_ - 5;
 }
 
-void _backend::_compiler::callGetFunction_0 (nameTable* variables, tree_st index) {
+void backend::compiler::callGetFunction_0 (nameTable* variables, tree_st index) {
     writeInObjText (com_call_get_0, sizeof (com_call_get_0));
 
     if (functions.searchNameInTable (node_[index].name) == -1)
@@ -136,7 +141,7 @@ void _backend::_compiler::callGetFunction_0 (nameTable* variables, tree_st index
     functions.var[index_function].loadNewDependedPosition ((long long) (record_position_ - 5));
 }
 
-void _backend::_compiler::callPutFunction_0 (nameTable* variables, tree_st index) {
+void backend::compiler::callPutFunction_0 (nameTable* variables, tree_st index) {
     writeInObjText (com_call_put_0, sizeof (com_call_put_0));
     if (functions.searchNameInTable (node_[index].name) == -1)
         functions.createNameInTable (node_[index].name);
@@ -144,7 +149,7 @@ void _backend::_compiler::callPutFunction_0 (nameTable* variables, tree_st index
     functions.var[index_function].loadNewDependedPosition ((long long) (record_position_ - 4));
 }
 
-void _backend::_compiler::callExit () {
+void backend::compiler::callExit () {
     writeInObjText (com_call_exit, sizeof (com_call_exit));
 
     functions.createNameInTable ("exit");

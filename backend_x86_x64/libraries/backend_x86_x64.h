@@ -5,13 +5,16 @@
 #ifndef BACKEND_X86_X64_BACKEND_X86_X64_H
 #define BACKEND_X86_X64_BACKEND_X86_X64_H
 
+#include "windows.h"
+#include <winnt.h>
+
 #include "MyTree.h"
 #include "NameTable.h"
 //#include <cstring>
 
 
 
-struct _backend {
+struct backend {
 private:
     //------------------------------CONSTANTS------------------------------//
     static const char TYPE_OPERATOR = 1, TYPE_NUMBER   = 2,
@@ -29,16 +32,15 @@ private:
 
 public:
     static Tree tree;
+    static size_t       record_position_;
 
     //==============================COMPILER===============================//
-    struct _compiler {  // struct for function and variable for binary compiler
+    struct compiler {  // struct for function and variable for binary compiler
         void compilingCode ();
         void writeInObjFile (const char* name_file);
 
     private:
-        int optimization_             {};
-        static unsigned char* text_obj_;
-        size_t       record_position_ {};
+        int          optimization_    {};
         tree_st      root_            {};
         Node*        node_            {};
 
@@ -104,12 +106,32 @@ public:
         void allFunctionAddressFilling ();
     } compiler;
 
+    static unsigned char* text_obj_;
     static nameTable functions;
-
     //==============================COMPILER===============================//
+
+    //==============================LINKER=================================//
+    static unsigned char* text_exe_;
+    struct linker {
+        void linking ();
+        void writeExeInFile(const char* name_file);
+        void secondLinking (const char* name_file);
+    private:
+        void createDosHeader ();
+        void createPeHeader  ();
+
+        size_t record_position_exe_;
+
+
+        void writeInExeText (const unsigned char* command, size_t num_bytes);
+        void createSectionHeader ();
+    } linker;
+
+    //==============================LINKER=================================//
 
 
     //------------------------------FUNCTION-------------------------------//
+    void freeMemory();
     static void whatItIs     (Node* node);     // check what type this Node
     static void treeColoring (FILE* file, Node* node);
 

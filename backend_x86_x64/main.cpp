@@ -5,14 +5,17 @@
 
 int main (int num_arguments, char *strings[])
 {
-    _backend back = {};
+    backend back = {};
     back.tree.readTreeFromFile (strings[1]);
-    back.tree.fullVisit (_backend::whatItIs);
-    back.tree.dump      (_backend::treeColoring);
+    back.tree.fullVisit (backend::whatItIs);
+    back.tree.dump      (backend::treeColoring);
 
     back.compiler.compilingCode ();
     back.compiler.writeInObjFile ("obj_text_log.obj");
-
+//    back.linker.linking ();
+//    back.linker.writeExeInFile ("testlink.exe");
+    back.linker.secondLinking ("program.exe");
+    back.freeMemory ();
 
     return 0;
 }

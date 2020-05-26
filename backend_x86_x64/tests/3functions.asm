@@ -80,7 +80,7 @@ print:
 		add r9, rax
 		loop while
 		
-		mov rcx, r9		; return value in rcx if form  ddddd.dd
+		mov rax, r9		; return value in rcx if form  ddddd.dd
 		
 		push rbp
 		pop  rsp
@@ -107,22 +107,27 @@ Start:
 		and rsp, ~0xf
 		
 		lea rdi, [rsp-1]
+		xor r10, r10
+		
+		std
+		
+		mov al, 10		; add '\n' at the end of string
+		stosb
+		inc r10
+		
 		mov rsi, rsp
 		sub rsp, 32 + 16
 		mov rax, rcx
-		xor r10, r10
-		
+
 		xor r12, r12
 		
 		mov r8, 100
-		
-		std
 		mov rcx, 18
 		
 		mov rbx, 10
 	;------------------
 	looop:					; write num as a string in reverse order
-		cmp r10, 2
+		cmp r10, 3
 		jne continue
 		;============
 		mov r8, rax
@@ -146,6 +151,8 @@ Start:
 		loop looop
 	;-------------------	
 	exit:
+	
+		
 		
 		cld
 		

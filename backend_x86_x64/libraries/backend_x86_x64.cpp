@@ -8,19 +8,22 @@
 
 
 //---------------DEFINITION-OF-THE-STATIC-DATA-MEMBER---------------//
-unsigned char*     _backend::_compiler::text_obj_;
-         Tree      _backend::tree;
-         nameTable _backend::functions;
+unsigned char*     backend::text_obj_;
+unsigned char*     backend::text_exe_;
+         Tree      backend::tree;
+         nameTable backend::functions;
+size_t             backend::record_position_ = 0;
+
 //---------------DEFINITION-OF-THE-STATIC-DATA-MEMBER---------------//
 
 
-void _backend::whatItIs (Node* node) {
+void backend::whatItIs (Node* node) {
     if (isOperator (node)) return;
     if (isNumber   (node)) return;
     if (isVariable (node)) return;
 }
 
-bool _backend::isOperator (Node* node)
+bool backend::isOperator (Node* node)
 {
 //----------------------------DEFINE----------------------------//
 #define OPER(str, num) if (!strcmp( #str , node->name)) {\
@@ -45,7 +48,7 @@ bool _backend::isOperator (Node* node)
     return false;
 }
 
-bool _backend::isNumber   (Node* node) {
+bool backend::isNumber   (Node* node) {
     double  temp_number = 0;
     int     num_read    = 0;
 
@@ -61,7 +64,7 @@ bool _backend::isNumber   (Node* node) {
     return false;
 }
 
-bool _backend::isVariable (Node* node) {
+bool backend::isVariable (Node* node) {
 //----------------------------DEFINE----------------------------//
 #define NAME(name_var) if (!strcmp(node->name , name_var)) {\
         return false;\
@@ -104,7 +107,7 @@ bool _backend::isVariable (Node* node) {
     }
 }
 
-void _backend::treeColoring (FILE* file, Node* node) {
+void backend::treeColoring (FILE* file, Node* node) {
     switch (node->type) {
         case TYPE_OPERATOR:
             fprintf(file, "style=\"filled\", fillcolor=\"lightgrey\" ");
@@ -120,7 +123,7 @@ void _backend::treeColoring (FILE* file, Node* node) {
     }
 }
 
-void _backend::_compiler::compilingCode () {
+void backend::compiler::compilingCode () {
     text_obj_ = (unsigned char*) calloc (DEFAULT_LENGTH_BIN_CODE, sizeof (unsigned char));
     if (!text_obj_) {
         printf ("Error in calloc in compiler!\n");
@@ -138,11 +141,11 @@ void _backend::_compiler::compilingCode () {
     allFunctionAddressFilling ();
 }
 
-void _backend::_compiler::createAllFunctionLabel () {
+void backend::compiler::createAllFunctionLabel () {
     tree.controlledExternalFunctionFromRoot (createOneFunctionLabel);
 }
 
-int _backend::_compiler::createOneFunctionLabel (Node* node) {
+int backend::compiler::createOneFunctionLabel (Node* node) {
     if (!strcmp (node->name, ";"))
         return tree.BOTH_BRANCH;
 
@@ -155,13 +158,13 @@ int _backend::_compiler::createOneFunctionLabel (Node* node) {
     return tree.NO_BRANCH;
 }
 
-void _backend::_compiler::uploadDataFromTree () {
+void backend::compiler::uploadDataFromTree () {
     root_ = tree.getRoot  ();
     node_ = tree.getNodes ();
 }
 
 //      After this function will be porting code        //
-void _backend::_compiler::searchMainFunctionView (tree_st index) {
+void backend::compiler::searchMainFunctionView (tree_st index) {
     if (!strcmp (node_[index].name, ";")) {
         if (!strcmp (node_[node_[index].left].name, "$main")) {
             functionView (node_[index].left);
@@ -174,7 +177,7 @@ void _backend::_compiler::searchMainFunctionView (tree_st index) {
         printf ("Error first line program\n");
 }
 
-bool _backend::_compiler::functionView (tree_st index) {
+bool backend::compiler::functionView (tree_st index) {
     if (node_[index].name[0] == '$') {
         nameTable variable;
 
@@ -190,7 +193,7 @@ bool _backend::_compiler::functionView (tree_st index) {
     return false;
 }
 
-void _backend::_compiler::searchAllVariablesInFunctionView (nameTable* variables, tree_st index) {
+void backend::compiler::searchAllVariablesInFunctionView (nameTable* variables, tree_st index) {
     if (index) {
         if (node_[index].type == TYPE_VARIABLE &&
            !checkNameVariable (variables, node_[index].name))
@@ -200,14 +203,14 @@ void _backend::_compiler::searchAllVariablesInFunctionView (nameTable* variables
     }
 }
 
-bool _backend::_compiler::checkNameVariable (nameTable* table, char* name) {
+bool backend::compiler::checkNameVariable (nameTable* table, char* name) {
     if (table->searchNameInTable (name) != -1)
         return true;
     else
         return false;
 }
 
-void _backend::_compiler::writeInObjText (const byte* command, size_t num_bytes) {
+void backend::compiler::writeInObjText (const byte* command, size_t num_bytes) {
     if (text_obj_ == 0 || command == nullptr || num_bytes == 0) {
         printf ("Error in arguments of 'writeInObjText\n");
         abort ();
@@ -221,7 +224,7 @@ void _backend::_compiler::writeInObjText (const byte* command, size_t num_bytes)
     record_position_ += num_bytes;
 }
 
-void _backend::_compiler::lineOfFunctionsView (nameTable* variables, tree_st index) {
+void backend::compiler::lineOfFunctionsView (nameTable* variables, tree_st index) {
     if (index) {
         if (strcmp (node_[index].name, "op") != 0)
             printf ("Error in operators of functions!\n");
@@ -232,7 +235,7 @@ void _backend::_compiler::lineOfFunctionsView (nameTable* variables, tree_st ind
 }
 
 //      IN WORK
-void _backend::_compiler::operatorsView (nameTable* variables, tree_st index) {
+void backend::compiler::operatorsView (nameTable* variables, tree_st index) {
     if (index == 0)
         printf ("Error, \"op\" haven't left knot!\n");
     else {
@@ -254,7 +257,7 @@ void _backend::_compiler::operatorsView (nameTable* variables, tree_st index) {
 }
 
 //      IN WORK
-bool _backend::_compiler::callFunctionsView (nameTable* variables, tree_st index) {
+bool backend::compiler::callFunctionsView (nameTable* variables, tree_st index) {
     if ((node_[index].type == TYPE_OPERATOR && !strcmp (node_[index].name, "="))     // should be check second condition
     && (*node_[node_[index].right].name == '$')) {
 
@@ -273,7 +276,7 @@ bool _backend::_compiler::callFunctionsView (nameTable* variables, tree_st index
 }
 
 //  Write finction argiments when call and return number arguments
-int _backend::_compiler::writeArgumentFunction (nameTable* variables, tree_st index) {
+int backend::compiler::writeArgumentFunction (nameTable* variables, tree_st index) {
     int num_offset = 0;
     if (index) {
         tree_st end_index = index;
@@ -293,14 +296,14 @@ int _backend::_compiler::writeArgumentFunction (nameTable* variables, tree_st in
     return num_offset;
 }
 
-void _backend::_compiler::writeInObjFile (const char* name_file) {
+void backend::compiler::writeInObjFile (const char* name_file) {
     FILE* file_obj = fopen (name_file, "wb");
 
     fwrite (text_obj_, sizeof (char), record_position_, file_obj);
     fclose (file_obj);
 }
 
-void _backend::_compiler::mathOperatorsView (nameTable* table, tree_st index) {
+void backend::compiler::mathOperatorsView (nameTable* table, tree_st index) {
     if (!index)
         return;
     if (oneMathOperatorView (table, index, "+",   OPERATOR_ADD))
@@ -332,7 +335,7 @@ void _backend::_compiler::mathOperatorsView (nameTable* table, tree_st index) {
     }
 }
 
-bool _backend::_compiler::oneMathOperatorView (nameTable* table, tree_st index, const char* name, value_t value) {
+bool backend::compiler::oneMathOperatorView (nameTable* table, tree_st index, const char* name, value_t value) {
     if (!strcmp (node_[index].name, name)) {
         node_[index].type  = TYPE_OPERATOR;
         node_[index].value = value;
@@ -383,7 +386,7 @@ bool _backend::_compiler::oneMathOperatorView (nameTable* table, tree_st index, 
 }
 
 /*
-int _backend::_compiler::priorityFunction(tree_st index) {
+int backend::compiler::priorityFunction(tree_st index) {
     if (node_[index].type == 0)
         return 1;
     if (node_[index].type == TYPE_NUMBER ||
@@ -413,7 +416,7 @@ int _backend::_compiler::priorityFunction(tree_st index) {
 }
 */
 
-bool _backend::_compiler::assignmentView (nameTable* variables, tree_st index) {
+bool backend::compiler::assignmentView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "=") && *node_[node_[index].right].name != '$') {
         if (variables == nullptr) {
             printf ("YOU DON'T ADD GLOBAL VARIABLE!");
@@ -427,7 +430,7 @@ bool _backend::_compiler::assignmentView (nameTable* variables, tree_st index) {
     return false;
 }
 
-void _backend::_compiler::mainLineView (tree_st index) {
+void backend::compiler::mainLineView (tree_st index) {
     if (!strcmp(node_[index].name, ";")) {
         secondLineView (node_[index].left);
         if (node_[index].right)
@@ -436,13 +439,13 @@ void _backend::_compiler::mainLineView (tree_st index) {
         printf ("Error first line program");
 }
 
-void _backend::_compiler::secondLineView (tree_st index) {
+void backend::compiler::secondLineView (tree_st index) {
     if (strcmp(node_[index].name, "$main") != 0)
         if (index != 0 && !functionView (index) && !assignmentView (0, index))
             printf ("Error, unknown branch from main line!\n");
 }
 
-bool _backend::_compiler::operatorIfView (nameTable* variables, tree_st index) {
+bool backend::compiler::operatorIfView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "if")) {
         jmpblock jump[2] = {};
 
@@ -452,7 +455,7 @@ bool _backend::_compiler::operatorIfView (nameTable* variables, tree_st index) {
     return false;
 }
 
-void _backend::_compiler::compareView (nameTable* variables, tree_st index, jmpblock* jump) {
+void backend::compiler::compareView (nameTable* variables, tree_st index, jmpblock* jump) {
     writeCopmareValues (variables, node_[index].left);
     writeCopmareValues (variables, node_[index].right);
 
@@ -474,11 +477,11 @@ void _backend::_compiler::compareView (nameTable* variables, tree_st index, jmpb
     jump[0].from = record_position_ - 4;
 }
 
-void _backend::_compiler::writeCopmareValues (nameTable* variables, tree_st index) {
+void backend::compiler::writeCopmareValues (nameTable* variables, tree_st index) {
     mathOperatorsView (variables, index);
 }
 
-void _backend::_compiler::allResultIfView (nameTable* variables, tree_st index, jmpblock* jump) {
+void backend::compiler::allResultIfView (nameTable* variables, tree_st index, jmpblock* jump) {
     if (!node_[index].left)
         printf ("Error, \"if\" haven't main result");
 
@@ -496,7 +499,7 @@ void _backend::_compiler::allResultIfView (nameTable* variables, tree_st index, 
     }
 }
 
-void _backend::_compiler::uploadValueFromJmpBlock (jmpblock* jump) {
+void backend::compiler::uploadValueFromJmpBlock (jmpblock* jump) {
     if (!jump->from || !jump->to) {
         printf ("There is not enough data in the jumping jmpblock!\n");
     }
@@ -504,7 +507,7 @@ void _backend::_compiler::uploadValueFromJmpBlock (jmpblock* jump) {
 }
 
 //  You can't have ret in main
-bool _backend::_compiler::operatorReturnView (nameTable* variables, tree_st index) {
+bool backend::compiler::operatorReturnView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "ret")) {
         mathOperatorsView (variables, node_[index].left);
         if (node_[index].left != 0)
@@ -517,7 +520,7 @@ bool _backend::_compiler::operatorReturnView (nameTable* variables, tree_st inde
     return false;
 }
 
-bool _backend::_compiler::operatorWhileView (nameTable* variables, tree_st index) {
+bool backend::compiler::operatorWhileView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "while")) {
         jmpblock jump[2] = {};
 
@@ -537,7 +540,7 @@ bool _backend::_compiler::operatorWhileView (nameTable* variables, tree_st index
     return false;
 }
 
-bool _backend::_compiler::operatorPutView (nameTable* variables, tree_st index) {
+bool backend::compiler::operatorPutView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "put")) {
         mathOperatorsView (variables, node_[index].left);
         callPutFunction_0 (variables, index);
@@ -546,7 +549,7 @@ bool _backend::_compiler::operatorPutView (nameTable* variables, tree_st index) 
     return false;
 }
 
-bool _backend::_compiler::operatorGetView (nameTable* variables, tree_st index) {
+bool backend::compiler::operatorGetView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "get")) {
         callGetFunction_0    (variables, index);
         assignmentVariable_0 (variables, node_[index].left);
@@ -566,7 +569,7 @@ long itLength(FILE* file)
     return result;
 }
 
-void _backend::_compiler::connectionOfAdditionalFunctions (const char* name_func_file) {
+void backend::compiler::connectionOfAdditionalFunctions (const char* name_func_file) {
     FILE* func_file = fopen (name_func_file, "rb");
     if (func_file == nullptr) {
         printf ("Not found file with functions!\n");
@@ -592,8 +595,13 @@ void _backend::_compiler::connectionOfAdditionalFunctions (const char* name_func
         functions.var[index_get_func].position_object = ((ntable_t)*(int*)(&file_hader[4]) + (ntable_t)record_position_);
 
     ntable_t index_put_func = functions.searchNameInTable ("put");
-    if (index_get_func != -1)
-        functions.var[index_get_func].position_object = ((ntable_t)*(int*)(&file_hader[8]) + (ntable_t)record_position_);
+    if (index_put_func != -1)
+        functions.var[index_put_func].position_object = ((ntable_t)*(int*)(&file_hader[8]) + (ntable_t)record_position_);
+
+
+    ntable_t index_exit_func = functions.searchNameInTable ("exit");
+    if (index_exit_func != -1)
+        functions.var[index_exit_func].position_object = ((ntable_t)*(int*)(&file_hader[12]) + (ntable_t)record_position_);
 
     // Check sem length main program + add function
 
@@ -601,7 +609,7 @@ void _backend::_compiler::connectionOfAdditionalFunctions (const char* name_func
     record_position_ += length_file;
 }
 
-void _backend::_compiler::allFunctionAddressFilling () {
+void backend::compiler::allFunctionAddressFilling () {
     ntable_t size = functions.size_;
     for (ntable_t i = 0; i < size; i++) {
         element* func = &functions.var[i];
@@ -610,4 +618,138 @@ void _backend::_compiler::allFunctionAddressFilling () {
                     (int)(func->position_object - func->position_depended[j] - 4);
         }                           // We sub 4, because point for counter to jmp counted down from next command
     }
+}
+
+void backend::linker::linking () {
+    text_exe_ = (unsigned char*) calloc (DEFAULT_LENGTH_BIN_CODE, sizeof (unsigned char));
+    if (!text_exe_) {
+        printf ("Error in calloc in compiler!\n");
+        abort ();
+    }
+
+    createDosHeader ();
+    createPeHeader  ();
+    createSectionHeader ();
+
+
+}
+
+void backend::linker::createDosHeader () {
+    _IMAGE_DOS_HEADER dos_header = {};
+    dos_header.e_magic = 0x5A4D;
+    dos_header.e_lfanew = 0x40;     // <-- From this plasce start PE header
+
+    writeInExeText ((unsigned char*)&dos_header, sizeof (dos_header));
+}
+
+void backend::linker::writeInExeText (const unsigned char* command, size_t num_bytes) {
+    if (text_exe_ == 0 || command == nullptr || num_bytes == 0) {
+        printf ("Error in arguments of 'writeInObjText\n");
+        abort ();
+    }
+    if (record_position_exe_ + 10 >= DEFAULT_LENGTH_BIN_CODE) {
+        printf ("Error in length of binary code, not enough space\n");
+        abort ();
+    }
+
+    memcpy (text_exe_ + record_position_exe_, command, num_bytes);
+    record_position_exe_ += num_bytes;
+}
+
+void backend::linker::createPeHeader () {
+    _IMAGE_NT_HEADERS pe_header = {};
+    pe_header.Signature = 0x00004550;
+    pe_header.FileHeader.Machine              = IMAGE_FILE_MACHINE_AMD64  ;
+    pe_header.FileHeader.NumberOfSections     = 2;
+    pe_header.FileHeader.SizeOfOptionalHeader = IMAGE_SIZEOF_NT_OPTIONAL64_HEADER;
+    pe_header.FileHeader.Characteristics      = 0x102;
+                                      // 0x100 - that program for architecture win32
+                                      // 0x002 - This indicates that the image file is valid and can be run
+
+    pe_header.OptionalHeader.Magic                 = IMAGE_NT_OPTIONAL_HDR64_MAGIC ; // x64
+    pe_header.OptionalHeader.AddressOfEntryPoint   = 0x1000;
+    pe_header.OptionalHeader.ImageBase             = 0x400000;
+    pe_header.OptionalHeader.SectionAlignment      = 0x1000;
+    pe_header.OptionalHeader.FileAlignment         = 0x200;
+    pe_header.OptionalHeader.MajorSubsystemVersion = 4;
+    pe_header.OptionalHeader.SizeOfImage           = 0x4000;
+    pe_header.OptionalHeader.SizeOfHeaders         = 0x200;
+    pe_header.OptionalHeader.Subsystem             = 2;
+    pe_header.OptionalHeader.NumberOfRvaAndSizes   = 16;
+
+    pe_header.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress = 0x2000;  // Import Directory
+
+    writeInExeText ((unsigned char*)&pe_header, sizeof (pe_header));    // Write our struct in file
+
+}
+
+void backend::linker::createSectionHeader () {
+    _IMAGE_SECTION_HEADER section_header[2] = {};
+
+    //--------------------SECTION-.TEXT--------------------//
+    strcpy ((char*)(section_header[0].Name), ".text");
+    section_header[0].Misc.VirtualSize = 0x1000;
+    section_header[0].VirtualAddress   = 0x1000;
+    section_header[0].SizeOfRawData    = 0x200;    // size physical cost memory
+    section_header[0].PointerToRawData = 0x200;    // physical offset
+    section_header[0].Characteristics  = IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ;
+    //--------------------SECTION-.TEXT--------------------//
+
+    //--------------------SECTION-.RDATA--------------------//
+    strcpy ((char*)(section_header[1].Name), ".rdata");
+    section_header[1].Misc.VirtualSize = 0x1000;
+    section_header[1].VirtualAddress   = 0x2000;
+    section_header[1].SizeOfRawData    = 0x1000;   // size physical cost memory
+    section_header[1].PointerToRawData = 0x200;    // physical offset
+    section_header[1].Characteristics  = IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ;
+    //--------------------SECTION-.RDATA--------------------//
+
+    writeInExeText ((unsigned char*)&section_header[0],
+                    2 * sizeof (section_header[0]));    // Write our struct in file
+
+}
+
+void backend::linker::writeExeInFile(const char* name_file) {
+    FILE* file_exe = fopen (name_file, "wb");
+
+    fwrite (text_exe_, sizeof (char), 2 * record_position_exe_, file_exe);
+    fclose (file_exe);
+}
+
+void backend::linker::secondLinking (const char* name_file) {
+    assert (name_file != nullptr);
+    FILE* empty_program = fopen ("empty.exe", "rb");
+    assert (empty_program);
+    size_t length_file = itLength (empty_program);
+    unsigned char* empty_text = (unsigned  char*) calloc (length_file, sizeof (char));
+
+    fread (empty_text, sizeof (char), length_file, empty_program);
+
+    memcpy (empty_text + 512, text_obj_, record_position_);
+    memcpy (empty_text + record_position_ - 12 + 512, com_jmp, sizeof (com_jmp));
+    memcpy (empty_text + record_position_ - 20 + 512, com_jmp, sizeof (com_jmp));
+    memcpy (empty_text + record_position_ - 28 + 512, com_jmp, sizeof (com_jmp));
+    memcpy (empty_text + record_position_ - 36 + 512, com_jmp, sizeof (com_jmp));
+
+    *(empty_text + record_position_ - 36 + 512 - 1) = 90;   //
+    *(empty_text + record_position_ - 28 + 512 - 3) = 90;   // To help debugger undestand command
+    *(empty_text + record_position_ - 20 + 512 - 3) = 90;   //
+    *(empty_text + record_position_ - 12 + 512 - 3) = 90;   //
+
+    *(int*)(empty_text + record_position_ + 512 - 36 + 1) = (8192 - (record_position_ - 36) - 5);  // Read ConsoleA
+    *(int*)(empty_text + record_position_ + 512 - 28 + 1) = (8200 - (record_position_ - 28) - 5);  // GetHandle
+    *(int*)(empty_text + record_position_ + 512 - 20 + 1) = (8208 - (record_position_ - 20) - 5);  // WriteConsoleA
+    *(int*)(empty_text + record_position_ + 512 - 12 + 1) = (8216 - (record_position_ - 12) - 5);  // Exit
+    fclose (empty_program);
+
+    FILE* done_program = fopen (name_file, "wb");
+    fwrite (empty_text, sizeof (char), length_file, done_program);
+    fclose (done_program);
+    free   (empty_text);
+
+}
+
+void backend::freeMemory() {
+    free (text_obj_);
+    free (text_exe_);
 }
