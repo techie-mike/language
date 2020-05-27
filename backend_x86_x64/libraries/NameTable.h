@@ -35,7 +35,7 @@ struct nameTable {
     nameTable ();
    ~nameTable ();
 
-    ntable_t searchNameInTable (      char* name);
+    ntable_t searchNameInTable (const char* name);
     void     createNameInTable (      char* name);
     void     createNameInTable (const char* name);
 

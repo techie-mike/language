@@ -79,7 +79,7 @@ void nameTable::fillingPoisonousValues()
     }
 }
 
-ntable_t nameTable::searchNameInTable (char* name) {
+ntable_t nameTable::searchNameInTable (const char* name) {
     for (ntable_t i = 0; i < size_; i++) {
         if (!strcmp (name, var[i].name))
             return i;

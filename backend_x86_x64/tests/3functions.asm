@@ -27,8 +27,10 @@ section .text
 	nop
 	nop
 	nop
-print:    
-	
+scan:    
+;---------------------------------------
+;	Read in console number with 
+;	fixed accuracy 
 ;	Ret: RAX	input value
 ;---------------SCAN--------------------
 	
@@ -36,7 +38,6 @@ print:
 		push rsp
 		pop  rbp
 		
-;		push rcx
 		
 		and rsp, ~0xf
 		
@@ -64,6 +65,17 @@ print:
 		mov rbx, 0x2E
 		mov rcx, 18
 		lea rsi, [rsp + 40]
+		
+	;------------------------; Check minus
+		xor r10, r10
+		lodsb
+		cmp al, 45
+		jne skip_min
+		inc rsi
+		inc r10
+	skip_min:
+		dec rsi
+	;------------------------
 	while:
 		lodsb
 		cmp al, bl
@@ -73,12 +85,17 @@ print:
 	skip:	
 		xchg rax, r9
 		
-		mul  r8			; rdx *= 10
+		imul rax, r8	; rdx *= 10
 		xchg rax, r9
 		
 		sub al, 48
 		add r9, rax
 		loop while
+		
+		cmp r10, 1
+		jne not_minus_scan
+		neg r9
+	not_minus_scan:	
 		
 		mov rax, r9		; return value in rcx if form  ddddd.dd
 		
@@ -125,6 +142,12 @@ Start:
 		mov rcx, 18
 		
 		mov rbx, 10
+		
+		xor r11, r11
+		cmp rax, 0
+		jge looop
+		neg rax
+		inc r11
 	;------------------
 	looop:					; write num as a string in reverse order
 		cmp r10, 3
@@ -137,8 +160,8 @@ Start:
 		mov rax, r8
 		;^^^^^^^^^^^^
 	continue:
-		xor rdx, rdx
-		div rbx
+		cqo
+		idiv rbx
 		xchg rax, rdx
 		add al, 48
 		stosb
@@ -151,9 +174,12 @@ Start:
 		loop looop
 	;-------------------	
 	exit:
-	
-		
-		
+		cmp r11, 1
+		jne not_minus
+		mov al, 45
+		stosb
+		inc r10
+	not_minus:
 		cld
 		
 		sub rsp, 32 + 16

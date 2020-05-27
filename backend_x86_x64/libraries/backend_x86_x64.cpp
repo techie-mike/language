@@ -719,7 +719,7 @@ void backend::linker::writeExeInFile(const char* name_file) {
 void backend::linker::secondLinking (const char* name_file) {
     assert (name_file != nullptr);
     FILE* empty_program = fopen ("empty.exe", "rb");
-    assert (empty_program);
+    assert (empty_program != nullptr);
     size_t length_file = itLength (empty_program);
     unsigned char* empty_text = (unsigned  char*) calloc (length_file, sizeof (char));
 
@@ -743,6 +743,7 @@ void backend::linker::secondLinking (const char* name_file) {
     fclose (empty_program);
 
     FILE* done_program = fopen (name_file, "wb");
+    assert (done_program != 0);
     fwrite (empty_text, sizeof (char), length_file, done_program);
     fclose (done_program);
     free   (empty_text);

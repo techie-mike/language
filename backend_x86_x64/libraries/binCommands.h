@@ -111,6 +111,7 @@ const byte com_operator_mul_0[] =
         0x48, 0xC7, 0xC3,       // mov  rbx, 0x64
         0x64, 0x00, 0x00, 0x00,
 
+        0x48, 0x99,             // cqo
         0x48, 0xF7, 0xFB,       // idiv rbx
         0x50                    // push rax
         };
@@ -123,6 +124,7 @@ const byte com_operator_div_0[] =
         0x64, 0x00, 0x00, 0x00,
 
         0x48, 0xF7, 0xEA,       // imul rdx
+        0x48, 0x99,             // cqo
         0x48, 0xF7, 0xFB,       // idiv rbx
         0x50                    // push rax
         };
@@ -131,17 +133,20 @@ const byte com_operator_pow[] =
         {
         0x5B,                   // pop rbx (then not use)
         0x58,                   // pop rax
+        0x48, 0x99,             // cqo
 
-        0x48, 0xC7, 0xC3,       // mov rbx, 0xa
-        0x0A, 0x00, 0x00, 0x00,
+        0x48, 0xC7,0xC3,        // mov rbx, 100
+        0x64, 0x00, 0x00, 0x00,
 
-        0x48, 0xF7, 0xEB,       // imul  rbx
+        0x48, 0xF7, 0xFB,       // idiv rbx
+
         0x50,                   // push rax
         0x48, 0x89, 0xE3,       // mov  rbx, rsp
         0xDB, 0x03,             // fild DWORD PTR [rbx]
         0xD9, 0xFA,             // fsqrt
-        0xDB, 0x1B,             // fistp DWORD PTR [rbx]
-        0x48, 0x89, 0xEC        // mov  rsp, rbp
+        0x48, 0xC7, 0x03, 0x64, 0x00, 0x00, 0x00, // mov qword ptr [rbx], 0x64
+        0xDA, 0x0B,             // fimul dword ptr[rbx]
+        0xDB, 0x1B,             // fistp dword ptr[rbx]
         };
 
 const byte com_operator_sin[] =
