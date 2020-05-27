@@ -174,6 +174,18 @@ Start:
 		loop looop
 	;-------------------	
 	exit:
+		cmp r10, 3
+		jg not_empty_start
+		;+++++++++++++++++
+		mov al, 46
+		stosb
+		inc r10
+		
+		mov al, 48
+		stosb
+		inc r10
+		;+++++++++++++++++
+	not_empty_start:	
 		cmp r11, 1
 		jne not_minus
 		mov al, 45

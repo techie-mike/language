@@ -731,7 +731,7 @@ void backend::linker::secondLinking (const char* name_file) {
     memcpy (empty_text + record_position_ - 28 + 512, com_jmp, sizeof (com_jmp));
     memcpy (empty_text + record_position_ - 36 + 512, com_jmp, sizeof (com_jmp));
 
-    *(empty_text + record_position_ - 36 + 512 - 1) = 90;   //
+//    *(empty_text + record_position_ - 36 + 512 - 1) = 90;   //
     *(empty_text + record_position_ - 28 + 512 - 3) = 90;   // To help debugger undestand command
     *(empty_text + record_position_ - 20 + 512 - 3) = 90;   //
     *(empty_text + record_position_ - 12 + 512 - 3) = 90;   //
