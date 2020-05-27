@@ -1,0 +1,43 @@
+     1                                                                                  ; Console Message, 64 bit. V1.03
+     2                                  NULL              EQU 0                         ; Constants
+     3                                  STD_OUTPUT_HANDLE EQU -11
+     4                                  
+     5                                  extern GetStdHandle                             ; Import external symbols
+     6                                  extern WriteFile                                ; Windows API functions, not decorated
+     7                                  extern ExitProcess
+     8                                  extern WriteConsoleA
+     9                                  
+    10                                  global Start                                    ; Export symbols. The entry point
+    11                                  
+    12                                  section .data                                   ; Initialized data segment
+    13 00000000 436F6E736F6C65204D-      Message        db "Console Message 64", 0Dh, 0Ah
+    13 00000009 657373616765203634-
+    13 00000012 0D0A               
+    14                                   MessageLength  EQU $-Message                   ; Address of this line ($) - address of Message
+    15                                  
+    16                                  section .bss                                    ; Uninitialized data segment
+    17                                  ;alignb 8
+    18 00000000 <res 00000008>           StandardHandle resq 1
+    19                                   ;Written        resq 1
+    20                                  
+    21                                  section .text                                   ; Code segment
+    22                                  ;	temp dq 1
+    23                                  Start:
+    24                                  
+    25 00000000 4883EC00                 sub   RSP, 0                                   ; Align the stack to a multiple of 16 bytes
+    26 00000004 4883EC20                 sub   RSP, 32                                  ; 32 bytes of shadow space
+    27 00000008 B9F5FFFFFF               mov   ECX, STD_OUTPUT_HANDLE
+    28 0000000D E8(00000000)             call  GetStdHandle
+    29 00000012 4889C1                   mov   rcx, RAX
+    30 00000015 4883C420                 add   RSP, 32                                  ; Remove the 32 bytes
+    31 00000019 4883EC28                 sub   RSP, 32 + 8                          ; Shadow space + 5th parameter + align stack
+    32                                                                                  ; to a multiple of 16 bytes
+    33 0000001D 488D15(00000000)         lea   RDX, [REL Message]                       ; 2nd parameter
+    34 00000024 41B80A000000             mov   R8, 10                        ; 3rd parameter
+    35 0000002A 41B900000000             mov   R9, 0                        ; 4th parameter
+    36 00000030 48C744242000000000       mov   qword [RSP + 4 * 8], NULL                ; 5th parameter
+    37 00000039 E8(00000000)             call  WriteConsoleA                                ; Output can be redirect to a file using >
+    38 0000003E 4883C428                 add   RSP, 40                                  ; Remove the 48 bytes
+    39                                  
+    40 00000042 31C9                     xor   ECX, ECX
+    41 00000044 E8(00000000)             call  ExitProcess

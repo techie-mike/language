@@ -224,9 +224,13 @@ Tree::~Tree() {
 }
 
 
-void Tree::dump (void (*colorFunction) (FILE* file, Node* node))
+void Tree::dump (const char* name_file, void (* colorFunction) (FILE*, Node*))
 {
-    FILE* file = fopen("text_picture_refactor.dot", "wb");
+    FILE* file = fopen (name_file, "wb");
+    if (!file) {
+        printf ("Can't open file in function dump!\n");
+        exit (2);
+    }
     fprintf (file, "digraph structs {\n");
     fprintf (file, "rankdir=HR;\n");
 
@@ -262,7 +266,14 @@ void Tree::dump (void (*colorFunction) (FILE* file, Node* node))
 
 //    system("iconv -f windows-1251 -t utf-8 ../logs/text_picture.dot -o ../logs/text_picture_utf8.dot");
 
-    system ("dot text_picture_refactor.dot -T png -o text_picture_refactor.png");
+    char name_png_dump[20]  = {};
+    strcat (name_png_dump, name_file);
+    char* pointer_on_dot = strrchr (name_png_dump, '.');
+    strcpy (pointer_on_dot, ".png");
+
+    char system_command[100] = "dot text_picture_refactor.dot -T png -o ";
+    strcat (system_command, name_png_dump);
+    system (system_command);
 }
 
 void Tree::fullVisit (void (*func)(Node* node)) {

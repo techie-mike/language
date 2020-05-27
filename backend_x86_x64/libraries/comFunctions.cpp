@@ -10,7 +10,6 @@ typedef unsigned long long type_proc;
 #define LOADCOMMAND(name_variable, name_command) \
     byte name_variable[sizeof (name_command)] = {};\
     memcpy (name_variable, name_command, sizeof (name_command));
-//#include "declComFunctions.h"
 
 // DONE
 void backend::compiler::startFunction_0 (nameTable* variables, tree_st index) {
@@ -60,7 +59,6 @@ void backend::compiler::copyArgument_0 (nameTable* variables, tree_st index) {
 
     ntable_t index_in_ram = loadElementIndex (variables, index);
 
-
     //          |----|----|----||old rbp|ret|----|----|     <-- stack growth
     //          \            / ^             \       /
     //           \          / rbp             \     /
@@ -68,7 +66,21 @@ void backend::compiler::copyArgument_0 (nameTable* variables, tree_st index) {
     //        local_variables               num_arguments_
 
     *(type_proc*)(&command[3]) = (type_proc) index_in_ram;
+    writeInObjText (command, sizeof (command));
+}
 
+void backend::compiler::copyArgument_1 (nameTable* variables, tree_st index) {
+    LOADCOMMAND (command, com_push_arguments_1);
+
+    ntable_t index_in_ram = loadElementIndex (variables, index);
+
+    //          |----|----|----||old rbp|ret|----|----|     <-- stack growth
+    //          \            / ^             \       /
+    //           \          / rbp             \     /
+    //            \________/                   \___/
+    //        local_variables               num_arguments_
+
+    *(type_proc*)(&command[2]) = - (type_proc) index_in_ram;
     writeInObjText (command, sizeof (command));
 }
 
@@ -113,7 +125,17 @@ void backend::compiler::operatorCos_0 () {
 }
 
 void backend::compiler::writeValueVariable (nameTable* variables, tree_st index) {
-    copyArgument_0 (variables, index);
+    switch (optimization_) {
+        case 0:
+            copyArgument_0 (variables, index);
+            break;
+        case 1:
+            copyArgument_1 (variables, index);
+            break;
+        default:
+            printf ("Unknown optimization!\n");
+            break;
+    }
 }
 
 void backend::compiler::writeValueNumber (nameTable* variables, tree_st index) {
@@ -132,7 +154,7 @@ size_t backend::compiler::writeCompare() {
     return record_position_ - 5;
 }
 
-void backend::compiler::callGetFunction_0 (nameTable* variables, tree_st index) {
+void backend::compiler::callGetFunction_0 (tree_st index) {
     writeInObjText (com_call_get_0, sizeof (com_call_get_0));
 
     if (functions.searchNameInTable (node_[index].name) == -1)
@@ -141,7 +163,7 @@ void backend::compiler::callGetFunction_0 (nameTable* variables, tree_st index) 
     functions.var[index_function].loadNewDependedPosition ((long long) (record_position_ - 5));
 }
 
-void backend::compiler::callPutFunction_0 (nameTable* variables, tree_st index) {
+void backend::compiler::callPutFunction_0 (tree_st index) {
     writeInObjText (com_call_put_0, sizeof (com_call_put_0));
     if (functions.searchNameInTable (node_[index].name) == -1)
         functions.createNameInTable (node_[index].name);

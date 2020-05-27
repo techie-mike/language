@@ -31,13 +31,16 @@ private:
     //------------------------------CONSTANTS------------------------------//
 
 public:
-    static Tree tree;
-    static size_t       record_position_;
+    static          Tree    tree;
+    static          size_t  record_position_;
+    static    const char*   name_file_to_write_;
+    static          bool    debug_;
 
     //==============================COMPILER===============================//
     struct compiler {  // struct for function and variable for binary compiler
         void compilingCode ();
         void writeInObjFile (const char* name_file);
+        void checkArguments (int num_arguments, char *strings[]);
 
     private:
         int          optimization_    {};
@@ -72,7 +75,6 @@ public:
 
         void mathOperatorsView      (nameTable* table, tree_st index);
         bool oneMathOperatorView    (nameTable* table, tree_st index, const char* name, value_t value);
-//        int  priorityFunction       (tree_st index);
 
         void writeValueVariable     (nameTable* table, tree_st index);
         void writeValueNumber       (nameTable* variables, tree_st index);
@@ -94,15 +96,15 @@ public:
         bool operatorGetView        (nameTable* variables, tree_st index);
 
 
-
         void uploadValueFromJmpBlock (jmpblock* jump);
 
         //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
         #include "declComFunctions.h"
-
         //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
+
         void writeInObjText (const unsigned char* command, size_t num_bytes);
         void connectionOfAdditionalFunctions (const char* name_func_file);
+        void entryInTheTableServiceFunctions (char header_additional_file[]);
         void allFunctionAddressFilling ();
     } compiler;
 
@@ -113,7 +115,7 @@ public:
     //==============================LINKER=================================//
     static unsigned char* text_exe_;
     struct linker {
-        void linking ();
+        void firstLinking ();
         void writeExeInFile(const char* name_file);
         void secondLinking (const char* name_file);
     private:

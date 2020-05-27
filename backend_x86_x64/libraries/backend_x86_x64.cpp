@@ -8,11 +8,13 @@
 
 
 //---------------DEFINITION-OF-THE-STATIC-DATA-MEMBER---------------//
-unsigned char*     backend::text_obj_;
-unsigned char*     backend::text_exe_;
+         bool      backend::debug_              = false;
+unsigned char*     backend::text_obj_           = 0;
+unsigned char*     backend::text_exe_           = 0;
+const    char*     backend::name_file_to_write_ = "program.exe";
          Tree      backend::tree;
          nameTable backend::functions;
-size_t             backend::record_position_ = 0;
+size_t             backend::record_position_    = 0;
 
 //---------------DEFINITION-OF-THE-STATIC-DATA-MEMBER---------------//
 
@@ -284,8 +286,19 @@ int backend::compiler::writeArgumentFunction (nameTable* variables, tree_st inde
             index = node_[index].left;
 
         while (index != end_index) {    //  Raise from bottom to top argument
-            if (node_[node_[index].right].type == TYPE_VARIABLE)
-                copyArgument_0 (variables, node_[index].right);
+            if (node_[node_[index].right].type == TYPE_VARIABLE) {
+                switch (optimization_) {
+                    case 0:
+                        copyArgument_0 (variables, node_[index].right);
+                        break;
+                    case 1:
+                        copyArgument_1 (variables, node_[index].right);
+                        break;
+                    default:
+                        printf ("Unknown optimization!\n");
+                        break;
+                }
+            }
             if (node_[node_[index].right].type == TYPE_OPERATOR) {
                 mathOperatorsView (variables, node_[index].right);
             }
@@ -298,6 +311,10 @@ int backend::compiler::writeArgumentFunction (nameTable* variables, tree_st inde
 
 void backend::compiler::writeInObjFile (const char* name_file) {
     FILE* file_obj = fopen (name_file, "wb");
+    if (!file_obj) {
+        printf ("Can't open file in function dump!\n");
+        exit (2);
+    }
 
     fwrite (text_obj_, sizeof (char), record_position_, file_obj);
     fclose (file_obj);
@@ -339,7 +356,7 @@ bool backend::compiler::oneMathOperatorView (nameTable* table, tree_st index, co
     if (!strcmp (node_[index].name, name)) {
         node_[index].type  = TYPE_OPERATOR;
         node_[index].value = value;
-//        int now_priority = priorityFunction (index);
+
         mathOperatorsView (table, node_[index].left);
         mathOperatorsView (table, node_[index].right);
 
@@ -385,44 +402,13 @@ bool backend::compiler::oneMathOperatorView (nameTable* table, tree_st index, co
     return false;
 }
 
-/*
-int backend::compiler::priorityFunction(tree_st index) {
-    if (node_[index].type == 0)
-        return 1;
-    if (node_[index].type == TYPE_NUMBER ||
-        node_[index].type == TYPE_VARIABLE)
-           return 1;
-
-    if (node_[index].type == TYPE_OPERATOR &&
-        (node_[index].value == OPERATOR_ADD ||
-         node_[index].value == OPERATOR_SUB))
-        return 2;
-
-    if (node_[index].type == TYPE_OPERATOR &&
-        (node_[index].value == OPERATOR_MUL ||
-         node_[index].value == OPERATOR_DIV))
-        return 3;
-
-    if (node_[index].type == TYPE_OPERATOR &&
-        (node_[index].value == OPERATOR_POW))
-        return 4;
-
-    if (node_[index].type == TYPE_OPERATOR &&
-        (node_[index].value == OPERATOR_LN
-       ||node_[index].value == OPERATOR_SIN
-       ||node_[index].value == OPERATOR_COS))
-        return 5;
-    printf("Error in priority function %d\n", node_[index].type);
-}
-*/
 
 bool backend::compiler::assignmentView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "=") && *node_[node_[index].right].name != '$') {
         if (variables == nullptr) {
             printf ("YOU DON'T ADD GLOBAL VARIABLE!");
         }
-        mathOperatorsView (variables, node_[index].right);
-
+        mathOperatorsView    (variables, node_[index].right);
         assignmentVariable_0 (variables, node_[index].left);
         return true;
     }
@@ -543,7 +529,7 @@ bool backend::compiler::operatorWhileView (nameTable* variables, tree_st index) 
 bool backend::compiler::operatorPutView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "put")) {
         mathOperatorsView (variables, node_[index].left);
-        callPutFunction_0 (variables, index);
+        callPutFunction_0 (index);
         return true;
     }
     return false;
@@ -551,7 +537,7 @@ bool backend::compiler::operatorPutView (nameTable* variables, tree_st index) {
 
 bool backend::compiler::operatorGetView (nameTable* variables, tree_st index) {
     if (!strcmp (node_[index].name, "get")) {
-        callGetFunction_0    (variables, index);
+        callGetFunction_0    (index);
         assignmentVariable_0 (variables, node_[index].left);
         return true;
     }
@@ -577,6 +563,7 @@ void backend::compiler::connectionOfAdditionalFunctions (const char* name_func_f
     }
     long length_file = itLength (func_file) - 16;
 
+    // Check sum length main program + add function
     if (length_file + record_position_ >= DEFAULT_LENGTH_BIN_CODE) {
         printf ("Error in length of binary code, not enough space\n");
         abort ();
@@ -590,23 +577,28 @@ void backend::compiler::connectionOfAdditionalFunctions (const char* name_func_f
         abort();
     }
 
+    entryInTheTableServiceFunctions (file_hader);
+
+    fread (text_obj_ + record_position_, length_file, sizeof (char), func_file);
+    record_position_ += length_file;
+}
+
+void backend::compiler::entryInTheTableServiceFunctions (char header_additional_file[]) {
     ntable_t index_get_func = functions.searchNameInTable ("get");
     if (index_get_func != -1)
-        functions.var[index_get_func].position_object = ((ntable_t)*(int*)(&file_hader[4]) + (ntable_t)record_position_);
+        functions.var[index_get_func].position_object =
+                ((ntable_t)*(int*)(&header_additional_file[4]) + (ntable_t)record_position_);
 
     ntable_t index_put_func = functions.searchNameInTable ("put");
     if (index_put_func != -1)
-        functions.var[index_put_func].position_object = ((ntable_t)*(int*)(&file_hader[8]) + (ntable_t)record_position_);
+        functions.var[index_put_func].position_object =
+                ((ntable_t)*(int*)(&header_additional_file[8]) + (ntable_t)record_position_);
 
 
     ntable_t index_exit_func = functions.searchNameInTable ("exit");
     if (index_exit_func != -1)
-        functions.var[index_exit_func].position_object = ((ntable_t)*(int*)(&file_hader[12]) + (ntable_t)record_position_);
-
-    // Check sem length main program + add function
-
-    fread (text_obj_ + record_position_, length_file, sizeof (char), func_file);
-    record_position_ += length_file;
+        functions.var[index_exit_func].position_object =
+                ((ntable_t)*(int*)(&header_additional_file[12]) + (ntable_t)record_position_);
 }
 
 void backend::compiler::allFunctionAddressFilling () {
@@ -620,7 +612,8 @@ void backend::compiler::allFunctionAddressFilling () {
     }
 }
 
-void backend::linker::linking () {
+//-----------------------------------------FIRST-LINKING---(IN-WORK)-----------------------------------------//
+void backend::linker::firstLinking () {
     text_exe_ = (unsigned char*) calloc (DEFAULT_LENGTH_BIN_CODE, sizeof (unsigned char));
     if (!text_exe_) {
         printf ("Error in calloc in compiler!\n");
@@ -630,7 +623,6 @@ void backend::linker::linking () {
     createDosHeader ();
     createPeHeader  ();
     createSectionHeader ();
-
 
 }
 
@@ -712,9 +704,12 @@ void backend::linker::createSectionHeader () {
 void backend::linker::writeExeInFile(const char* name_file) {
     FILE* file_exe = fopen (name_file, "wb");
 
-    fwrite (text_exe_, sizeof (char), 2 * record_position_exe_, file_exe);
+    fwrite (text_exe_, sizeof (char), record_position_exe_, file_exe);
     fclose (file_exe);
 }
+
+//-----------------------------------------FIRST-LINKING---(IN-WORK)-----------------------------------------//
+
 
 void backend::linker::secondLinking (const char* name_file) {
     assert (name_file != nullptr);
@@ -731,15 +726,15 @@ void backend::linker::secondLinking (const char* name_file) {
     memcpy (empty_text + record_position_ - 28 + 512, com_jmp, sizeof (com_jmp));
     memcpy (empty_text + record_position_ - 36 + 512, com_jmp, sizeof (com_jmp));
 
-//    *(empty_text + record_position_ - 36 + 512 - 1) = 90;   //
-    *(empty_text + record_position_ - 28 + 512 - 3) = 90;   // To help debugger undestand command
-    *(empty_text + record_position_ - 20 + 512 - 3) = 90;   //
-    *(empty_text + record_position_ - 12 + 512 - 3) = 90;   //
+//    *(empty_text + record_position_ - 28 + 512 - 3) = 90;   // To help debugger undestand command
+//    *(empty_text + record_position_ - 20 + 512 - 3) = 90;   //
+//    *(empty_text + record_position_ - 12 + 512 - 3) = 90;   //
 
     *(int*)(empty_text + record_position_ + 512 - 36 + 1) = (8192 - (record_position_ - 36) - 5);  // Read ConsoleA
     *(int*)(empty_text + record_position_ + 512 - 28 + 1) = (8200 - (record_position_ - 28) - 5);  // GetHandle
     *(int*)(empty_text + record_position_ + 512 - 20 + 1) = (8208 - (record_position_ - 20) - 5);  // WriteConsoleA
     *(int*)(empty_text + record_position_ + 512 - 12 + 1) = (8216 - (record_position_ - 12) - 5);  // Exit
+
     fclose (empty_program);
 
     FILE* done_program = fopen (name_file, "wb");
@@ -747,10 +742,37 @@ void backend::linker::secondLinking (const char* name_file) {
     fwrite (empty_text, sizeof (char), length_file, done_program);
     fclose (done_program);
     free   (empty_text);
-
 }
 
 void backend::freeMemory() {
     free (text_obj_);
     free (text_exe_);
+}
+
+void backend::compiler::checkArguments (int num_arguments, char *strings[]) {
+    assert (num_arguments > 0);
+    assert (strings != 0);
+
+    for (int j = 1; j < num_arguments; j++){
+        char* temp_op = strstr (strings[j], "-O");
+        if (temp_op) {
+            int optimization = 0;
+            sscanf (temp_op + 2, "%d", &optimization);
+            if (optimization == 0 || optimization == 1) {
+                optimization_ = optimization;
+            } else {
+                printf ("Invalid optimization!\n");
+                exit (1);
+            }
+        }
+
+        if (!strcmp (strings[j], "-o")) {
+            name_file_to_write_ = strings[j+1];
+            j++;
+        }
+
+        if (strcmp (strings[j], "--d")) {
+            debug_ = true;
+        }
+    }
 }

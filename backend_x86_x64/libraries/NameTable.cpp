@@ -4,7 +4,6 @@
 
 #include "NameTable.h"
 
-
 nameTable::nameTable():
         var            (nullptr),
         num_arguments_ (0),
@@ -46,9 +45,7 @@ void nameTable::autoLengthIncrease (int factor) {
 
 void nameTable::autoLengthNamesIncrease (int factor) {
     if (size_names_ + 20 >= length_names_) {
-//        ntable_t last_length_names = length_names_;
         length_names_ *= factor;
-//        all_names_ = (char*) realloc(all_names_, length_names_*sizeof(char));
         char* new_names = (char*) calloc (length_names_, sizeof(char));
 
         if (new_names) {
@@ -59,10 +56,8 @@ void nameTable::autoLengthNamesIncrease (int factor) {
                 if (var[i].name != nullptr)
                     var[i].name = var[i].name - all_names_ + new_names;
             }
-
             free (all_names_);
             all_names_ = new_names;
-
         } else
             printf("Error in new_address\n");
     }

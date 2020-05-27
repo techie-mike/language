@@ -1431,6 +1431,8 @@ bool Tree::readTreeFromFile(int num_arguments, char *strings[]) {
 
     char new_name_file[200] = {};
     strcat (new_name_file, name_file);
+
+#ifndef _WIN64
     char* dot = strrchr (new_name_file, '.');
     *dot = '\0';
     strcat (new_name_file, "-win1251.gop");
@@ -1440,6 +1442,7 @@ bool Tree::readTreeFromFile(int num_arguments, char *strings[]) {
     strcat (system_command, new_name_file);
     system (system_command);
 
+#endif
 
   /*  char new_name_file[100] = {};
     strcat (new_name_file, name_file);
@@ -1452,7 +1455,7 @@ bool Tree::readTreeFromFile(int num_arguments, char *strings[]) {
 
     system(system_command);*/
 
-    FILE* file = fopen(new_name_file, "r+");
+    FILE* file = fopen(new_name_file, "rb+");
     long length_of_file = ItLength(file) + 1;
     char* text = (char*) calloc(length_of_file, sizeof(char));
     fread(text, sizeof(char), length_of_file - 1, file);
@@ -1460,10 +1463,11 @@ bool Tree::readTreeFromFile(int num_arguments, char *strings[]) {
 
     loadingTree(text);
 
-
+#ifndef _WIN64
     char command[100] = "rm ";
     strcat (command, new_name_file);
     system (command);
+#endif
 }
 
 void Tree::mainLineView (size_tree_t index) {
@@ -1568,11 +1572,14 @@ void Tree::writeConvertCode (const char* name_file) {
     fwrite (text, sizeof (char), num_write_text_, file_code);
     fclose (file_code);
 
+#ifndef _WIN64
     char system_command[200] = {"iconv -f windows-1251 -t utf-8 "};
     strcat (system_command, name_file);
     strcat (system_command, " -o ");
     strcat (system_command, name_file);
     system (system_command);
+#endif
+
 }
 
 void Tree::writeNameInTextCode (char* name) {

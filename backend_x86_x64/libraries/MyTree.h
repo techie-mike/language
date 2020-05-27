@@ -10,7 +10,6 @@
 #include <cstring>
 
 #define LEVEL_VERIFIC 0
-//#include "my_stack.h"
 
 
 typedef int       tree_st;     // tree size type
@@ -49,7 +48,7 @@ public:
     Tree (const Tree& that) = delete;
 
     void readTreeFromFile (char* name_file  );
-    void dump (void (*colorFunction)(FILE* file, Node* node)); // Pass the function to change the colors of the blocks
+    void dump (const char* name_file, void (* colorFunction) (FILE*, Node*)); // Pass the function to change the colors of the blocks
 
     void fullVisit (void (*func)(Node* node));
 

@@ -12,78 +12,64 @@ typedef unsigned char byte;
 
 const byte com_start_function_0[] =
         {
-        0x55,                   // push rbp
-        0x54,                   // push rsp
-        0x5D,                   // pop  rbp
-        0x48, 0xB8,             // mov  rax, imm64
+        0x55,                           // push rbp
+        0x54,                           // push rsp
+        0x5D,                           // pop  rbp
+        0x48, 0xB8,                     // mov  rax, imm64
 
-        0x00, 0x00, 0x00, 0x00, // imm64
-        0x00, 0x00, 0x00, 0x00, //
+        0x00, 0x00, 0x00, 0x00,         // imm64
+        0x00, 0x00, 0x00, 0x00,         //
 
-        0x48, 0x29, 0xC4       // sub  rsp, rax
+        0x48, 0x29, 0xC4                // sub  rsp, rax
         };
 
 const byte com_init_coproc[] =
         {
-        0x9B, 0xDB, 0xE3        // finit
+        0x9B, 0xDB, 0xE3                // finit
         };
 
 const byte com_push_arguments_0[] =
         {
-        0x55,                   // push rbp
-        0x48, 0xBB,             // mov  rbx, imm64
+        0x55,                           // push rbp
+        0x48, 0xBB,                     // mov  rbx, imm64
 
-        0x00, 0x00, 0x00, 0x00, // imm64
-        0x00, 0x00, 0x00, 0x00, //
+        0x00, 0x00, 0x00, 0x00,         // imm64
+        0x00, 0x00, 0x00, 0x00,         //
 
-        0x58,                   // pop  rax
-        0x48, 0x29, 0xD8,       // sub  rax, rbx
-        0xFF, 0x30              // push QWORD ptr [rax]
+        0x58,                           // pop  rax
+        0x48, 0x29, 0xD8,               // sub  rax, rbx
+        0xFF, 0x30                      // push QWORD ptr [rax]
+        };
+
+const byte com_push_arguments_1[] =
+        {
+        0xFF, 0xB5, 0x00, 0x00, 0x00, 0x00      // push qword ptr [rbp + 0]
         };
 
 const byte com_call_function_0[] =
         {
-//        0x48, 0xB8,             // mov  rax, imm64
-//
-//        0x00, 0x00, 0x00, 0x00, // imm64
-//        0x00, 0x00, 0x00, 0x00,
-//
-//        0xFF, 0xD0,             // call rax
+        0xE8, 0x00, 0x00, 0x00, 0x00,   // call 0x0
 
-        0xE8, 0x00, 0x00, 0x00, 0x00, // call 0x0
+        0x48, 0xBB,                     // mov  rbx, imm64
 
-        0x48, 0xBB,             // mov  rbx, imm64
-
-        0x00, 0x00, 0x00, 0x00, // imm64
+        0x00, 0x00, 0x00, 0x00,         // imm64
         0x00, 0x00, 0x00, 0x00,
 
-        0x48, 0x01, 0xDC,       // add  rsp, rbx
-        0x50                    // push rax
+        0x48, 0x01, 0xDC,               // add  rsp, rbx
+        0x50                            // push rax
         };
-
-//const byte loading_element_address_in_rax[] =
-//        {
-//        0x55,                   // push rbp
-//        0x48, 0xBB,             // mov  rbp, imm64
-//
-//        0x00, 0x00, 0x00, 0x00, // imm64
-//        0x00, 0x00, 0x00, 0x00,
-//
-//        0x48, 0x29, 0xD8,       // sub  rax, rbx
-//        0x48, 0x83, 0xC0, 0x10  // add  rax, 0x10 (or will be 'nop' x4)
-//        };
 
 const byte com_assignment_variable_0[] =
         {
-        0x55,                   // push rbp
-        0x58,                   // pop rax
-        0x48, 0xBB,             // mov rbx, imm64
+        0x55,                           // push rbp
+        0x58,                           // pop rax
+        0x48, 0xBB,                     // mov rbx, imm64
 
-        0x00, 0x00, 0x00, 0x00, // imm64
+        0x00, 0x00, 0x00, 0x00,         // imm64
         0x00, 0x00, 0x00, 0x00,
 
-        0x48, 0x29, 0xD8,       // sub rax, rbx
-        0x8F, 0x00              // pop QWORD ptr [rax]
+        0x48, 0x29, 0xD8,               // sub rax, rbx
+        0x8F, 0x00                      // pop QWORD ptr [rax]
         };
 
 const byte com_operator_add_0[] =
@@ -115,6 +101,7 @@ const byte com_operator_mul_0[] =
         0x48, 0xF7, 0xFB,       // idiv rbx
         0x50                    // push rax
         };
+
 const byte com_operator_div_0[] =
         {
         0x5B,                   // pop rbx
