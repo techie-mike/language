@@ -225,18 +225,14 @@ int Tokens::lexicalAnalysisWriteSymbols(char **text) {
 
 int Tokens::nummemchr(char *memptr, int val, size_t num_block) {
     char* copy_memptr = memptr;
-//    num_block--;
-//    memptr--;
 
     int num_enters = 0;
     while  (true) {
-
-//        memptr = (char *) memchr ((void *) memptr, val, num_block - (memptr - copy_memptr) - 1 );
         memptr = (char *) memchr ((void *) memptr, val, num_block - 1);
         if (memptr == nullptr)
             break;
         memptr++;
-        num_block -= memptr - copy_memptr;
+        num_block -= (memptr - copy_memptr) - 1;
         num_enters++;
     }
     return num_enters;
