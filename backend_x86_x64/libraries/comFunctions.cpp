@@ -6,12 +6,17 @@
 #include "binCommands.h"
 
 typedef unsigned long long type_proc;
-
+//=====================IMPORTANT INFORMATION=====================
+//     Index after name function (for example, func_0) means
+//     level of optimization:
+//     ..._0      zero level
+//     ..._1      first level
+//===============================================================
 #define LOADCOMMAND(name_variable, name_command) \
     byte name_variable[sizeof (name_command)] = {};\
     memcpy (name_variable, name_command, sizeof (name_command));
 
-// DONE
+
 void backend::compiler::startFunction_0 (nameTable* variables, tree_st index) {
     byte command[sizeof (com_start_function_0)] = {};   // Copy commnad from data base
     memcpy (command, com_start_function_0,
@@ -26,7 +31,7 @@ void backend::compiler::startFunction_0 (nameTable* variables, tree_st index) {
     writeInObjText (command, sizeof (command));
 }
 
-// DONE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 void backend::compiler::callFunction_0 (nameTable* variables, tree_st index, int num_parameters) {
     ntable_t block_function = functions.searchNameInTable (node_[index].name + 1);
     if (block_function == -1) {
@@ -44,7 +49,7 @@ void backend::compiler::callFunction_0 (nameTable* variables, tree_st index, int
     writeInObjText (command, sizeof (command));
 }
 
-// DONE
+
 void backend::compiler::assignmentVariable_0 (nameTable* variables, tree_st index) {
     LOADCOMMAND (command, com_assignment_variable_0);
     ntable_t index_in_ram = loadElementIndex (variables, index);
@@ -53,7 +58,7 @@ void backend::compiler::assignmentVariable_0 (nameTable* variables, tree_st inde
     writeInObjText (command, sizeof (command));
 }
 
-// DONE
+
 void backend::compiler::copyArgument_0 (nameTable* variables, tree_st index) {
     LOADCOMMAND (command, com_push_arguments_0);
 
@@ -84,7 +89,7 @@ void backend::compiler::copyArgument_1 (nameTable* variables, tree_st index) {
     writeInObjText (command, sizeof (command));
 }
 
-// DONE
+
 ntable_t backend::compiler::loadElementIndex (nameTable* variables, tree_st index) {
     ntable_t index_variable = variables->searchNameInTable (node_[index].name);
     if (index_variable == -1) {
