@@ -18,17 +18,24 @@ set(GCC_COVERAGE_COMPILE_FLAGS "-g -Wall -Wextra -Weffc++ -Wc++0x-compat -Wc++11
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
 
-add_executable(backend_x86_x64
-        main.cpp
-        libraries/MyTree.cpp
+add_executable(
+        backend_x86_x64 main.cpp
         libraries/MyTree.h
+        libraries/MyTree.cpp
 
-        libraries/backend_x86_x64.cpp
         libraries/backend_x86_x64.h
+        libraries/backend_x86_x64.cpp
 
-        libraries/NameTable.cpp
         libraries/NameTable.h
+        libraries/NameTable.cpp
 
         libraries/binCommands.h
         libraries/comFunctions.cpp
         libraries/declComFunctions.h)
+
+IF (WIN32)
+    set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++
+        -lwsock32 -lws2_32 ${CMAKE_CSS_STANDARD_LIBRARIES}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Bstatic,--whole-archive \
+        -lwinpthread -Wl,--no-whole-archive")
+ENDIF()
