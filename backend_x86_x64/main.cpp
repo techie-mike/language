@@ -4,19 +4,19 @@
 
 int main (int num_arguments, char *strings[])
 {
-    backend back = {};
+    Backend back = {};
 
     back.compiler.checkArguments (num_arguments, strings);
-    back.tree.readTreeFromFile   (strings[1]);
-    back.tree.fullVisit          (backend::whatItIs);
+    back.tree_.readTreeFromFile   (strings[1]);
+    back.tree_.fullVisit          (Backend::whatItIs);
 
 //              The note on future
-//    typedef void (backend::compiler::*func) ();
-//    func first = &backend::compiler::compilingCode;
+//    typedef void (Backend::compiler::*func) ();
+//    func first = &Backend::compiler::compilingCode;
     back.compiler.compilingCode ();
 
     if (back.debug_) {
-        back.tree.dump ("..\\logs\\backend_x86", backend::treeColoring);
+        back.tree_.dump ("..\\logs\\backend_x86", Backend::treeColoring);
         back.compiler.writeInObjFile ("..\\logs\\obj_text_log.obj");
     }
 

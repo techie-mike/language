@@ -12,32 +12,30 @@
 #define LEVEL_VERIFIC 0
 
 
-typedef int       tree_st;     // tree size type
+typedef int       tree_st;     // tree_ size type
 typedef long long value_t;
 
 struct Node {
-    char   *name   ;
-    tree_st type   ;
-    value_t value  ;
+    char   *name  ;
+    tree_st type  ;
+    value_t value ;
 
-    tree_st left   ;
-    tree_st right  ;
-    tree_st parent ;
-
-
+    tree_st left  ;
+    tree_st right ;
+    tree_st parent;
 };
 
-struct Tree {
+class Tree {
 private:
-    Node        *node_          ;
-    char        *all_names_     ;
+    Node        *node_       ;
+    char        *all_names_  ;
 
-    tree_st     size_           ;
-    tree_st     size_names_     ;
-    tree_st     root_           ;
-    tree_st     free_           ;
-    tree_st     length_         ;
-    tree_st     length_names_   ;
+    tree_st     size_        ;
+    tree_st     size_names_  ;
+    tree_st     root_        ;
+    tree_st     free_        ;
+    tree_st     length_      ;
+    tree_st     length_names_;
 
 public:
     enum { NO_BRANCH = 0, ONLY_LEFT_BRANCH, ONLY_RIGHT_BRANCH, BOTH_BRANCH };
@@ -47,27 +45,30 @@ public:
     ~Tree ();
     Tree (const Tree& that) = delete;
 
-    void readTreeFromFile (char* name_file  );
-    void dump (const char* name_file, void (* colorFunction) (FILE*, Node*)); // Pass the function to change the colors of the blocks
+    void readTreeFromFile (char* name_file);
+
+    // Pass the function to change the colors of the blocks
+    void dump (const char* name_file, void (*colorFunction)(FILE*, Node*));
 
     void fullVisit (void (*func)(Node* node));
 
     tree_st getRoot();
     Node*   getNodes();
 
+    //-------------------------------------------------------------------------------//
+    //                             !!!IMPOTANT!!!                                    //
+    //  Function "controlledExternalFunction" goes into the branches (left & right)  //
+    //  depending on the return value of the "func":                                 //
+    //       return  NO_BRANCH           don't go anywhere                           //
+    //       return  ONLY_LEFT_BRANCH    go into ONLY left  branch                   //
+    //       return  ONLY_RIGHT_BRANCH   go into ONLY right branch                   //
+    //       return  BOTH_BRANCH         go into both branch                         //
     void controlledExternalFunction (tree_st index, int (*func)(Node* node));
-        //                             !!!IMPOTANT!!!                                    //
-        //  Function "controlledExternalFunction" goes into the branches (left & right)  //
-        //  depending on the return value of the "func":                                 //
-        //       return  NO_BRANCH           don't go anywhere                           //
-        //       return  ONLY_LEFT_BRANCH    go into ONLY left  branch                   //
-        //       return  ONLY_RIGHT_BRANCH   go into ONLY right branch                   //
-        //       return  BOTH_BRANCH         go into both branch                         //
-        //-------------------------------------------------------------------------------//
 
+    //  Based on "controlledExternalFunction", but this function
+    //  always start from "root" index
     void controlledExternalFunctionFromRoot (int (*func)(Node* node));
-        //  Based on "controlledExternalFunction", but this function
-        //  always start from "root" index
+
 
 private:
 //----------------------------FUNCTIONS----------------------------//
@@ -78,7 +79,7 @@ private:
 
 
     //----------------LOADING-TREE----------------//
-    void loadingTree  (char  text[]  );    // load tree from text in this struct
+    void loadingTree  (char  text[]  );    // load tree_ from text in this struct
     void readTextTree (char* read_now);
 
     //----------------------------------------------

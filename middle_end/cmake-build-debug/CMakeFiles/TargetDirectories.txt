@@ -1,3 +1,0 @@
-/home/texnar/CLionProjects/language/middle_end/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/texnar/CLionProjects/language/middle_end/cmake-build-debug/CMakeFiles/middle_end.dir
-/home/texnar/CLionProjects/language/middle_end/cmake-build-debug/CMakeFiles/edit_cache.dir

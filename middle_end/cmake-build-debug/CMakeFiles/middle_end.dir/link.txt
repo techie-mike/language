@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/middle_end.dir/main.cpp.o CMakeFiles/middle_end.dir/libraries/my_stack.cpp.o CMakeFiles/middle_end.dir/libraries/MyTree.cpp.o  -o middle_end 

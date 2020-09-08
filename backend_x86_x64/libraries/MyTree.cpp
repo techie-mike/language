@@ -33,8 +33,8 @@ char* Tree::readTextFromFile (char* name_file) {
 
     long length_of_file = itLength (file) + 1;
 
-    char* text = (char*) calloc (length_of_file, sizeof(char));
-    fread   (text, sizeof(char), length_of_file - 1, file);
+    char* text = (char*) calloc (length_of_file, sizeof (char));
+    fread (text, sizeof (char), length_of_file - 1, file);
     text[length_of_file - 1] = '\0';
 
     fclose (file);
@@ -52,9 +52,9 @@ void Tree::loadingTree (char* text) {
     readTextTree (text);
 }
 
-void Tree::readTextTree(char *read_now)
+void Tree::readTextTree (char *read_now)
 {
-    if (*read_now == '{'){
+    if (*read_now == '{') {
         read_now ++;
         readNewObject (&read_now);
     }
@@ -281,8 +281,8 @@ void Tree::fullVisit (void (*func)(Node* node)) {
 }
 
 void Tree::visit (tree_st index, void (*func)(Node* node)) {
-    if (node_[index].left )     visit (node_[index].left,  func);    // Visiting all node in tree and
-    func (&(node_[index]));                                          // tree doesn't know what function we use.
+    if (node_[index].left )     visit (node_[index].left,  func);    // Visiting all node in tree_ and
+    func (&(node_[index]));                                          // tree_ doesn't know what function we use.
     if (node_[index].right)     visit (node_[index].right, func);
 }
 

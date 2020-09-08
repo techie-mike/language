@@ -2,8 +2,8 @@
 // Created by Texnar on 23.05.2020.
 //
 
-#ifndef BACKEND_X86_X64_DECLCOMFUNCTIONS_H
-#define BACKEND_X86_X64_DECLCOMFUNCTIONS_H
+#ifndef BACKEND_X86_X64_DECLCOMFUNCTIONS_INC
+#define BACKEND_X86_X64_DECLCOMFUNCTIONS_INC
 
 void startFunction_0      (nameTable* variables, tree_st index);
 
@@ -32,4 +32,4 @@ void callExit ();
     void operatorSin_0 ();
     void operatorCos_0 ();
 
-#endif //BACKEND_X86_X64_DECLCOMFUNCTIONS_H
+#endif //BACKEND_X86_X64_DECLCOMFUNCTIONS_INC

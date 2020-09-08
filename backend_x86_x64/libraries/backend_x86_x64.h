@@ -10,11 +10,9 @@
 
 #include "MyTree.h"
 #include "NameTable.h"
-//#include <cstring>
 
 
-
-struct backend {
+class Backend {
 private:
     //------------------------------CONSTANTS------------------------------//
     static const char TYPE_OPERATOR = 1, TYPE_NUMBER   = 2,
@@ -31,13 +29,13 @@ private:
     //------------------------------CONSTANTS------------------------------//
 
 public:
-    static          Tree    tree;
+    static          Tree    tree_;
     static          size_t  record_position_;
     static    const char*   name_file_to_write_;
     static          bool    debug_;
 
     //==============================COMPILER===============================//
-    struct compiler {  // struct for function and variable for binary compiler
+    class compiler {  // class for function and variable for binary compiler
         void compilingCode ();
         void writeInObjFile (const char* name_file);
         void checkArguments (int num_arguments, char *strings[]);
@@ -54,12 +52,12 @@ public:
 
         //-------------------------WRITE-OBJ-TEXT-----------------------------
         void searchMainFunctionView (tree_st index);
-        struct jmpblock {
+        struct JmpBlock {
             size_t from;
             size_t to;
         };
 
-        bool functionView           (tree_st index);
+        bool functionView (tree_st index);
 
         void searchAllVariablesInFunctionView (nameTable* variables, tree_st index);
         bool checkNameVariable                (nameTable* table, char* name);
@@ -73,10 +71,11 @@ public:
         int  writeArgumentFunction  (nameTable* variables, tree_st index);
         void lineOfFunctionsView    (nameTable* variables, tree_st index);
 
-        void mathOperatorsView      (nameTable* table, tree_st index);
-        bool oneMathOperatorView    (nameTable* table, tree_st index, const char* name, value_t value);
+        void mathOperatorsView      (nameTable* table,     tree_st index);
+        bool oneMathOperatorView    (nameTable* table,     tree_st index, const char* name,
+                                     value_t value);
 
-        void writeValueVariable     (nameTable* table, tree_st index);
+        void writeValueVariable     (nameTable* table,     tree_st index);
         void writeValueNumber       (nameTable* variables, tree_st index);
 
         bool assignmentView         (nameTable* variables, tree_st index);
@@ -85,10 +84,10 @@ public:
         void secondLineView         (tree_st index);
 
         bool operatorIfView         (nameTable* variables, tree_st index);
-        void compareView            (nameTable* variables, tree_st index, jmpblock* jump);
+        void compareView            (nameTable* variables, tree_st index, JmpBlock* jump);
         void writeCopmareValues     (nameTable* variables, tree_st index);
 
-        void allResultIfView        (nameTable* variables, tree_st index, jmpblock* jump);
+        void allResultIfView        (nameTable* variables, tree_st index, JmpBlock* jump);
         bool operatorReturnView     (nameTable* variables, tree_st index);
 
         bool operatorWhileView      (nameTable* variables, tree_st index);
@@ -96,10 +95,10 @@ public:
         bool operatorGetView        (nameTable* variables, tree_st index);
 
 
-        void uploadValueFromJmpBlock (jmpblock* jump);
+        void uploadValueFromJmpBlock (JmpBlock* jump);
 
         //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
-        #include "declComFunctions.h"
+        #include "declComFunctions.inc"
         //---------------------INCLUDE-COMMAND-FUNCTION--------------------//
 
         void writeInObjText (const unsigned char* command, size_t num_bytes);
@@ -114,7 +113,7 @@ public:
 
     //==============================LINKER=================================//
     static unsigned char* text_exe_;
-    struct linker {
+    class linker {
         void firstLinking ();
         void writeExeInFile(const char* name_file);
         void secondLinking (const char* name_file);
@@ -141,8 +140,6 @@ private:
     static bool isOperator (Node* node);
     static bool isNumber   (Node* node);
     static bool isVariable (Node* node);
-
 };
-
 
 #endif //BACKEND_X86_X64_BACKEND_X86_X64_H
