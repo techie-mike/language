@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(backend_x86_x64)
+project(backend_x86_64)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -19,19 +19,19 @@ set(GCC_COVERAGE_COMPILE_FLAGS "-g -Wall -Wextra -Weffc++ -Wc++0x-compat -Wc++11
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
 
 add_executable(
-        backend_x86_x64 main.cpp
-        libraries/MyTree.h
-        libraries/MyTree.cpp
+        backend_x86_64 main.cpp
+        src/base/my_tree.h
+        src/base/my_tree.cpp
 
-        libraries/backend_x86_x64.h
-        libraries/backend_x86_x64.cpp
+        src/backend_x86_64.h
+        src/backend_x86_64.cpp
 
-        libraries/NameTable.h
-        libraries/NameTable.cpp
+        src/name_table.h
+        src/name_table.cpp
 
-        libraries/binCommands.h
-        libraries/comFunctions.cpp
-        libraries/declComFunctions.inc)
+        src/bin_commands.h
+        src/com_functions.cpp
+        src/decl_com_functions.inc)
 
 IF (WIN32)
     set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++

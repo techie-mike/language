@@ -2,8 +2,8 @@
 // Created by Texnar on 23.05.2020.
 //
 
-#ifndef BACKEND_X86_X64_BINCOMMANDS_H
-#define BACKEND_X86_X64_BINCOMMANDS_H
+#ifndef BACKEND_X86_64_BINCOMMANDS_H
+#define BACKEND_X86_64_BINCOMMANDS_H
 
 typedef unsigned char byte;
 
@@ -221,4 +221,4 @@ const byte com_return_rbp[] =
         0x5C,   // pop rsp
         0x5D    // pop rbp
         };
-#endif //BACKEND_X86_X64_BINCOMMANDS_H
+#endif //BACKEND_X86_64_BINCOMMANDS_H

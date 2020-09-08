@@ -1,5 +1,5 @@
 /backend/cmake-build-debug/*
-/backend_x86_x64/cmake-build-debug/*
+/backend_x86_64/cmake-build-debug/*
 /frontend/cmake-build-debug/*
 /frontend_back/cmake-build-debug/*
 /middle_end/cmake-build-debug/*

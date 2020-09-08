@@ -2,7 +2,7 @@
 // Created by Texnar on 21.05.2020.
 //
 
-#include "MyTree.h"
+#include "my_tree.h"
 
 long Tree::itLength(FILE* file)
 {

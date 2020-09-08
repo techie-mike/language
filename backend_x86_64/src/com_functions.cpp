@@ -2,8 +2,8 @@
 // Created by Texnar on 23.05.2020.
 //
 
-#include "backend_x86_x64.h"
-#include "binCommands.h"
+#include "backend_x86_64.h"
+#include "bin_commands.h"
 
 typedef unsigned long long type_proc;
 //=====================IMPORTANT INFORMATION=====================
@@ -17,7 +17,7 @@ typedef unsigned long long type_proc;
     memcpy (name_variable, name_command, sizeof (name_command));
 
 
-void Backend::compiler::startFunction_0 (nameTable* variables, tree_st index) {
+void Backend::compiler::startFunction_0 (NameTable* variables, tree_st index) {
     byte command[sizeof (com_start_function_0)] = {};   // Copy commnad from data base
     memcpy (command, com_start_function_0,
              sizeof (com_start_function_0));
@@ -25,20 +25,20 @@ void Backend::compiler::startFunction_0 (nameTable* variables, tree_st index) {
     ntable_t offset_local_variables = 8 * (variables->size_ - variables->num_arguments_);
     ntable_t block_function = functions.searchNameInTable (node_[index].name + 1);
 
-    functions.var[block_function].position_object = record_position_;
+    functions.var_[block_function].position_object = record_position_;
 
     *(type_proc*)(&command[5]) = (type_proc) offset_local_variables;
     writeInObjText (command, sizeof (command));
 }
 
 
-void Backend::compiler::callFunction_0 (nameTable* variables, tree_st index, int num_parameters) {
+void Backend::compiler::callFunction_0 (NameTable* variables, tree_st index, int num_parameters) {
     ntable_t block_function = functions.searchNameInTable (node_[index].name + 1);
     if (block_function == -1) {
         printf ("no function implementation!\n");
         abort();
     }
-    element* call_func      = &functions.var[block_function];
+    Element* call_func      = &functions.var_[block_function];
 
     LOADCOMMAND (command, com_call_function_0);
     *(type_proc*)(&command[7]) = (type_proc) (8 * num_parameters);
@@ -50,7 +50,7 @@ void Backend::compiler::callFunction_0 (nameTable* variables, tree_st index, int
 }
 
 
-void Backend::compiler::assignmentVariable_0 (nameTable* variables, tree_st index) {
+void Backend::compiler::assignmentVariable_0 (NameTable* variables, tree_st index) {
     LOADCOMMAND (command, com_assignment_variable_0);
     ntable_t index_in_ram = loadElementIndex (variables, index);
 
@@ -59,7 +59,7 @@ void Backend::compiler::assignmentVariable_0 (nameTable* variables, tree_st inde
 }
 
 
-void Backend::compiler::copyArgument_0 (nameTable* variables, tree_st index) {
+void Backend::compiler::copyArgument_0 (NameTable* variables, tree_st index) {
     LOADCOMMAND (command, com_push_arguments_0);
 
     ntable_t index_in_ram = loadElementIndex (variables, index);
@@ -74,7 +74,7 @@ void Backend::compiler::copyArgument_0 (nameTable* variables, tree_st index) {
     writeInObjText (command, sizeof (command));
 }
 
-void Backend::compiler::copyArgument_1 (nameTable* variables, tree_st index) {
+void Backend::compiler::copyArgument_1 (NameTable* variables, tree_st index) {
     LOADCOMMAND (command, com_push_arguments_1);
 
     ntable_t index_in_ram = loadElementIndex (variables, index);
@@ -90,7 +90,7 @@ void Backend::compiler::copyArgument_1 (nameTable* variables, tree_st index) {
 }
 
 
-ntable_t Backend::compiler::loadElementIndex (nameTable* variables, tree_st index) {
+ntable_t Backend::compiler::loadElementIndex (NameTable* variables, tree_st index) {
     ntable_t index_variable = variables->searchNameInTable (node_[index].name);
     if (index_variable == -1) {
         printf ("Error in loadElement index, search not exist variable: %s\n", node_[index].name);
@@ -129,7 +129,7 @@ void Backend::compiler::operatorCos_0 () {
     writeInObjText (com_operator_cos, sizeof (com_operator_cos));
 }
 
-void Backend::compiler::writeValueVariable (nameTable* variables, tree_st index) {
+void Backend::compiler::writeValueVariable (NameTable* variables, tree_st index) {
     switch (optimization_) {
         case 0:
             copyArgument_0 (variables, index);
@@ -143,7 +143,7 @@ void Backend::compiler::writeValueVariable (nameTable* variables, tree_st index)
     }
 }
 
-void Backend::compiler::writeValueNumber (nameTable* variables, tree_st index) {
+void Backend::compiler::writeValueNumber (NameTable* variables, tree_st index) {
     LOADCOMMAND(command, com_push_number);
     *(type_proc*)(&command[2]) = (type_proc) node_[index].value;
     writeInObjText (command, sizeof (command));
@@ -165,7 +165,7 @@ void Backend::compiler::callGetFunction_0 (tree_st index) {
     if (functions.searchNameInTable (node_[index].name) == -1)
         functions.createNameInTable (node_[index].name);
     ntable_t index_function = functions.searchNameInTable (node_[index].name);
-    functions.var[index_function].loadNewDependedPosition ((long long) (record_position_ - 5));
+    functions.var_[index_function].loadNewDependedPosition ((long long) (record_position_ - 5));
 }
 
 void Backend::compiler::callPutFunction_0 (tree_st index) {
@@ -173,7 +173,7 @@ void Backend::compiler::callPutFunction_0 (tree_st index) {
     if (functions.searchNameInTable (node_[index].name) == -1)
         functions.createNameInTable (node_[index].name);
     ntable_t index_function = functions.searchNameInTable (node_[index].name);
-    functions.var[index_function].loadNewDependedPosition ((long long) (record_position_ - 4));
+    functions.var_[index_function].loadNewDependedPosition ((long long) (record_position_ - 4));
 }
 
 void Backend::compiler::callExit () {
@@ -181,5 +181,5 @@ void Backend::compiler::callExit () {
 
     functions.createNameInTable ("exit");
     ntable_t index_function = functions.searchNameInTable ("exit");
-    functions.var[index_function].loadNewDependedPosition ((long long) (record_position_ - 4));
+    functions.var_[index_function].loadNewDependedPosition ((long long) (record_position_ - 4));
 }

@@ -2,10 +2,10 @@
 // Created by texnar on 16/12/2019.
 //
 
-#include "NameTable.h"
+#include "name_table.h"
 
-nameTable::nameTable():
-        var            (nullptr),
+NameTable::NameTable():
+        var_           (nullptr),
         num_arguments_ (0),
         size_          (0),
         all_names_     (nullptr),
@@ -15,35 +15,35 @@ nameTable::nameTable():
         free_          (0)
 
 {
-    length_names_ = DEFAULT_LENGTH_NAMES;
-    length_       = DEFAULT_LENGTH;
-    var           = (element*) calloc (sizeof (element), DEFAULT_LENGTH);
-    all_names_    = (char*)    calloc (sizeof (char),    DEFAULT_LENGTH_NAMES);
+    length_names_ = DEFAULT_LENGTH_NAMES_;
+    length_       = DEFAULT_LENGTH_;
+    var_          = (Element*) calloc (sizeof (Element), DEFAULT_LENGTH_);
+    all_names_    = (char*)    calloc (sizeof (char), DEFAULT_LENGTH_NAMES_);
 
-    if (!var || !all_names_) {
+    if (!var_ || !all_names_) {
         printf ("Error in calloc nameTable!");
     }
 }
 
-nameTable::~nameTable() {
-    free (var);
+NameTable::~NameTable() {
+    free (var_);
     free (all_names_);
 }
 
-void nameTable::autoLengthIncrease (int factor) {
+void NameTable::autoLengthIncrease (int factor) {
     if (size_ + 2 >= length_) {
         length_ *= factor;
-        var = (element*) realloc (var, length_ * sizeof (element));
-        if (var){
+        var_ = (Element*) realloc (var_, length_ * sizeof (Element));
+        if (var_) {
             fillingPoisonousValues();
-
-        } else
-            printf("Error in new_address\n");
+        } else {
+            printf ("Error in new_address\n");
+        }
     }
 
 }
 
-void nameTable::autoLengthNamesIncrease (int factor) {
+void NameTable::autoLengthNamesIncrease (int factor) {
     if (size_names_ + 20 >= length_names_) {
         length_names_ *= factor;
         char* new_names = (char*) calloc (length_names_, sizeof(char));
@@ -53,8 +53,8 @@ void nameTable::autoLengthNamesIncrease (int factor) {
                 new_names[i] = all_names_[i];
 
             for (ntable_t i = 0; i < size_; i++) {
-                if (var[i].name != nullptr)
-                    var[i].name = var[i].name - all_names_ + new_names;
+                if (var_[i].name != nullptr)
+                    var_[i].name = var_[i].name - all_names_ + new_names;
             }
             free (all_names_);
             all_names_ = new_names;
@@ -64,32 +64,32 @@ void nameTable::autoLengthNamesIncrease (int factor) {
 
 }
 
-void nameTable::fillingPoisonousValues()
+void NameTable::fillingPoisonousValues()
 {
     for (ntable_t i = size_ + 1; i < length_; i++){
-        var[i].position_object = 0;
-        var[i].free_places     = 0;
-        var[i].state           = false;
-        var[i].name            = nullptr;
+        var_[i].position_object = 0;
+        var_[i].free_places     = 0;
+        var_[i].state           = false;
+        var_[i].name            = nullptr;
     }
 }
 
-ntable_t nameTable::searchNameInTable (const char* name) {
+ntable_t NameTable::searchNameInTable (const char* name) {
     for (ntable_t i = 0; i < size_; i++) {
-        if (!strcmp (name, var[i].name))
+        if (!strcmp (name, var_[i].name))
             return i;
     }
     return -1;
 }
 
-void nameTable::createNameInTable (char* name) {
+void NameTable::createNameInTable (char* name) {
     createNameInTable ((const char*) name);
 }
 
-void nameTable::createNameInTable (const char* name) {
+void NameTable::createNameInTable (const char* name) {
     autoLengthNamesIncrease ();
     autoLengthIncrease ();
-    var[free_].name = all_names_ + size_names_;
+    var_[free_].name = all_names_ + size_names_;
     strcpy (all_names_ + size_names_, name);
     size_names_ += strlen (name) + 1;
 
@@ -97,9 +97,9 @@ void nameTable::createNameInTable (const char* name) {
     free_++;
 }
 
-void element::loadNewDependedPosition (ntable_t new_position) {
+void Element::loadNewDependedPosition (ntable_t new_position) {
     if (DEFAULT_LENGTH_OF_ARRAY_POINTER <= free_places + 1) {
-        printf ("Error, not enough free space for position_depended for element in nameTable!\n");
+        printf ("Error, not enough free space for position_depended for Element in NameTable!\n");
         assert (DEFAULT_LENGTH_OF_ARRAY_POINTER >= free_places + 1);
     }
     position_depended[free_places] = new_position;
