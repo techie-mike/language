@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-#include <assert.h>
+#include <cassert>
 
 typedef long long ntable_t;
 
@@ -48,8 +48,8 @@ private:
     ntable_t length_names_;
     ntable_t free_;
 
-    const int DEFAULT_LENGTH_       = 5 ;
-    const int DEFAULT_LENGTH_NAMES_ = 40;
+    const unsigned long long DEFAULT_LENGTH_       = 5 ;
+    const unsigned long long DEFAULT_LENGTH_NAMES_ = 40;
 
     void autoLengthIncrease      (int factor = 2);
     void autoLengthNamesIncrease (int factor = 2);

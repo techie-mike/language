@@ -38,7 +38,7 @@ public:
     public:
         void compilingCode ();
         void writeInObjFile (const char* name_file);
-        void checkArguments (int num_arguments, char *strings[]);
+        void checkArguments (int num_arguments, char ** strings);
 
     private:
         int          optimization_    {};

@@ -38,7 +38,10 @@ private:
     tree_st     length_names_;
 
 public:
-    enum { NO_BRANCH = 0, ONLY_LEFT_BRANCH, ONLY_RIGHT_BRANCH, BOTH_BRANCH };
+    enum { NO_BRANCH = 0,
+           ONLY_LEFT_BRANCH,
+           ONLY_RIGHT_BRANCH,
+           BOTH_BRANCH };
 
     Tree (tree_st DEFAULT_LENGTH       = 50 ,
           tree_st DEFAULT_LENGTH_NAMES = 200);
@@ -73,7 +76,7 @@ public:
 private:
 //----------------------------FUNCTIONS----------------------------//
     static char* readTextFromFile (char* name_file);
-    static long  itLength         (FILE* file);
+    static unsigned long itLength (FILE* file);
 
     void visit (tree_st index, void (*func)(Node* node));
 

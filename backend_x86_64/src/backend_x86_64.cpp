@@ -8,8 +8,8 @@
 
 //---------------DEFINITION-OF-THE-STATIC-DATA-MEMBER---------------//
          bool      Backend::debug_              = false;
-unsigned char*     Backend::text_obj_           = 0;
-unsigned char*     Backend::text_exe_           = 0;
+unsigned char*     Backend::text_obj_           = nullptr;
+unsigned char*     Backend::text_exe_           = nullptr;
 const    char*     Backend::name_file_to_write_ = "program.exe";
          Tree      Backend::tree_;
          NameTable Backend::functions;
@@ -128,8 +128,7 @@ void Backend::treeColoring (FILE* file, Node* node) {
 void Backend::compiler::compilingCode () {
     text_obj_ = (unsigned char*) calloc (DEFAULT_LENGTH_BIN_CODE, sizeof (unsigned char));
     if (!text_obj_) {
-        printf ("Error in calloc in compiler!\n");
-        abort ();
+        throw "Failed to allocate the requested block of memory in compiler!";
     }
 
     createAllFunctionLabel ();
@@ -213,12 +212,10 @@ bool Backend::compiler::checkNameVariable (NameTable* table, char* name) {
 
 void Backend::compiler::writeInObjText (const byte* command, size_t num_bytes) {
     if (text_obj_ == 0 || command == nullptr || num_bytes == 0) {
-        printf ("Error in arguments of 'writeInObjText\n");
-        abort ();
+        throw "Error in arguments of 'writeInObjText'";
     }
     if (record_position_ + 10 >= DEFAULT_LENGTH_BIN_CODE) {
-        printf ("Error in length of binary code, not enough space\n");
-        abort ();
+        throw "Error in length of binary code, not enough space";
     }
 
     memcpy (text_obj_ + record_position_, command, num_bytes);
@@ -292,7 +289,7 @@ int Backend::compiler::writeArgumentFunction (NameTable* variables, tree_st inde
                         copyArgument_1 (variables, node_[index].right);
                         break;
                     default:
-                        printf ("Unknown optimization!\n");
+                        throw "Unknown optimization!";
                         break;
                 }
             }
@@ -309,8 +306,7 @@ int Backend::compiler::writeArgumentFunction (NameTable* variables, tree_st inde
 void Backend::compiler::writeInObjFile (const char* name_file) {
     FILE* file_obj = fopen (name_file, "wb");
     if (!file_obj) {
-        printf ("Can't open file in function dump!\n");
-        exit (2);
+        throw "Can't open file in function dump!";
     }
 
     fwrite (text_obj_, sizeof (char), record_position_, file_obj);
@@ -361,8 +357,7 @@ bool Backend::compiler::oneMathOperatorView (NameTable* table, tree_st index, co
         if (value == OPERATOR_POW
         && (node_[node_[index].right].type  != TYPE_NUMBER
         ||  node_[node_[index].right].value != 50)) {     // 50 it is = 1/2 * 100
-            printf ("Error, can be only pow = 0.5, only as a number!\n");
-            abort ();
+            throw "Error, can be only pow = 0.5, only as a number!";
         }
 
         //-------------------------------Calling-functions-------------------------------//
@@ -541,7 +536,7 @@ bool Backend::compiler::operatorGetView (NameTable* variables, tree_st index) {
     return false;
 }
 
-long itLength(FILE* file)
+long itLength (FILE* file)
 {
     assert (file != nullptr);
 
@@ -555,23 +550,20 @@ long itLength(FILE* file)
 void Backend::compiler::connectionOfAdditionalFunctions (const char* name_func_file) {
     FILE* func_file = fopen (name_func_file, "rb");
     if (func_file == nullptr) {
-        printf ("Not found file with functions!\n");
-        abort();
+        throw "Not found file with functions (for developer)!";
     }
     long length_file = itLength (func_file) - 16;
 
     // Check sum length main program + add function
     if (length_file + record_position_ >= DEFAULT_LENGTH_BIN_CODE) {
-        printf ("Error in length of binary code, not enough space\n");
-        abort ();
+        throw "Error in length of binary code, not enough space (for developer)";
     }
 
     char file_hader[16] = {};
     fread (file_hader, 16, sizeof (char), func_file);
 
     if (file_hader[0] != 'M' || file_hader[1] != 'K') {
-        printf ("Error, signature in file with function not true!\n");
-        abort();
+        throw "Signature in file with function not true, wrong file transferred (for developer)!";
     }
 
     entryInTheTableServiceFunctions (file_hader);
@@ -613,8 +605,7 @@ void Backend::compiler::allFunctionAddressFilling () {
 void Backend::linker::firstLinking () {
     text_exe_ = (unsigned char*) calloc (DEFAULT_LENGTH_BIN_CODE, sizeof (unsigned char));
     if (!text_exe_) {
-        printf ("Error in calloc in compiler!\n");
-        abort ();
+        throw "Failed to allocate the requested block of memory! (for developer)";
     }
 
     createDosHeader ();
@@ -628,17 +619,15 @@ void Backend::linker::createDosHeader () {
     dos_header.e_magic = 0x5A4D;
     dos_header.e_lfanew = 0x40;     // <-- From this plasce start PE header
 
-    writeInExeText ((unsigned char*)&dos_header, sizeof (dos_header));
+    writeInExeText ((unsigned char*) &dos_header, sizeof (dos_header));
 }
 
 void Backend::linker::writeInExeText (const unsigned char* command, size_t num_bytes) {
     if (text_exe_ == 0 || command == nullptr || num_bytes == 0) {
-        printf ("Error in arguments of 'writeInObjText\n");
-        abort ();
+        throw "Error in arguments of 'writeInObjText'";
     }
     if (record_position_exe_ + 10 >= DEFAULT_LENGTH_BIN_CODE) {
-        printf ("Error in length of binary code, not enough space\n");
-        abort ();
+        throw "Error in length of binary code, not enough space";
     }
 
     memcpy (text_exe_ + record_position_exe_, command, num_bytes);
@@ -742,15 +731,19 @@ void Backend::linker::secondLinking (const char* name_file) {
 }
 
 void Backend::freeMemory() {
-    free (text_obj_);
-    free (text_exe_);
+    if (text_obj_ != nullptr) {
+        free (text_obj_);
+    }
+    if (text_exe_ != nullptr) {
+        free (text_exe_);
+    }
 }
 
-void Backend::compiler::checkArguments (int num_arguments, char *strings[]) {
+void Backend::compiler::checkArguments (int num_arguments, char ** strings) {
     assert (num_arguments > 0);
     assert (strings != 0);
 
-    for (int j = 1; j < num_arguments; j++){
+    for (int j = 1; j < num_arguments; j++) {
         char* temp_op = strstr (strings[j], "-O");
         if (temp_op) {
             int optimization = 0;
@@ -758,8 +751,7 @@ void Backend::compiler::checkArguments (int num_arguments, char *strings[]) {
             if (optimization == 0 || optimization == 1) {
                 optimization_ = optimization;
             } else {
-                printf ("Invalid optimization!\n");
-                exit (1);
+                throw "Invalid optimization!";
             }
         }
 

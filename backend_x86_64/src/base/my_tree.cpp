@@ -4,21 +4,25 @@
 
 #include "my_tree.h"
 
-long Tree::itLength(FILE* file)
+unsigned long Tree::itLength (FILE* file)
 {
     assert (file != nullptr);
 
     fseek (file, 0, SEEK_END);
     long result = ftell (file);
+
+    if (result == -1) {
+        throw "It is impossible to know the length of the text!";
+    }
+
     fseek (file, 0, SEEK_SET);
 
-    return result;
+    return (unsigned long) result;
 }
 
-void Tree::readTreeFromFile(char *name_file) {
+void Tree::readTreeFromFile (char *name_file) {
     if (name_file == nullptr) {
-        printf ("File name not received!\n");
-        abort ();
+        throw "File name not received!";
     }
 
     char* text = readTextFromFile (name_file);
@@ -29,14 +33,24 @@ char* Tree::readTextFromFile (char* name_file) {
     assert (name_file != nullptr);
 
     FILE* file = fopen (name_file, "rb");
-    assert (file != nullptr);
+    if (file == nullptr)
+        throw "Can't open file with tree!";
 
-    long length_of_file = itLength (file) + 1;
+    // MAX value "itLength" is 1L, so there will NEVER be overflow.
+    unsigned long length_of_file = itLength (file) + 1;
 
     char* text = (char*) calloc (length_of_file, sizeof (char));
-    fread (text, sizeof (char), length_of_file - 1, file);
+    if (text == nullptr) {
+        throw "Failed to allocate the requested block of memory!";
+    }
+
+    size_t num_read_symbols = fread (text, sizeof (char), length_of_file - 1, file);
+    if (num_read_symbols != length_of_file - 1) {
+        throw "not the whole file has been read!";
+    }
     text[length_of_file - 1] = '\0';
 
+    // If file didn't open, the exception above would have worked already.
     fclose (file);
     return text;
 }
@@ -77,8 +91,7 @@ tree_st Tree::readNewObject (char **read_now)
         return root_;
     }
     else {
-        printf("Error, don't found end of object!\n");
-        abort();
+        throw "Don't found end of object when read tree!";
     }
 }
 
@@ -228,8 +241,7 @@ void Tree::dump (const char* name_file, void (* colorFunction) (FILE*, Node*))
 {
     FILE* file = fopen (name_file, "wb");
     if (!file) {
-        printf ("Can't open file in function dump!\n");
-        exit (2);
+        throw "Can't open file in function dump! (for developer)";
     }
     fprintf (file, "digraph structs {\n");
     fprintf (file, "rankdir=HR;\n");
@@ -287,29 +299,20 @@ void Tree::visit (tree_st index, void (*func)(Node* node)) {
 }
 
 void Tree::controlledExternalFunction (tree_st index, int (*func)(Node* node)) {
-//#define CHECK_INDEX(index, branch) \
-//    if (node_[index].branch <= 0) {\
-//        printf ("Attempt to enter an empty node from node with index: %d in " #branch "\n", index);\
-//        abort();\
-//    }
     if (index <= 0) return;
     int return_value = func (&node_[index]);
 
     if (return_value == ONLY_LEFT_BRANCH ||
         return_value == BOTH_BRANCH)
     {
-//        CHECK_INDEX (index, left)
         controlledExternalFunction (node_[index].left, func);
     }
 
     if (return_value == ONLY_RIGHT_BRANCH ||
         return_value == BOTH_BRANCH)
     {
-//        CHECK_INDEX (index, right)
         controlledExternalFunction (node_[index].right, func);
     }
-
-#undef CHECK_INDEX
 }
 
 void Tree::controlledExternalFunctionFromRoot (int (*func)(Node* node)) {
