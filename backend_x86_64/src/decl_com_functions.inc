@@ -7,7 +7,7 @@
 
 void startFunction_0      (NameTable* variables, tree_st index);
 
-void callFunction_0       (NameTable* variables, tree_st index, int num_parameters);
+void callFunction_0       (                      tree_st index, int num_parameters);
 void assignmentVariable_0 (NameTable* variables, tree_st index);
 
 void copyArgument_0       (NameTable* variables, tree_st index);

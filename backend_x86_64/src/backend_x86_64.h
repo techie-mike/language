@@ -76,7 +76,7 @@ public:
                                      value_t value);
 
         void writeValueVariable     (NameTable* table, tree_st index);
-        void writeValueNumber       (NameTable* variables, tree_st index);
+        void writeValueNumber       (tree_st index);
 
         bool assignmentView         (NameTable* variables, tree_st index);
 

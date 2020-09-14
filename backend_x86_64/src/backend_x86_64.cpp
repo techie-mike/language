@@ -265,7 +265,7 @@ bool Backend::compiler::callFunctionsView (NameTable* variables, tree_st index) 
     if (*node_[index].name == '$') {
         int num_offset = writeArgumentFunction (variables, index);
 
-        callFunction_0 (variables, index, num_offset);
+        callFunction_0 (num_offset, 0);
         return true;
     }
     return false;
@@ -340,7 +340,7 @@ void Backend::compiler::mathOperatorsView (NameTable* table, tree_st index) {
         return;
     }
     if (node_[index].type == TYPE_NUMBER){
-        writeValueNumber (table, index);
+        writeValueNumber (index);
         return;
     }
 }
@@ -536,23 +536,12 @@ bool Backend::compiler::operatorGetView (NameTable* variables, tree_st index) {
     return false;
 }
 
-long itLength (FILE* file)
-{
-    assert (file != nullptr);
-
-    fseek (file, 0, SEEK_END);
-    long result = ftell (file);
-    fseek (file, 0, SEEK_SET);
-
-    return result;
-}
-
 void Backend::compiler::connectionOfAdditionalFunctions (const char* name_func_file) {
     FILE* func_file = fopen (name_func_file, "rb");
     if (func_file == nullptr) {
         throw "Not found file with functions (for developer)!";
     }
-    long length_file = itLength (func_file) - 16;
+    unsigned long length_file = Tree::itLength (func_file) - 16;
 
     // Check sum length main program + add function
     if (length_file + record_position_ >= DEFAULT_LENGTH_BIN_CODE) {
@@ -701,7 +690,7 @@ void Backend::linker::secondLinking (const char* name_file) {
     assert (name_file != nullptr);
     FILE* empty_program = fopen ("empty.exe", "rb");
     assert (empty_program != nullptr);
-    size_t length_file = itLength (empty_program);
+    size_t length_file = Tree::itLength (empty_program);
     unsigned char* empty_text = (unsigned  char*) calloc (length_file, sizeof (char));
 
     fread (empty_text, sizeof (char), length_file, empty_program);
@@ -716,10 +705,10 @@ void Backend::linker::secondLinking (const char* name_file) {
 //    *(empty_text + record_position_ - 20 + 512 - 3) = 90;   //
 //    *(empty_text + record_position_ - 12 + 512 - 3) = 90;   //
 
-    *(int*)(empty_text + record_position_ + 512 - 36 + 1) = (8192 - (record_position_ - 36) - 5);  // Read ConsoleA
-    *(int*)(empty_text + record_position_ + 512 - 28 + 1) = (8200 - (record_position_ - 28) - 5);  // GetHandle
-    *(int*)(empty_text + record_position_ + 512 - 20 + 1) = (8208 - (record_position_ - 20) - 5);  // WriteConsoleA
-    *(int*)(empty_text + record_position_ + 512 - 12 + 1) = (8216 - (record_position_ - 12) - 5);  // Exit
+    *(int*)(empty_text + record_position_ + 512 - 36 + 1) = (int)(8192 - (record_position_ - 36) - 5);  // Read ConsoleA
+    *(int*)(empty_text + record_position_ + 512 - 28 + 1) = (int)(8200 - (record_position_ - 28) - 5);  // GetHandle
+    *(int*)(empty_text + record_position_ + 512 - 20 + 1) = (int)(8208 - (record_position_ - 20) - 5);  // WriteConsoleA
+    *(int*)(empty_text + record_position_ + 512 - 12 + 1) = (int)(8216 - (record_position_ - 12) - 5);  // Exit
 
     fclose (empty_program);
 
@@ -740,8 +729,12 @@ void Backend::freeMemory() {
 }
 
 void Backend::compiler::checkArguments (int num_arguments, char ** strings) {
-    assert (num_arguments > 0);
+    assert (num_arguments != 0);
     assert (strings != 0);
+
+    if (num_arguments <= 1) {
+        throw "Didn't give the file!";
+    }
 
     for (int j = 1; j < num_arguments; j++) {
         char* temp_op = strstr (strings[j], "-O");

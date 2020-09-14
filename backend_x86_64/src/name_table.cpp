@@ -46,7 +46,7 @@ void NameTable::autoLengthIncrease (int factor) {
 void NameTable::autoLengthNamesIncrease (int factor) {
     if (size_names_ + 20 >= length_names_) {
         length_names_ *= factor;
-        char* new_names = (char*) calloc (length_names_, sizeof(char));
+        char* new_names = (char*) calloc (length_names_, sizeof (char));
 
         if (new_names) {
             for (ntable_t i = 0; i < size_names_; i++)
@@ -64,9 +64,8 @@ void NameTable::autoLengthNamesIncrease (int factor) {
 
 }
 
-void NameTable::fillingPoisonousValues()
-{
-    for (ntable_t i = size_ + 1; i < length_; i++){
+void NameTable::fillingPoisonousValues() {
+    for (ntable_t i = size_ + 1; i < length_; i++) {
         var_[i].position_object = 0;
         var_[i].free_places     = 0;
         var_[i].state           = false;

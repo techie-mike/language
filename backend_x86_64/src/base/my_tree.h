@@ -71,12 +71,12 @@ public:
     //  Based on "controlledExternalFunction", but this function
     //  always start from "root" index
     void controlledExternalFunctionFromRoot (int (*func)(Node* node));
+    static unsigned long itLength (FILE* file);
 
 
 private:
 //----------------------------FUNCTIONS----------------------------//
     static char* readTextFromFile (char* name_file);
-    static unsigned long itLength (FILE* file);
 
     void visit (tree_st index, void (*func)(Node* node));
 

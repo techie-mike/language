@@ -4,8 +4,7 @@
 
 #include "my_tree.h"
 
-unsigned long Tree::itLength (FILE* file)
-{
+unsigned long Tree::itLength (FILE* file) {
     assert (file != nullptr);
 
     fseek (file, 0, SEEK_END);
@@ -21,6 +20,8 @@ unsigned long Tree::itLength (FILE* file)
 }
 
 void Tree::readTreeFromFile (char *name_file) {
+    assert (name_file);
+
     if (name_file == nullptr) {
         throw "File name not received!";
     }
@@ -66,18 +67,20 @@ void Tree::loadingTree (char* text) {
     readTextTree (text);
 }
 
-void Tree::readTextTree (char *read_now)
-{
+void Tree::readTextTree (char *read_now) {
+    assert (read_now);
+
     if (*read_now == '{') {
-        read_now ++;
+        read_now++;
         readNewObject (&read_now);
     }
     else
         printf("Error in read!\n");
 }
 
-tree_st Tree::readNewObject (char **read_now)
-{
+tree_st Tree::readNewObject (char **read_now) {
+    assert (read_now != nullptr);
+
     tree_st left_temp  =  0,
             right_temp =  0;
     char    name[100]  = {};
@@ -96,6 +99,8 @@ tree_st Tree::readNewObject (char **read_now)
 }
 
 tree_st Tree::readNewObjectBranch (char** read_now) {
+    assert (read_now != nullptr);
+
     if (**read_now == '@'){
         (*read_now)++;
         return 0;
@@ -113,6 +118,9 @@ tree_st Tree::readNewObjectBranch (char** read_now) {
 
 
 void Tree::readName (char **read_now, char *name) {
+    assert (read_now != nullptr);
+    assert (name     != nullptr);
+
     int  read_symbol = 0;
     char num_read    = 0;
 
@@ -126,16 +134,20 @@ void Tree::readName (char **read_now, char *name) {
     *read_now += read_symbol;
 }
 
-bool Tree::haveQuotes(char **read_now) {
+bool Tree::haveQuotes (char **read_now) {
+    assert (read_now != nullptr);
+
     char symbol[3] = {};
     assert (*read_now > (void*) 0x1000);
     return sscanf_s (*read_now, "%[\"]", symbol, 3) != 0;
 }
 
 tree_st Tree::createNewObject (char    name[],
-                         tree_st left  ,
-                         tree_st right ,
-                         tree_st parent) {
+                               tree_st left  ,
+                               tree_st right ,
+                               tree_st parent) {
+    assert (name != nullptr);
+
     autoLengthIncrease();
     autoLengthNamesIncrease();
 
@@ -156,22 +168,24 @@ tree_st Tree::createNewObject (char    name[],
 
 
     int length = (int) (strlen(name) + 1);
-    strcpy((all_names_ + size_names_), name);
+    strcpy ((all_names_ + size_names_), name);
     size_names_ += length;
 
     size_++;
     return new_index;
 }
 
-void Tree::autoLengthIncrease(int factor) {
+void Tree::autoLengthIncrease (int factor) {
+    assert (factor < 1);
+
     if (size_ + 2 >= length_) {
         length_ *= factor;
-        node_ = (Node*) realloc (node_, length_ * sizeof(node_[0]));
-        if (node_){
+        node_ = (Node*) realloc (node_, length_ * sizeof (node_[0]));
+        if (node_) {
             fillingPoisonousValues();
 
         } else
-            printf("Error in new_address\n");
+            printf ("Error in new_address\n");
     }
 
 }
@@ -189,10 +203,12 @@ void Tree::fillingPoisonousValues() {
 }
 
 void Tree::autoLengthNamesIncrease (int factor) {
+    assert (factor < 1);
+
     if (size_names_ + 100 >= length_names_) {
         tree_st last_length_names = length_names_;
         length_names_ *= factor;
-        char* new_names = (char*) calloc (length_names_, sizeof(char));
+        char* new_names = (char*) calloc (length_names_, sizeof (char));
 
         if (new_names){
             for (int i = 0; i < last_length_names; i++)
@@ -207,15 +223,15 @@ void Tree::autoLengthNamesIncrease (int factor) {
             all_names_ = new_names;
 
         } else
-            printf("Error in new_address\n");
+            printf ("Error in new_address\n");
     }
 
 }
 
 Tree::Tree (tree_st DEFAULT_LENGTH      ,
             tree_st DEFAULT_LENGTH_NAMES):
-        node_         ((Node*) calloc (DEFAULT_LENGTH,       sizeof(node_[0]))),
-        all_names_    ((char*) calloc (DEFAULT_LENGTH_NAMES, sizeof(char))    ),
+        node_         ((Node*) calloc (DEFAULT_LENGTH,       sizeof (node_[0]))),
+        all_names_    ((char*) calloc (DEFAULT_LENGTH_NAMES, sizeof (char))    ),
         size_         (0),
         size_names_   (0),
         root_         (0),
@@ -237,8 +253,10 @@ Tree::~Tree() {
 }
 
 
-void Tree::dump (const char* name_file, void (* colorFunction) (FILE*, Node*))
-{
+void Tree::dump (const char* name_file, void (* colorFunction) (FILE*, Node*)) {
+    assert (name_file     != nullptr);
+    assert (colorFunction != nullptr);
+
     FILE* file = fopen (name_file, "wb");
     if (!file) {
         throw "Can't open file in function dump! (for developer)";
@@ -250,31 +268,31 @@ void Tree::dump (const char* name_file, void (* colorFunction) (FILE*, Node*))
     for (tree_st i = 1; i < length_; i++){
         if (node_[i].parent != -1){
             if (*(node_[i].name) == '>' || *(node_[i].name) == '<')
-                fprintf(file, "Index%d [shape=record, label=\" <left>  %d | {'\\%s' | Par: %d} | {Index: %d | Type: %d | Value: %lld} | <right> %d \",",
+                fprintf (file, "Index%d [shape=record, label=\" <left>  %d | {'\\%s' | Par: %d} | {Index: %d | Type: %d | Value: %lld} | <right> %d \",",
                         i, node_[i].left, node_[i].name, node_[i].parent, i, node_[i].type, node_[i].value, node_[i].right);
             else
-                fprintf(file, "Index%d [shape=record, label=\" <left>  %d | {'%s' | Par: %d} | {Index: %d | Type: %d | Value: %lld} | <right> %d \",",
+                fprintf (file, "Index%d [shape=record, label=\" <left>  %d | {'%s' | Par: %d} | {Index: %d | Type: %d | Value: %lld} | <right> %d \",",
                         i, node_[i].left, node_[i].name, node_[i].parent, i, node_[i].type, node_[i].value, node_[i].right);
 
             colorFunction (file, &(node_[i]));
-            fprintf(file, "];\n");
+            fprintf (file, "];\n");
 
         }
     }
-    fprintf(file, "System [shape=record, label=\" <root> Root\" ];\n");
-    fprintf(file, "System: <root> -> Index%d;\n", root_);
+    fprintf (file, "System [shape=record, label=\" <root> Root\" ];\n");
+    fprintf (file, "System: <root> -> Index%d;\n", root_);
 
     for (tree_st i = 1; i < length_; i++) {
         if (node_[i].parent != -1) {
             if (node_[i].left != 0)
-                fprintf(file, "Index%d: <left> -> Index%d ;\n", i, node_[i].left);
+                fprintf (file, "Index%d: <left> -> Index%d ;\n", i, node_[i].left);
             if (node_[i].right != 0)
-                fprintf(file, "Index%d: <right> -> Index%d ;\n", i, node_[i].right);
+                fprintf (file, "Index%d: <right> -> Index%d ;\n", i, node_[i].right);
         }
     }
 
-    fprintf(file, "}\n");
-    fclose(file);
+    fprintf (file, "}\n");
+    fclose  (file);
 
 //    system("iconv -f windows-1251 -t utf-8 ../logs/text_picture.dot -o ../logs/text_picture_utf8.dot");
 
@@ -289,33 +307,43 @@ void Tree::dump (const char* name_file, void (* colorFunction) (FILE*, Node*))
 }
 
 void Tree::fullVisit (void (*func)(Node* node)) {
+    assert (func != nullptr);
+
     visit (root_, func);
 }
 
 void Tree::visit (tree_st index, void (*func)(Node* node)) {
-    if (node_[index].left )     visit (node_[index].left,  func);    // Visiting all node in tree_ and
-    func (&(node_[index]));                                          // tree_ doesn't know what function we use.
-    if (node_[index].right)     visit (node_[index].right, func);
+    assert (func != nullptr);
+
+    if (node_[index].left)
+        visit (node_[index].left,  func);    // Visiting all node in tree_ and
+
+    func (&(node_[index]));                  // tree_ doesn't know what function we use.
+
+    if (node_[index].right)
+        visit (node_[index].right, func);
 }
 
 void Tree::controlledExternalFunction (tree_st index, int (*func)(Node* node)) {
+    assert (func != nullptr);
+
     if (index <= 0) return;
     int return_value = func (&node_[index]);
 
     if (return_value == ONLY_LEFT_BRANCH ||
-        return_value == BOTH_BRANCH)
-    {
+        return_value == BOTH_BRANCH) {
         controlledExternalFunction (node_[index].left, func);
     }
 
     if (return_value == ONLY_RIGHT_BRANCH ||
-        return_value == BOTH_BRANCH)
-    {
+        return_value == BOTH_BRANCH) {
         controlledExternalFunction (node_[index].right, func);
     }
 }
 
 void Tree::controlledExternalFunctionFromRoot (int (*func)(Node* node)) {
+    assert (func != nullptr);
+
     controlledExternalFunction (root_, func);
 }
 

@@ -32,12 +32,12 @@ void Backend::compiler::startFunction_0 (NameTable* variables, tree_st index) {
 }
 
 
-void Backend::compiler::callFunction_0 (NameTable* variables, tree_st index, int num_parameters) {
+void Backend::compiler::callFunction_0 (tree_st index, int num_parameters) {
     ntable_t block_function = functions.searchNameInTable (node_[index].name + 1);
     if (block_function == -1) {
         throw "No function implementation! (for developer)";
     }
-    Element* call_func      = &functions.var_[block_function];
+    Element* call_func = &functions.var_[block_function];
 
     LOADCOMMAND (command, com_call_function_0);
     *(type_proc*)(&command[7]) = (type_proc) (8 * num_parameters);
@@ -142,7 +142,7 @@ void Backend::compiler::writeValueVariable (NameTable* variables, tree_st index)
     }
 }
 
-void Backend::compiler::writeValueNumber (NameTable* variables, tree_st index) {
+void Backend::compiler::writeValueNumber (tree_st index) {
     LOADCOMMAND(command, com_push_number);
     *(type_proc*)(&command[2]) = (type_proc) node_[index].value;
     writeInObjText (command, sizeof (command));
