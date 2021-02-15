@@ -11,6 +11,8 @@
 #include "base/my_tree.h"
 #include "name_table.h"
 
+#include "base/utilities.h"
+
 
 class Backend {
     //------------------------------CONSTANTS------------------------------//

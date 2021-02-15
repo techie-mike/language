@@ -90,7 +90,7 @@ private:
     tree_st readNewObjectBranch    (char** read_now);
 
     inline static bool haveQuotes  (char** read_now);
-    static void        readName    (char** read_now, char name[]);
+           static void readName    (char** read_now, char name[]);
     //----------------------------------------------
 
     tree_st createNewObject (char    name[]     ,

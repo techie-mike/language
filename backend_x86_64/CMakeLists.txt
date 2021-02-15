@@ -39,7 +39,9 @@ add_executable(
 
         src/bin_commands.h
         src/com_functions.cpp
-        src/decl_com_functions.inc)
+        src/decl_com_functions.inc
+        src/base/utilities.h
+        src/base/utilities.cpp)
 
 IF (WIN32)
     set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++

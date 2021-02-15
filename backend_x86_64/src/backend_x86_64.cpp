@@ -676,7 +676,7 @@ void Backend::linker::createSectionHeader () {
 
 }
 
-void Backend::linker::writeExeInFile(const char* name_file) {
+void Backend::linker::writeExeInFile (const char* name_file) {
     FILE* file_exe = fopen (name_file, "wb");
 
     fwrite (text_exe_, sizeof (char), record_position_exe_, file_exe);

@@ -6,6 +6,7 @@ int main (int num_arguments, char *strings[])
 {
     Backend back = {};
     try {
+        THROW_ERROR(USER_ERROR, "", std::string(""))
         back.compiler_.checkArguments (num_arguments, strings);
         back.tree_.readTreeFromFile (strings[1]);
         back.tree_.fullVisit (Backend::whatItIs);
