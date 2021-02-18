@@ -28,7 +28,7 @@ struct nameTable {
     void     createNameInTable (      char* name);
     void     createNameInTable (const char* name);
 
-	operator = (const nameTable&) = delete;
+	nameTable& operator = (const nameTable& other) = delete;
     ntable_t size_;
 private:
     char*    all_names_;
